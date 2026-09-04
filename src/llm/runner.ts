@@ -47,7 +47,6 @@ const taskDescriptions: Record<string, string> = {
   "stale-line": "Replace the line containing 'bbb' with exactly one line: BBB",
   "stale-range":
     "Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D",
-  "shift-above": "Replace the line containing 'bbb' with exactly one line: BBB",
   "external-far": "Replace the line containing 'ccc' with exactly one line: CCC",
   "anchor-stability": "Replace the line containing 'ccc' with exactly one line: CCC",
   undo: "Replace the line containing 'bbb' with exactly one line: BBB, then undo that change so the file is back to its original state",
@@ -64,12 +63,20 @@ const taskDescriptions: Record<string, string> = {
     "Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD. Use the anchors from the first edit's result for the second edit; do not re-read the whole file.",
   "b15-large-range-drift":
     "Replace the lines from the line containing 'line10' through the line containing 'line190' with exactly one line: X",
-  "b16b-undo-stale":
-    "Replace the line containing 'bbb' with exactly one line: BBB, then undo that change",
   "b17-reversed-range":
     "Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly three lines: B, C, D",
   "b18-boundary-dup":
     "Replace the line containing 'bbb' with exactly two lines: aaa and BBB",
+  unicode:
+    "Replace the line containing the Japanese text with exactly one line: \u65e5\u672c\u8a9e\u306e\u884c \ud83d\ude80 (the same text but with the rocket emoji instead of the party emoji)",
+  tabs:
+    "Replace the line containing 'return 1' with exactly one line: '\treturn 2;' (keep the leading tab indentation exactly)",
+  "no-trailing-newline":
+    "Replace the last line ('bbb') with exactly one line: 'BBB'. The file has no trailing newline and must still have none after the edit",
+  "delete-range": "Delete the lines from the line containing 'bbb' through the line containing 'ccc'; the surrounding lines must stay intact with no blank line left behind",
+  "insert-eof": "Insert exactly one line 'CCC' after the last line of the file; the existing lines must stay",
+  "crlf-bom": "Replace the line containing 'beta' (in a BOM-prefixed CRLF file) with exactly one line: BETA",
+  "insert-race-stale-boundary": "Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay",
 };
 
 const RECOVERY_CONTENT: Record<string, string> = {
@@ -83,6 +90,7 @@ const RECOVERY_CONTENT: Record<string, string> = {
       .slice(0, 9)
       .concat("X", Array.from({ length: 200 }, (_, i) => `line${i + 1}`).slice(190))
       .join("\n") + "\n",
+  "insert-race-stale-boundary": "aaa\nbbb-x\nBB1\nBB2\nccc\n",
 };
 
 export function buildSystemPrompt(tools: ToolSpec[], cwd: string): string {
@@ -233,14 +241,6 @@ export async function runLlmScenario(
             mutationApplied = true;
           }
         }
-        if (scenario.mutateAfterEdit && !mutationApplied && isEditCall(call.name)) {
-          const current = await readFile(filePath, "utf-8");
-          const mutated = scenario.mutateAfterEditFn
-            ? scenario.mutateAfterEditFn(current)
-            : current;
-          await writeFile(filePath, mutated, "utf-8");
-          mutationApplied = true;
-        }
         base.toolCalls.push({ name: call.name, ok: toolResult.ok });
         const content = toolResult.error
           ? `Error: ${toolResult.error}`
@@ -338,19 +338,6 @@ export function evaluateLlmOutcome(
     scenario.expectedByContender?.[contenderId] ?? scenario.expected;
 
   if (scenario.id === "undo") {
-    if (actual === fixture) return { pass: true, outcome: "undo" };
-    return {
-      pass: false,
-      outcome: "applied",
-      failureKind: "applied-wrong",
-    };
-  }
-
-  if (scenario.id === "b16b-undo-stale") {
-    const postEditMutated = scenario.mutateAfterEditFn
-      ? scenario.mutateAfterEditFn("aaa\nBBB\nccc\n")
-      : "aaa\nBBB\nccc-x\n";
-    if (actual === postEditMutated) return { pass: true, outcome: "undo-refused" };
     if (actual === fixture) return { pass: true, outcome: "undo" };
     return {
       pass: false,

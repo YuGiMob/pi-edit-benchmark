@@ -8,7 +8,7 @@ import {
   makeRegistry,
 } from "./shared";
 
-const ROW_RE = /^([A-Za-z0-9]{3})│(.*)$/;
+const ROW_RE = /^([A-Za-z0-9]+)│(.*)$/;
 
 export function proContender(): Contender {
   const registryRef: { registry?: ReturnType<typeof makeRegistry> } = {};

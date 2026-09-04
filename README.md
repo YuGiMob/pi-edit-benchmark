@@ -32,7 +32,7 @@ Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without
 The model must read the file and issue edits through the tools; the file state afterwards is scored with the same expectations as the tool-level benchmark. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
 
 ```
-bun run src/main-llm.ts                        # 10 models × 8 tools × 34 scenarios (2,720 runs)
+bun run src/main-llm.ts                        # 10 models × 8 tools × 35 scenarios (2,800 runs)
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
@@ -85,11 +85,11 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 
 `@oh-my-pi/hashline` is the reference engine driven directly (no pi tools) — included in the deterministic suite, excluded from LLM rounds.
 
-## Scenarios (34)
+## Scenarios (35)
 
-Each scenario carries a `focus` that the reports split by: **core editing** (15), **staleness & concurrency** (11), and **served-state & undo** (8) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
+Each scenario carries a `focus` that the reports split by: **core editing** (18), **staleness & concurrency** (10), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
 
-### Core editing (15)
+### Core editing (18)
 - `single-line` — replace one line
 - `range` — replace an inclusive range
 - `delete-line` — delete one line cleanly
@@ -103,12 +103,13 @@ Each scenario carries a `focus` that the reports split by: **core editing** (15)
 - `unicode` — CJK/emoji/accent content survives byte-level
 - `tabs` — tab indentation stays byte-identical
 - `no-trailing-newline` — a missing EOF newline stays absent
+- `delete-range` — delete an inclusive range cleanly
+- `insert-eof` — insert after the last line
+- `crlf-bom` — BOM and CRLF survive together
 
-### Staleness & concurrency (11)
+### Staleness & concurrency (10)
 - `stale-line` — the target line changed on disk; the edit must be refused
 - `stale-range` — a line *inside* the replaced range changed; the edit must be refused
-- `shift-above` — a line was inserted above the target (position shift)
-- `target-deleted` — an external writer *deleted* the target line; the edit must be refused
 - `external-far` — an unrelated distant change must not block the edit
 - `b6-change-then-revert` — interior change reverted before the edit; must apply
 - `b9-boundary-changed` — the anchor line itself changed; must reject
@@ -116,14 +117,14 @@ Each scenario carries a `focus` that the reports split by: **core editing** (15)
 - `b12-noop-with-drift` — noop edit with unrelated external change; file untouched
 - `b15-large-range-drift` — 200-line range with drifted interior; must reject
 - `error-guidance` — a refused edit explains how to recover
+- `insert-race-stale-boundary` — insert after a line changed on disk; must be refused
 
-### Served-state & undo (8)
+### Served-state & undo (7)
 - `anchor-stability` — anchors of untouched lines survive an edit (no re-read needed)
 - `undo` — undo restores the exact previous bytes
 - `b7-paged-read-gap` — edit targets a line never shown by a paged read; served-state tools must reject
 - `b8-blind-edit` — edit with anchors never served for this file; served-state tools must reject
 - `b13-chained-diff-edit` — second edit anchored on the post-edit diff rows, no re-read
-- `b16b-undo-stale` — undo after an external change; must be refused
 - `b17-reversed-range` — swapped remove_from/remove_to; anchor tools autocorrect
 - `b18-boundary-dup` — replacement re-includes the boundary line; dedup tools strip it
 
@@ -215,7 +216,7 @@ Per-tool process (all models):
 ```
 src/
   contenders/   per-tool adapters (read → parse → build request → execute)
-  scenarios/    the scenario battery (34, tagged core/staleness/served-state)
+  scenarios/    the scenario battery (35, tagged core/staleness/served-state)
   harness/      runner + scoring
   llm/          multi-provider client + LLM runner (pi-mirror system prompt)
   report/       markdown/JSON report generation

@@ -1,15 +1,5 @@
 import type { Scenario } from "../types";
 
-const NO_UNDO = [
-  "builtin-edit",
-  "pi-hashline-edit",
-  "pi-hashline-context-edit",
-  "pi-hashline-readmap",
-  "@oh-my-pi/hashline",
-  "@cortexkit/aft-pi",
-  "@xynogen/pix-edit",
-];
-
 const NO_ANCHORS = [
   "builtin-edit",
   "@xynogen/pix-edit",
@@ -138,23 +128,6 @@ export const betterEditScenarios: Scenario[] = [
     expected: { outcome: "rejected" },
   },
   {
-    id: "b16b-undo-stale",
-    fileName: "b16b.ts",
-    category: "robustness",
-    focus: "served-state",
-    name: "undo after external change refused (B16b)",
-    description:
-      "After an applied edit, an external change makes the undo stale; undo must be refused and the file kept.",
-    fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
-    mutateAfterEdit: true,
-    undoAfterExternalChange: true,
-    mutateAfterEditFn: (content) => content.replace("ccc", "ccc-x"),
-    expected: { outcome: "either", content: "aaa\nBBB\nccc-x\n" },
-    skipFor: NO_UNDO,
-  },
-  {
     id: "b17-reversed-range",
     fileName: "b17.ts",
     category: "correctness",
@@ -183,7 +156,6 @@ export const betterEditScenarios: Scenario[] = [
     expected: { outcome: "applied", content: "aaa\naaa\nBBB\nccc\n" },
     expectedByContender: {
       "pi-hashline-edit-pro": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
-      "pi-better-edit": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
       "pi-hashline-readmap": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
     },
   },

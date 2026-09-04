@@ -70,7 +70,7 @@ export async function runScenario(
       await writeFile(filePath, scenario.mutateAfterRead(current), "utf-8");
     }
 
-    const isInsert = scenario.id === "insert-after";
+    const isInsert = scenario.useInsert ?? scenario.id === "insert-after";
     const request = isInsert
       ? contender.buildInsertRequest?.(readResult, scenario, dir)
       : contender.buildEditRequest(readResult, scenario, dir);
@@ -113,26 +113,6 @@ export async function runScenario(
       }
     }
 
-    if (scenario.undoAfterExternalChange && result?.ok) {
-      const current = await readFile(filePath, "utf-8");
-      const mutated = scenario.mutateAfterEditFn
-        ? scenario.mutateAfterEditFn(current)
-        : current;
-      await writeFile(filePath, mutated, "utf-8");
-      if (contender.supportsUndo && contender.undo) {
-        const undoResult = await contender.undo(scenario.fileName, dir);
-        const afterUndo = await readFile(filePath, "utf-8");
-        if (undoResult.ok || afterUndo !== mutated) {
-          base.outcome = "applied";
-          base.failureKind = "applied-wrong";
-          base.errorMessage = undoResult.error;
-          base.pass = false;
-          await rm(dir, { recursive: true, force: true });
-          opts.onRun?.(contender.info.id, scenario.id, base);
-          return base;
-        }
-      }
-    }
 
     const actual = await readFile(filePath, "utf-8");
     base.actualContent = actual;

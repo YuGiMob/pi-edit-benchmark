@@ -40,14 +40,12 @@ export interface Scenario {
   target: TargetSpec;
   replacement: string[];
   mutateAfterRead?: (content: string) => string;
-  mutateAfterEdit?: boolean;
-  mutateAfterEditFn?: (content: string) => string;
   chainedSecondTarget?: TargetSpec;
   chainedSecondReplacement?: string[];
   readOptions?: { offset?: number; limit?: number };
   blindEdit?: boolean;
   chained?: boolean;
-  undoAfterExternalChange?: boolean;
+  useInsert?: boolean;
   reversedRange?: boolean;
   skipFor?: string[];
   expected: {
