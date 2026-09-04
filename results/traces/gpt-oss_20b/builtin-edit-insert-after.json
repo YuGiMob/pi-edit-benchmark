@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "builtin-edit",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:00:00.588Z",
+ "durationMs": 11687,
+ "tokensIn": 2898,
+ "tokensOut": 923,
+ "costUsd": 0.00047976000000000003,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-6JDBR9/builtin-edit-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_hxrcc8rt",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\",\"offset\":1,\"limit\":2000}"
+    }
+   ],
+   "reasoning": "We need to modify insert.ts in the current directory /tmp/pi-llm-bench-6JDBR9/builtin-edit-insert-after. Let's read the file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_hxrcc8rt",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_wvipe3g4",
+     "name": "edit",
+     "arguments": "{\"path\":\"insert.ts\",\"edits\":[{\"newText\":\"bbb\\nB1\\nB2\",\"oldText\":\"bbb\"}]}"
+    }
+   ],
+   "reasoning": "We need to modify insert.ts. Currently content:\n\n```\naaa\nbbb\nccc\n```\n\nWe must insert exactly two lines 'B1' and 'B2' immediately after line containing 'bbb', keep 'bbb'.\n\nThus resulting file should be:\n\n```\naaa\nbbb\nB1\nB2\nccc\n```\n\nInsert two lines exactly. So we need to read file, then apply edit. We need to replace the target region: we can match the line 'bbb' and then insert after it.\n\nBecause edit tool supports replacing text with new content. We need to match 'bbb' and replace with 'bbb\\nB1\\nB2'. But we want to keep 'bbb' line. So we can do edit: oldText: 'bbb', newText: 'bbb\\nB1\\nB2'. That adds two lines after.\n\nBut must ensure lines remain separated correctly: Using newlines appropriately.\n\nLet's do edit call:\n\nedits: [{oldText: 'bbb', newText: 'bbb\\nB1\\nB2'}]\n\nBut be careful to not change other 'bbb's? There's only one.\n\nProceed."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_wvipe3g4",
+   "content": "Successfully replaced 1 block(s) in insert.ts."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_1xdhzm7x",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "We read the file: lines: aaa, bbb, ccc. Need to insert two lines after 'bbb', keep bbb. After insertion should show: aaa, bbb, B1, B2, ccc. The tool replaced 'bbb' with 'bbb\\nB1\\nB2' but removed ccc? Wait we replaced only the line 'bbb' with 'bbb\\nB1\\nB2'. The original file had 'aaa\\nbbb\\nccc'. After replacement, we get 'aaa\\nbbb\\nB1\\nB2'. But ccc line is omitted. We need the ccc line after B2. So we need to modify: we need to replace 'bbb\\nccc' with 'bbb\\nB1\\nB2\\nccc'? Or better: we can edit the file by replacing 'bbb\\nccc' with 'bbb\\nB1\\nB2\\nccc'. However it says do not include large unchanged region; we can do edit that replaces 'bbb' with 'bbb\\nB1\\nB2' and then re-add ccc? but editing from original file to new file; we can modify by replacing 'bbb\\nccc' with 'bbb\\nB1\\nB2\\nccc'. This matches entire segment. Let's do that.\n\nLet's reread file again to ensure we reference original content accurately. current file content after previous edit: ? Actually file updated to 'aaa\\nbbb\\nB1\\nB2'. ccc line removed. So to add ccc again, we can simply edit by inserting after B2 line. But we need to use original text; we can't match since after edit we don't have original. However guidelines say edits[].oldText is matched against the original file before editing. So we must base on original. The original file had 'aaa\\nbbb\\nccc'. So we should replace 'bbb\\nccc' with 'bbb\\nB1\\nB2\\nccc'. Let's open file again to confirm content: we don't need. But we'll perform new edit from current file; but edits.oldText matches original before second edit? Actually the function applies edits on the current content. The oldText is matched against the original file content at that time. But if we did earlier edit, we removed ccc. So if we edit again, oldText won't match. So we should revert and apply new edit from original content. It's safer to read again verifying content. Let's read file now after first edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_1xdhzm7x",
+   "content": "aaa\nbbb\nB1\nB2\nccc\n"
+  }
+ ]
+}

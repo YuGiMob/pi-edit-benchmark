@@ -1,0 +1,79 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "@cortexkit/aft-pi",
+ "scenarioId": "b16b-undo-stale",
+ "task": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:30:08.310Z",
+ "durationMs": 10127,
+ "tokensIn": 3315,
+ "tokensOut": 520,
+ "costUsd": 0.00038804999999999997,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "applied-wrong",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nBBB\nccc-x\n",
+ "actualContent": "aaa\nbbb\nccc-x\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents (supports offset/limit for large files)\n- edit: Partial file edits via appendContent, edits[], or symbol plus content (exactly one mode per call).\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nPrefer edit over write when changing part of an existing file.\nUse edit with appendContent when adding text to the end of a file.\nUse edits[] for multiple atomic changes in one file.\nInclude enough surrounding context in an edits[] find/replace item to make the match unique, or set replaceAll/occurrence explicitly.\n\nCurrent working directory: /tmp/pi-llm-bench-VqRrLQ/@cortexkit/aft-pi-b16b-undo-stale"
+  },
+  {
+   "role": "user",
+   "content": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_9r8re80d",
+     "name": "read",
+     "arguments": "{\"path\":\"b16b.ts\",\"lineStart\":1,\"lineEnd\":200}"
+    }
+   ],
+   "reasoning": "We need to modify b16b.ts: replace the line containing 'bbb' with exactly one line: BBB, then undo that change. So need to first read file, find 'bbb', replace that line with BBB, commit? Then undo: revert to original. The instructions: \"Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change.\" So we need to apply edit to replace that line, then revert. But we should do first read.\n\nLet's inspect file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_9r8re80d",
+   "content": "1: aaa\n2: bbb\n3: ccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_7q6wwt7u",
+     "name": "edit",
+     "arguments": "{\"path\":\"b16b.ts\",\"edits\":[{\"content\":\"BBB\",\"endLine\":2,\"startLine\":2}]}"
+    }
+   ],
+   "reasoning": "We need to modify b16b.ts: replace the line containing 'bbb' with exactly one line: \"BBB\". Then undo that change. So we first edit to replace the line. Then we need to undo the change, revert to original. Since we can edit the file again. Could revert line to \"bbb\". We'll do two edit calls. First call: replace 'bbb' with 'BBB'. Use edit with symbol? We have a line by content. Use edits[] replacing from 'bbb' to 'BBB', replaceAll? Only that line. Use startLine? We'll target line 2.\n\nFirst edit call: edits: [{ startLine:2, endLine:2, content:\"BBB\"}]. Or content only? We'll use that.\n\nSecond edit call: revert back to 'bbb' same line. Use same approach: startLine 2 endLine 2 content 'bbb'.\n\nLet's do first edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_7q6wwt7u",
+   "content": "Edited (+1/-1).\n 1 aaa\n-2 bbb\n+2 BBB\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_iqvk861n",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"content\":\"bbb\",\"endLine\":2,\"startLine\":2}],\"path\":\"b16b.ts\"}"
+    }
+   ],
+   "reasoning": "We should now undo change. Undo modification: replace BBB back to bbb. Let's edit same lines."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_iqvk861n",
+   "content": "Edited (+1/-1).\n 1 aaa\n-2 BBB\n+2 bbb\n 3 ccc-x"
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-edit",
+ "scenarioId": "error-guidance",
+ "task": "Modify error-guidance.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:04:56.348Z",
+ "durationMs": 15364,
+ "tokensIn": 7556,
+ "tokensOut": 1051,
+ "costUsd": 0.0008442200000000001,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires these anchors\n- edit: Make precise file edits at LINE#HASH anchors (e.g. 5#MQ) copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read before edit whenever you do not hold current LINE#HASH anchors for the file.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse raw: true when reading for context only; anchors are required for edit.\nUse edit with LINE#HASH anchors from the latest read, grep, or edit result for all file changes; batch every change to one file into a single edit call.\nNever reuse anchors from an earlier read or edit response once a newer one exists for the same file; treat only the most recent response as carrying valid anchors.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nOn [E_STALE_ANCHOR], the error lists the stale refs and any content-matched candidate anchors; re-read the file to get current anchors before retrying.\n\nCurrent working directory: /tmp/pi-llm-bench-HTNpFK/pi-hashline-edit-error-guidance"
+  },
+  {
+   "role": "user",
+   "content": "Modify error-guidance.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_29tzz5t3",
+     "name": "read",
+     "arguments": "{\"path\":\"error-guidance.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to modify error-guidance.ts. Let's read the file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_29tzz5t3",
+   "content": "1#TS:aaa\n2#PJ:bbb\n3#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_3ua294zh",
+     "name": "edit",
+     "arguments": "{\"path\":\"error-guidance.ts\",\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#PJ\"}]}"
+    }
+   ],
+   "reasoning": "We need to replace line containing 'bbb' with exactly one line: BBB. We must read the file first, which we did. Now we need to edit using edit() with anchors for that line. The anchor is 2#PJ:bbb. Actually, anchor includes content part after colon? Example earlier they might use anchor exactly with line number, hash, and optionally content. We can just use anchor \"2#PJ\" or with content \"2#PJ:bbb\". To ensure accurate match. We'll just use \"2#PJ\". For replace, we need to replace exactly that line; include new line content \"BBB\". The operation 'replace' with pos \"2#PJ\" and lines [\"BBB\"]. Should not include the anchor string. Let's craft edit payload.\n\nWe also need to ensure we don't run into stale anchor. We just had freshly read; no edits yet. Should be fine.\n\nLet's call edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_3ua294zh",
+   "content": "Error: [E_STALE_ANCHOR] 1 stale anchor: 2#PJ. Re-read the file to get current anchors; keep both endpoints for range replaces.\n(Recovery attempted: your anchors match an older read of this file, but replaying that edit conflicts with changes made since. Re-read to get current anchors.)"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_hqkg616p",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"error-guidance.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "The staleness indicates that after reading once, before doing edit, file changed? But we just read the file itself; how could it change? Possibly because read read and we got anchors, but while editing, the anchor got stale because maybe file changed due to some other process? Could be a bug: the read returned anchor 2#PJ, but the edit says stale. The error says \"keep both endpoints for range replaces\" means we likely need to re-read and for a single line replace use endpoints? Wait for single line replace we only need anchor of that line, but it says stale.\n\nSolution: we should re-read, grabbing latest anchors, then use those for the edit.\n\nLet's re-read after previous error? Actually the last read gave us anchors 1,2,3. We used anchor 2. Probably stale indicates that file was modified between read and edit. We need to re-read file: maybe the file changed due to our edit? Wait we haven't edited successfully. So maybe it's a race: read gave us anchors at positions 2; but edit fails because it sees the file changed or anchor hash may have changed due to non-UTF8 etc. Let's just re-read again and perform edit with fresh anchor.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_hqkg616p",
+   "content": "1#RX:aaa\n2#QV:bbb-external\n3#HJ:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_5lidmnk7",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#QV\"}],\"path\":\"error-guidance.ts\"}"
+    }
+   ],
+   "reasoning": "The file was changed between reads? Actually read shows line #PJ:bbb previously, now it's #QV:bbb-external. So anchor changed. We need to replace the line containing 'bbb'. The line contains 'bbb-external' now. Replace with 'BBB'. Need proper anchor. Use edit with anchor pos \"2#QV\" or include content to match. The content is \"bbb-external\". Replace that line. Use replace with pos anchor. Let's do that."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_5lidmnk7",
+   "content": "--- Anchors 1-3 ---\n1#RK:aaa\n2#ZZ:BBB\n3#PX:ccc\n 1#RK:aaa\n-2    bbb-external\n+2#ZZ:BBB\n 3#PX:ccc"
+  }
+ ]
+}

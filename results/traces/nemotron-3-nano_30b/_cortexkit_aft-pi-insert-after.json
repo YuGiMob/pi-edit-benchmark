@@ -1,0 +1,78 @@
+{
+ "modelId": "nemotron-3-nano:30b",
+ "contenderId": "@cortexkit/aft-pi",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T10:17:29.024Z",
+ "durationMs": 28283,
+ "tokensIn": 6200,
+ "tokensOut": 3289,
+ "costUsd": 0.00116136,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents (supports offset/limit for large files)\n- edit: Partial file edits via appendContent, edits[], or symbol plus content (exactly one mode per call).\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nPrefer edit over write when changing part of an existing file.\nUse edit with appendContent when adding text to the end of a file.\nUse edits[] for multiple atomic changes in one file.\nInclude enough surrounding context in an edits[] find/replace item to make the match unique, or set replaceAll/occurrence explicitly.\n\nCurrent working directory: /tmp/pi-llm-bench-tsu7dY/@cortexkit/aft-pi-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_1ghggbmn",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "We need to modify insert.ts by inserting two lines 'B1' and 'B2' right after line containing 'bbb', preserving the line 'bbb'. So we need to read the file, find line containing 'bbb', then insert two lines after it. Use tools: read, edit with appendContent or edits[]. We can use edit with edits[] specifying a line-range insertion? The tool supports edits with startLine, endLine, content. That can replace a range. To insert lines after a line, we could find the line containing 'bbb', then add lines after it. Perhaps easiest: read file path insert.ts. Then use edit with appendContent? That appends to end only. Instead we need to insert lines at some line number. The edits[] array can have objects with startLine, endLine, content where content replaces the range? It says replacement text for a batch line-range edit (empty string deletes lines). So using startLine, endLine, content could replace some lines. But we want to insert lines after a specific line. Strategy: read file to find line number of 'bbb', then use edit with edits[]nya? Actually we can use edits[] with startLine and endLine empty? Let's view docs: edits[] items have fields: content: replacement text for a batch line-range edit (empty string deletes the lines), endLine: 1-based end line for a batch line-range edit, newString: Replacement text for a batch find/replace edit, occurrence: 1-based occurrence for this batch item (1 = first match), oldString: Text to find for a batch find/replace edit, replaceAll: Replace every occurrence for this batch item, startLine: 1-based start line for a batch line-range edit.\n\nIt seems they have two modes: find/replace using oldString, newString; or line-range edit using startLine, endLine, content.\n\nThus to insert lines after 'bbb', we may want to use find/replace: target 'bbb' and replace it with 'bbb\\nB1\\nB2'? That would keep original line 'bbb' plus inserted after. But that adds them after the line (the replace would replace the 'bbb' line with same plus new lines). But we must keep the 'bbb' line as is. Actually replace 'bbb' (the line) with 'bbb\\nB1\\nB2' works: we essentially add newlines after the line. The line 'bbb' remains, then new lines after. So using find/replace with oldString: 'bbb' and newString: 'bbb\\nB1\\nB2' but we must ensure we match exactly the line. If file contains perhaps other occurrences of substring 'bbb' in other lines, we might replace them too; but we can limit to first occurrence.\n\nUse edits[] item: { oldString: 'bbb', newString: 'bbb\\nB1\\nB2', replaceAll: false maybe? Actually each item is just an object; replaceAll default false? They have a boolean field replaceAll optional. Probably default false (but could be omitted). For a single replacement, just set replaceAll: false if needed. Or we could just use oldString: 'bbb' and newString: (with line breaks) 'bbb\\nB1\\nB2'. Ensure quoting correctly.\n\nBut we must be careful: We need to replace the whole line containing 'bbb'. However, if the line contains something else? It says line containing 'bbb', so exactly that line maybe just 'bbb'? Might include trailing spaces? Probably just 'bbb'. Let's assume it's exactly 'bbb'.\n\nThus find/replace is appropriate.\n\nThus first read file: use read with path insert.ts. Then parse to find line? We can read entire file to confirm.\n\nBut we need to decide on edit operation. Let's compute through tool calls.\n\nFirst, read file: file is insert.ts relative path. Use read with path \"insert.ts\". Let's just read entire file to see its contents."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_1ghggbmn",
+   "content": "1: aaa\n2: bbb\n3: ccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_vv8yo7wu",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"content\":\"bbb\\nB1\\nB2\",\"endLine\":2,\"startLine\":2}],\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "We have read the file insert.ts, content is:\n\n1: aaa\n2: bbb\n3: ccc\n\nWe need to modify insert.ts by inserting exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay.\n\nThus after line 2 (bbb) we need to insert new lines B1 and B2. The file will then have:\n\n1: aaa\n2: bbb\n3: B1\n4: B2\n5: ccc\n\nWe need to use the appropriate edit tool. Since we need to insert lines after a certain line, we can use edits[] with startLine and content? Let's examine the edit tool definition. It says:\n\nedit takes path, symbol (optional), content (optional), appendContent, edits (batch). The edits is an array of objects with fields: content, endLine, newString, occurrence, replaceAll, startLine. The description: \"Batch edits — non-empty array of { oldString, newString }, { oldString, newString, replaceAll }, or { startLine, endLine, content } objects applied atomically.\"\n\nThus we can use a batch edit object of form { startLine, endLine, content } to replace a range of lines with content (empty string deletes lines). However to insert lines after a line, we could use a batch edit that inserts lines by specifying startLine = line number where we want to insert and content = lines to insert? Let's interpret: The object { startLine, endLine, content } probably replaces lines startLine through endLine with content. If we want to insert after line 2, we could set startLine = 3, endLine = 2? That doesn't make sense. Perhaps we can use a find/replace approach: Search for 'bbb' and then insert after it. But the tool does not have a direct insert after match. However we can use edits with oldString/newString and replaceAll? That would replace 'bbb' with something else, not appropriate.\n\nBut we can possibly use the { startLine, endLine, content } form to replace a range that includes the 'bbb' line plus maybe some lines after, but we need to keep 'bbb'.\n\nBetter approach: Use the insert capability: The edit tool may support insertion via specifying startLine and endLine both same? Let's parse the description: \"Batch edits — non-empty array of { oldString, newString }, { oldString, newString, replaceAll }, or { startLine, endLine, content } objects applied atomically.\" The third type is { startLine, endLine, content } - applied atomically. It says \"content\" is replacement text for a batch line-range edit (empty string deletes the lines). So this can replace a range of lines with content. If we want to insert lines after line 2, we can set startLine = 3, endLine = 2? That's invalid because startLine must be <= endLine presumably. Actually the definitions: startLine is 1-based start line for a batch line-range edit; endLine is 1-based end line for a batch line-range edit. They can be any integer >=1. Usually startLine <= endLine. To replace a range with new content, we might need to specify startLine = 3, endLine = 3 (some line we want to replace) with content = \"B1\\nB2\". But we want to insert new lines after line 2, pushing existing line 3 down. That is effectively replacing line 3 (which currently is 'ccc') with B1 and B2, but that changes the content of line 3 (ccc lost). Not desired.\n\nInstead we could replace lines 2..2 (i.e., just the 'bbb' line) with 'bbb\\nB1\\nB2' maybe? That would keep bbb and add B1, B2 after it. But the spec says content is replacement text for a batch line-range edit; it probably replaces the entire range with the given content, wiping out the original lines. If we replace lines 2..2 with \"bbb\\nB1\\nB2\", then we would have bbb, B1, B2 in three lines, but we also need to keep ccc after them. That would shift ccc to line 5. That works: we replace the single line containing 'bbb' with three lines: 'bbb', 'B1', 'B2'. Actually that will preserve bbb and insert B1, B2 after it. But we must ensure the replacement string includes the original bbb line. The edit tool's find/replace version uses oldString, newString. But we can also use the { startLine, endLine, content } where we can directly specify the content to replace those lines with. If we set startLine=2, endLine=2, content='bbb\\nB1\\nB2', then line 2 will become these three lines? Or perhaps the content is used to replace the range lines and the line count is adjusted automatically? This is ambiguous.\n\nBut we can also use multiple edits: first, we could insert lines after line 2 using an append operation: AppendContent would append to the end of file, not suitable.\n\nThe problem likely expects using edits[] with oldString and newString to replace 'bbb' with 'bbb\\nB1\\nB2' maybe? Or maybe to replace 'bbb' with 'bbb' and then we insert B1 and B2 after it using separate edits? Let's examine the permissible forms: The edits array can contain objects of shape:\n\n- { oldString, newString }\n- { oldString, newString, replaceAll }\n- { startLine, endLine, content }\n\nThus we can do a batch edit that uses startLine and endLine and content. That seems like the appropriate way to replace lines in a given range with new content.\n\nSo we need to locate the line containing 'bbb' which is line 2. After that line, we want to insert two lines. This is equivalent to replacing line 2 with three lines: 'bbb', 'B1', 'B2', and then the original line 3 ('ccc') becomes line 4. But the replacement content must be exactly the new content for that range. If we set startLine=2, endLine=2, content='bbb\\nB1\\nB2', then line 2 becomes the content 'bbb\\nB1\\nB2'? That's one line? No, content likely is a string that will be placed in place of the range; if the range is a single line, the replacement content can contain newlines, which will result in those lines inserted, pushing subsequent lines down accordingly. So that seems viable.\n\nThus we can perform an edit with edits array containing one object: { startLine: 2, endLine: 2, content: \"bbb\\nB1\\nB2\" }.\n\nBut does the spec require us to include surrounding context for find/replace? Not needed if we use startLine and endLine. So we can directly specify the range to replace and the new content.\n\nNow the instruction: \"Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.\"\n\nWe have already read the file. Now we need to edit it accordingly.\n\nThus we should call edit with path \"insert.ts\" and edits array specifying insertion.\n\nWe need to use the edit tool. Allowed modes: appendContent, edits[], or symbol+content. We'll use edits[].\n\nThus call edit with:\n\n{\n  \"path\": \"insert.ts\",\n  \"edits\": [\n    {\n      \"startLine\": 2,\n      \"endLine\": 2,\n      \"content\": \"bbb\\nB1\\nB2\"\n    }\n  ]\n}\n\nBut we must also ensure that the edit is atomic and correct.\n\nBefore calling edit, we might want to confirm the line number of 'bbb' could be dynamic; but since we just read the file and saw it's line 2, we can safely assume it's line 2. However if the file had multiple 'bbb' occurrences, we might need to ensure we only edit the first occurrence or something. The instruction says \"the line containing 'bbb'\" (singular), and from our read we see there's exactly one occurrence at line 2. So it's fine.\n\nBut what about using replaceAll? Not needed.\n\nThus we shall call edit tool accordingly.\n\nOne caveat: The edit tool expects the \"edits\" property to be an array of objects; each object can have various fields. In the spec, the object can have fields: \"content\", \"endLine\", \"newString\", \"occurrence\", \"replaceAll\", \"startLine\". But our object uses \"startLine\", \"endLine\", \"content\". That's valid.\n\nThus the call should be:\n\n{\n  \"path\": \"insert.ts\",\n  \"edits\": [\n    {\n      \"startLine\": 2,\n      \"endLine\": 2,\n      \"content\": \"bbb\\nB1\\nB2\"\n    }\n  ]\n}\n\nMake sure to not include extra fields.\n\nNow we need to output a tool call.\n\nThus we produce a JSON in the tool call format."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_vv8yo7wu",
+   "content": "Edited (+2/-0).\n 1 aaa\n 2 bbb\n+3 B1\n+4 B2\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_6y1a7c8k",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "We need to modify insert.ts by inserting lines 'B1' and 'B2' immediately after line containing 'bbb'. The file currently has:\n\n1 aaa\n2 bbb\n3 ccc\n\nWe need after line 2: insert B1 and B2, so new lines become:\n\n1 aaa\n2 bbb\n3 B1\n4 B2\n5 ccc\n\nWe need to do it using the tools, reading before editing. The edit tool with edits array can do it. Possibly we need to match the line containing 'bbb' and add after.\n\nOur previous edit call gave exactly that output. It inserted lines B1 and B2 after line 2.\n\nNow to confirm final file content. Use read to verify."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_6y1a7c8k",
+   "content": "1: aaa\n2: bbb\n3: B1\n4: B2\n5: ccc\n"
+  }
+ ]
+}

@@ -1,0 +1,112 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-context-edit",
+ "scenarioId": "b16b-undo-stale",
+ "task": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:05:41.296Z",
+ "durationMs": 28341,
+ "tokensIn": 9453,
+ "tokensOut": 2226,
+ "costUsd": 0.00132951,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "applied-wrong",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nBBB\nccc-x\n",
+ "actualContent": "aaa\nbbb\nccc-x\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires normal (non-raw) read anchors\n- edit: Make precise file edits at LINE#HASH anchors copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse normal read before edit whenever you do not hold current LINE#HASH anchors for the file.\nUse `raw: true` only for inspection/token saving; raw output has no anchors.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse edit with LINE#HASH anchors from normal (non-raw) read for all file changes; batch every change to one file into a single edit call.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nAnchors are contextual; if a neighboring line changed, old anchors may go stale.\nOn [E_STALE_ANCHOR], retry with the >>> lines quoted in the error instead of re-reading the whole file.\n\nCurrent working directory: /tmp/pi-llm-bench-WwFTH6/pi-hashline-context-edit-b16b-undo-stale"
+  },
+  {
+   "role": "user",
+   "content": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_mexkbrf0",
+     "name": "read",
+     "arguments": "{\"path\":\"b16b.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to modify b16b.ts, replace the line containing 'bbb' with a line \"BBB\", then undo that change. So effectively we do: read file, find anchor with text containing 'bbb', edit replace that line with \"BBB\". Then undo that change: revert to original content. We can do a second edit replacing the \"BBB\" line with its original content. Should we keep original content? The requirement says \"undo that change\". So we should first edit to \"BBB\", then revert. Probably we need to do two separate edit calls. The sequence: read file -> edit replace -> read file again to get the new anchor for the \"BBB\" line -> edit revert.\n\nBut the instruction says \"Use the provided tools; always read the file before editing.\" So we need to read before each edit. So read before replace, then edit. Then read again before undo, then edit back.\n\nEdge: anchor lines with LINE#HASH. Need to read the file. Let's examine file structure. We'll read the file.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_mexkbrf0",
+   "content": "1#BV:aaa\n2#ZB:bbb\n3#ZS:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_w9nzqdqe",
+     "name": "edit",
+     "arguments": "{\"path\":\"b16b.ts\",\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#ZB\"}]}"
+    }
+   ],
+   "reasoning": "We need to replace the line containing 'bbb' with exactly one line: BBB, then undo that change. So first modify, then revert to original. We need to use edit, then undo. After edit, we can read again and revert using anchors from result? We need to keep track.\n\nFirst edit: replace line 2 with BBB. Anchor: line 2 is \"2#ZB:bbb\". create edit with pos \"2#ZB\". new lines [\"BBB\"].\n\nAfter we execute edit, we get new anchors. Then we need to undo change: revert that line back to original 'bbb'. We need anchor for updated line content: after first edit, the file has 'BBB'. We can read file again to get anchor for 'BBB'. Then replace it with 'bbb'.\n\nWe must read the file again after first edit. Let's do edit first.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_w9nzqdqe",
+   "content": "--- Anchors 1-3 ---\n1#HV:aaa\n2#MB:BBB\n3#WS:ccc\n 1#HV:aaa\n-2    bbb\n+2#MB:BBB\n 3#WS:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_bnl8t0jb",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b16b.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "We replaced the line with 'bbb' with BBB. Now need undo that change. Undo means revert to original line bbb. We need to apply edit again using old anchor 2#ZB. But after previous edit, anchor changed. We need to read file and then revert. Let's read file again."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_bnl8t0jb",
+   "content": "1#HV:aaa\n2#YN:BBB\n3#WW:ccc-x"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_jdu0pbrb",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"bbb\"],\"op\":\"replace\",\"pos\":\"2#YN\"}],\"path\":\"b16b.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_jdu0pbrb",
+   "content": "--- Anchors 1-3 ---\n1#BV:aaa\n2#JN:bbb\n3#ZW:ccc-x\n 1#BV:aaa\n-2    BBB\n+2#JN:bbb\n 3#ZW:ccc-x"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_lxfgt02d",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b16b.ts\",\"raw\":true}"
+    }
+   ],
+   "reasoning": "We need to undo the change that replaced 'bbb' with 'BBB'. The user instructions: \"Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing.\"\n\nWe already performed replace to BBB then replaced back to bbb. However there's a subtle: The second replace changed back to \"bbb\" but the content line anchor says \"bbb\"? Let's inspect file content. After the second edit, the line content is \"bbb\" indeed. But the line numberings show line 3 content is \"ccc-x\" not \"ccc\". In original file, line3 content was \"ccc\". The edit operations didn't modify line3. But our read shows line3 as \"ccc-x\". That suggests something wrong: The original file had \"ccc\" but after our modifications it's \"ccc-x\". This indicates that the file changed inadvertently. Let's trace: The edit added new content incorrectly? Wait: The second edit had lines [\"bbb\"] replace pos \"2#YN\". That should replace line 2, but shouldn't affect line 3. But our read shows \"ccc-x\". maybe because the edit appended \"bbb\" but also inserted something? Let's check the changes diff: The output from edit shows:\n\n--- Anchors 1-3 ---\n1#BV:aaa\n2#JN:bbb\n3#ZW:ccc-x\n 1#BV:aaa\n-2    BBB\n+2#JN:bbb\n 3#ZW:ccc-x\n\nIt shows \"3#ZW:ccc-x\". That means the file content line 3 changed to \"ccc-x\" already, maybe due to file encoding? Wait anchor shows content \"ccc-x\" not \"ccc\". But earlier original file was \"ccc\". Where did \"-x\" come? Probably earlier we had \"ccc-x\" lines due to some previous change. But not part of these edits. Let's open the file in full by reading raw lines to see? Let's read raw to see exact content lines."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_lxfgt02d",
+   "content": "aaa\nbbb\nccc-x"
+  }
+ ]
+}

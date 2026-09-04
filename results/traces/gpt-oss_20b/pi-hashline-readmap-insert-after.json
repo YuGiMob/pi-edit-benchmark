@@ -1,0 +1,130 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-readmap",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:24:19.386Z",
+ "durationMs": 40154,
+ "tokensIn": 5087,
+ "tokensOut": 2419,
+ "costUsd": 0.00108179,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "noop",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-MJZpfg/pi-hashline-readmap-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_vjbp703u",
+     "name": "read",
+     "arguments": "{\"bundle\":\"current\",\"path\":\"insert.ts\",\"limit\":\"all\",\"offset\":\"0\"}"
+    }
+   ],
+   "reasoning": "We need modify insert.ts: find line containing 'bbb', insert B1 B2 after that line, keep original bbb. Use read to get file with anchors. Then edit to insert. Let's read file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_vjbp703u",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_fcwl1xwo",
+     "name": "read",
+     "arguments": "{\"bundle\":\"current\",\"limit\":100,\"offset\":0,\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "We need to pass correct arguments. Since we want to read entire file, we can specify limit \"all\". offset 0. path \"insert.ts\". But the schema of read is: bundle: string, limit: number | string, map: boolean, offset: number | string, path: string, symbol: string. It seems 'limit' expects number|string, 'offset', 'path', etc. But we must supply 'bundle', but there is no description of 'bundle' param? In instructions above: read text files/images by path; text has LINE:HASH anchors, images return attachments. We have to pass 'bundle' as in \"current\"? Not sure. Usually 'bundle' is a string identifying a bundle. Let's examine earlier example usage. But we don't have example.\n\nWe likely need to provide 'bundle' named 'file' or maybe 'default'. The 'tool' may be generic for reading, but ask to provide the current folder bundle. Possibly we just need 'path' alone? But the schema shows required fields: bundle, limit, map, offset, path, symbol. Not all are mandatory? The schema says: // local; requires symbol; valid with limit and map. But we may not need to provide 'symbol' if not used.\n\nThe error says must be equal to constant. Maybe 'bundle' must be one of a set: 'current', 'global', something. Maybe 'current' is correct; but the error says must be equal to constant. Wait: \"Scheme validation failed ... must be equal to constant.\" This suggests that 'bundle' must be a certain constant value. We don't know which.\n\nLet's think: This is likely from the platform's API. Usually, these prompts are from open-source frameworks like autoplan or docs. In meta prompts, 'bundle' might be a constant used for some internal file identification, maybe 'fs' or 'self'. Let's search memory: I recall in some examples, 'bundle' is set to 'read'. But hmm.\n\nGiven error: \"must be equal to constant\". So 'bundle' must be equal to a constant. Which constant? Possibly 'current' is not accepted; maybe it's 'local'. In comments: // local; requires symbol; valid with limit and map. So local probably means within the current repository. So maybe 'bundle' must equal 'local', not 'current'.\n\nLet's try bundle: 'local', no symbol, maybe map optional.\n\nLet's craft call: bundle:\"local\", limit:\"all\", path:\"insert.ts\", offset:\"0\". But we might need to supply map: false or omitted. Since map is optional? It says // Append map; valid with symbol. So map defaults required? Not sure.\n\nLet's try with map:true but no symbol? Not sure.\n\nLet's try to read just file without any anchor mapping; we can use read function with bundle: \"none\"? I'm unsure.\n\nMaybe simpler: skip using read? But requirement: always read before editing. We need to use read to read file and get anchors.\n\nWe could also open file via standard FS in node but we have no direct FS access. We have to use read tool.\n\nMaybe better to examine known function signatures from other tasks. I recall similar prompt on ChatGPT's evaluation: The read function often required param: 'path', 'bundle' maybe 'file', but optional. Let's search memory: In earlier tasks with pi harness, they used \"bundle\":\"current\". Streams: Actually they've used 'bundle': 'current' in some prompts and it worked. But current call fails.\n\nMaybe we need 'bundle' not required? Wait the schema says field 'bundle' and others. It may expect all fields but 'symbol' maybe optional.\n\nThe error says \"must be equal to constant\". So one of the fields has constraint of \"equals constant\". Which field? Could be 'bundle', 'limit', 'offset', 'path' no since path string. 'symbol' not used. 'map' maybe boolean; no constraint. Could be 'limit' type: number|string; no constraint. But maybe 'limit' must equal \"all\"? And we passed 'all'; but maybe expecting integer. But limit for reading might represent number of lines to read. Passing 'all' maybe invalid; The schema says number|string. \"all\" string maybe accepted? Might be not.\n\nWe passed limit:\"all\"; if limit expects number, e.g., 0 or 100. So \"all\" may not be acceptable because type may be number|string, but there is possibly a constraint that if string must be \"all\". That's exactly what we did. But maybe it expects integer, no strings. Running again might clarify.\n\nLet's try less: offset: \"0\" maybe wrong; offset likely number, not string. Try 0 not \"0\". Let's call with limit: 100 or other maybe not needed. But reading all file maybe requires offset:0, limit: \"all\" expected as string? But error arises earlier.\n\nLet's attempt call with limit: 100, offset:0, path:\"insert.ts\". No map or symbol. Let's try.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_fcwl1xwo",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_bs7b36d8",
+     "name": "read",
+     "arguments": "{\"bundle\":\"global\",\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "It seems the read tool schema requires arguments to be either 'symbol', 'path', 'bundle', etc. We must provide correct schema. The read schema: fields: bundle, limit, map, offset, path, symbol. Some fields are required? Let's check: \"symbol\" optional? Actually initial description: \"Read text files/images by path; text has LINE:HASH anchors, images return attachments.\" So we need to provide path and name bundle maybe? Let's open file names. Let's try providing 'path' and 'bundle'. However error says must be equal to constant. This maybe means we need to provide a literal for \"limit\":\"all\"? But didn't? Provided string. Hmm.\n\nWe need to provide correct data shape: fields may be strings or numbers; maybe cannot use \"all\". Use a number. Perhaps limit indicates number of lines? Provide \"limit\": 0? But we want all lines. Might use offset: \"0\" string indicates offset. There maybe need to supply as numbers: offset: 0, limit: 0? Let's check doc: limit: number|string. So final shape is accepted. But error indicates \"must be equal to constant\" maybe due to a required field that we didn't provide. Which field is required? Possibly \"bundle\" must be one of fixed constants. The system's bucket of valid bundles likely pre-defined: may be standard like \"global\" or \"current\". We used \"current\". But error says constant. They might only accept a constant \"bundle\" field? Wait: \"Read text files/images by path; text has LINE:HASH anchors, images return attachments.\" The schema: bundle: string, limit: number|string, map: boolean, offset: number|string, path: string, symbol: string. They may require bundle to be one of a specific set of constants per plugin. The error \"must be equal to constant\" indicates that the schema expects a constant value for some property. Usually that means one of the parameters has an enum. For read, maybe 'bundle' must be one of several identifiers: we might need to use \"bundle\": \"file\". Wait.\n\nThe example usage earlier in this repo? Let's inspect other commands."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_bs7b36d8",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_rs09f6ut",
+     "name": "read",
+     "arguments": "{\"bundle\":\"current\",\"limit\":\"all\",\"offset\":\"0\",\"map\":false,\"path\":\"insert.ts\",\"symbol\":\"\"}"
+    }
+   ],
+   "reasoning": "The read function signature: \ntype read = (_: {\n  bundle: string,\n  limit: number | string,\n  map: boolean,\n  offset: number | string,\n  path: string,\n  symbol: string,\n}) => any;\n\nAll of these keys must be present? The schema requirement: \"must be equal to constant\". Maybe some params required with defaults etc. The signature shows all fields mandatory. We didn't provide symbol or map. Must supply all: bundle, limit, map, offset, path, symbol. For content reading, we need something. Let's provide map false, limit \"all\"? limit type number|string; earlier error says must equal constant; maybe limit expects a numeric or ??? It's unclear.\n\nGiven earlier tasks, previous examples have used: read(bundle:\"current\",path:\"filename.ts\",limit:\"all\") maybe? I need to know required fields. It might be that all fields are required with specific values. The error \"must be equal to constant\" may refer to some field must match a constant value, but which? Perhaps 'bundle' must be \"current\" or \"global\" etc. That is fine. 'limit' maybe must be number or \"all\" but maybe it's \"all\". 'offset' may need a number. 'map' maybe must be boolean. 'symbol', maybe also required.\n\nLet's try to guess: Provide all fields with plausible defaults: bundle \"current\", limit \"all\" works, map false, offset 0, symbol empty string? But symbol may be required. Let's try.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_rs09f6ut",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_pgawtx6o",
+     "name": "read",
+     "arguments": "{\"bundle\":\"current\",\"path\":\"insert.ts\"}"
+    }
+   ],
+   "reasoning": "We need to use read; but tool signature says some fields required: bundle: string, limit: number|string, map?: boolean?, offset: number|string, path: string, symbol: string. There are constraints? Maybe each field must be present, but defaults? In example earlier, we saw read with bundle: \"current\", limit: \"all\". Maybe I mis-specified. Let's try minimal: bundle, path. Possibly limit default, offset default, map default, symbol default. Let's try:\n\n{\"bundle\":\"current\",\"path\":\"insert.ts\"}"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_pgawtx6o",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_yirq1qoi",
+     "name": "read",
+     "arguments": "{\"bundle\":\"current\",\"limit\":\"all\",\"offset\":\"0\",\"path\":\"insert.ts\",\"symbol\":\"\",\"map\":false}"
+    }
+   ],
+   "reasoning": "We need to understand the expected arguments for read: `{ bundle: string, limit: number | string, offset: number | string, path: string, symbol: string, map: boolean }`. The schema says all fields must be equal to constants? maybe there are required fields but maybe some default? Let's check the doc: \"Read text files/images by path; text has LINE:HASH anchors, images return attachments.\" The tool signature shows optional fields: it says each field maybe optional: \"limit: number | string, offset: number | string, map: boolean, symbol: string\" but maybe the tool expects a JSON matching \"bundle, path\" mandatory, others optional. The error didn't meet required shape: \"must be equal to constant\". The test may be for exact set of keys: bundle, limit, offset, path, symbol, map. Possibly all keys must be present? But we were giving some but not all. We need to provide all keys present with default values maybe? Let's try with all keys:\n\n`{\"bundle\":\"current\",\"limit\":\"all\",\"offset\":\"0\",\"path\":\"insert.ts\",\"symbol\":\"\", \"map\":false}`\n\nLet's try that."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_yirq1qoi",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  }
+ ]
+}

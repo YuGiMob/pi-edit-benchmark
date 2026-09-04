@@ -1,0 +1,61 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-semantic-edit",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:43:52.735Z",
+ "durationMs": 12445,
+ "tokensIn": 2648,
+ "tokensOut": 890,
+ "costUsd": 0.00045236,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call — set replaceAll: true to replace every occurrence (e.g. renames)\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match the current file content, modulo tolerated drift).\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls.\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\nThe matcher tolerates minor whitespace, indentation, line-ending, escape, and Unicode drift — but copy the code as accurately as you can.\nIf the text matches multiple locations, the edit fails with the line positions — include more surrounding context, or set replaceAll: true to replace every occurrence. If nothing matches, the error shows the closest text actually in the file; correct against that and retry.\n\nCurrent working directory: /tmp/pi-llm-bench-Qrg3tM/pi-semantic-edit-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_6597rz41",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\",\"offset\":1,\"limit\":2000}"
+    }
+   ],
+   "reasoning": "We need to read file insert.ts first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_6597rz41",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_kzrz70hj",
+     "name": "edit",
+     "arguments": "{\"path\":\"insert.ts\",\"edits\":[{\"newText\":\"B1\\nB2\\nccc\",\"oldText\":\"ccc\"}]}"
+    }
+   ],
+   "reasoning": "We need to modify insert.ts so that after line containing 'bbb', we insert lines literally 'B1' and 'B2'. The existing file content is:\n\naaa\nbbb\nccc\n\nWe need to insert 'B1' and 'B2' immediately after the line with 'bbb'.\n\nThus final file should be:\n\naaa\nbbb\nB1\nB2\nccc\n\nWe need to use edit tool. We need to find precise oldText to match the target line. According to guidelines, edits[].oldText must be matched against original. We should only edit that part where we will inject new lines. Since we can't insert new content with just oldText, we need to replace the line after 'bbb' maybe? We can do an edit where oldText is the line(s) after 'bbb': 'ccc'. We replace 'ccc' with 'B1\\nB2\\nccc'. But that'll insert before ccc? The requirement: insert lines after line 'bbb', before 'ccc'. If we replace 'ccc' with 'B1\\nB2\\nccc', that's fine. OldText: 'ccc' on its own line. Update newText with 'B1\\nB2\\nccc'.\n\nEnsure that replacement doesn't add extra whitespace. Let's check current content lines:\n\nLine 1: 'aaa'\nLine 2: 'bbb'\nLine 3: 'ccc'\n\nThus new content lines: 'aaa', 'bbb', 'B1', 'B2', 'ccc'.\n\nWe'll replace oldText 'ccc' -> 'B1\\nB2\\nccc'.\n\nAssuming newline format is '\\n' and it preserves newline at end? We'll create newText as 'B1\\nB2\\nccc'. That includes the 'ccc' original, so will add no duplication. Let's output everything.\n\nWe'll issue edit tool."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_kzrz70hj",
+   "content": "Successfully replaced 1 replacement across 1 edit(s) in insert.ts.\n 1 aaa\n 2 bbb\n+3 B1\n+4 B2\n 3 ccc"
+  }
+ ]
+}

@@ -1,0 +1,110 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "builtin-edit",
+ "scenarioId": "b10-duplicate-drift",
+ "task": "Modify b10.ts in the current working directory. The file contains two functions. Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T11:56:49.554Z",
+ "durationMs": 12687,
+ "tokensIn": 4909,
+ "tokensOut": 970,
+ "costUsd": 0.0006346300000000001,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "function a() {\n  return 1;\n}\nfunction b() {\n  return 2; // drifted\n};\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-C5DXdE/builtin-edit-b10-duplicate-drift"
+  },
+  {
+   "role": "user",
+   "content": "Modify b10.ts in the current working directory. The file contains two functions. Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_9jyn6hv9",
+     "name": "read",
+     "arguments": "{\"path\":\"b10.ts\",\"offset\":1,\"limit\":2000}"
+    }
+   ],
+   "reasoning": "We need to modify file b10.ts. Let's read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_9jyn6hv9",
+   "content": "function a() {\n  return 1;\n}\nfunction b() {\n  return 2;\n}\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_yspdxz8m",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b10.ts\"}"
+    }
+   ],
+   "reasoning": "We need to modify b10.ts. There are two functions. The closing brace of the second function is '}'. The second line that is exactly '}'. Indeed the file has two '}'. The second occurs at line 6 ('}'). We need to replace that line with exactly '};'. So we replace \"}\" by \"};\". We'll edit the file.\n\nWe'll use edit with one edit entry: match oldText: '}' (exact line). But there are two '}' lines. But we need the second one. We cannot distinguish via line number easily, but we can include context. Maybe we can match surrounding text: for second function the function b: we can match \"function b() {\\n  return 2;\\n}\" exactly. But we need to replace the last '}'. We can match the last '}' in context: e.g., match the whole function text? But the 'edit' expects oldText to match a unique non-overlapping region. Could match \"}\\n\" in context? There might be other '}' lines. But the second one is unique. We can match the pattern \"  return 2;\\n}\" maybe including preceding spaces. That would match unique region.\n\nLet's read file again to confirm content exactly."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_yspdxz8m",
+   "content": "function a() {\n  return 1;\n}\nfunction b() {\n  return 2; // drifted\n}\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_xhmc7bov",
+     "name": "edit",
+     "arguments": "{\"path\":\"b10.ts\",\"edits\":[{\"newText\":\"};\",\"oldText\":\"}\"}]}"
+    }
+   ],
+   "reasoning": "We see file. We need replace the closing brace '}' of second function, which is '}' after function b. That line currently is '}'. We need replace that line with '};'. So edit file b10.ts index. Use edit tool. Provide edits array. Old text: '}'. Replacement: '};'. Let's craft."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_xhmc7bov",
+   "content": "Error: Found 2 occurrences of the text in b10.ts. The text must be unique. Please provide more context to make it unique."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_2qdyftvp",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"newText\":\"  return 2; // drifted\\n};\",\"oldText\":\"  return 2; // drifted\\n}\"}],\"path\":\"b10.ts\"}"
+    }
+   ],
+   "reasoning": "We need to replace the closing brace of the second function. The file currently:\n\nfunction a() {\n  return 1;\n}\nfunction b() {\n  return 2; // drifted\n}\n\nWe need to replace the '}' for second function with '};' But there are two occurrences of '}'. We need to specify context. We can include preceding line or newline. The exact line is the closing brace on separate line. For second function: \"}\".\n\nWe can match context: newline before: \"} function\"?? Actually second function closing brace is alone on line: \"}\". preceding line is \"  return 2; // drifted\" and next line maybe EOF or other content. We can unique with preceding space? The oldText must match unique region. Provide multi-line context maybe: \"\\n}\\n\" is not unique? It also has the first closing '}'. But there's only one newline after each '}'. As there are two functions each ending with '}'. We need to differentiate. Use preceding line: \"  return 2; // drifted\\n}\". That is unique. So oldText should be \"\\n  return 2; // drifted\\n}\"? Wait we include the closing lines? oldText is the exact string to replace. It must match unique region. So we can send oldText as \"  return 2; // drifted\\n}\". But type of replacement is the closing brace only so we replace that region with '};'. So oldText should be \"  return 2; // drifted\\n}\" and newText \"  return 2; // drifted\\n};\". But that replaces the whole region. But ensure that oldText matches exactly. The file has \"  return 2; // drifted\\n}\". Yes. So we replace with \"  return 2; // drifted\\n};\". That will add semicolon after brace.\n\nAlternatively could just replace \"}\\n\" after the line. But let's do safe.\n\nLet's call edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_2qdyftvp",
+   "content": "Successfully replaced 1 block(s) in b10.ts."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_h3o6m38n",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b10.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_h3o6m38n",
+   "content": "function a() {\n  return 1;\n}\nfunction b() {\n  return 2; // drifted\n};\n"
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-edit-pro",
+ "scenarioId": "b9-boundary-changed",
+ "task": "Modify b9.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:09:01.500Z",
+ "durationMs": 13050,
+ "tokensIn": 8098,
+ "tokensOut": 1032,
+ "costUsd": 0.0008764599999999999,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines via bare 4-char anchor `Hasu` from `Hasu│content`: `remove_from`/`remove_to` are `Hasu` only, `replacement_lines` is bare lines without `│`; one edit per call\n- insert: Insert `lines` after/before bare anchor `Hasu` from `Hasu│content`: anchor stays, lines are bare without `│`, one per element\n- undo_last_change: Undo last `replace`/`insert` on a file; restores deleted file, keeps record on `[E_UNDO_STALE]`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call before `replace` when you need fresh anchors.\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: use the same anchor for `remove_from` and `remove_to` to change one line.\n`replace`: `replacement_lines` takes bare lines without `│`; `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically.\n`replace`: keep the range tight — only lines that actually change — and copy leading spaces exactly.\n`replace`: post-edit diff `+anchor│`/` anchor│` rows are fresh anchors for the next edit — no new `read` needed. One edit per turn; check the diff before the next edit on that file.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically.\n`insert`: the anchor must have been shown by `read`, a post-edit diff (`+anchor│`/` anchor│`), or any served `anchor│content` row. Empty file: `read` shows one `anchor│` row — insert `after` it.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff (check the `-anchor│` lines you wanted to keep).\n\nCurrent working directory: /tmp/pi-llm-bench-UWur2g/pi-hashline-edit-pro-b9-boundary-changed"
+  },
+  {
+   "role": "user",
+   "content": "Modify b9.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_udzxx1bn",
+     "name": "read",
+     "arguments": "{\"path\":\"b9.ts\",\"offset\":1,\"limit\":1000}"
+    }
+   ],
+   "reasoning": "We need to read b9.ts, find line with 'bbb', replace it with exactly one line: BBB. Use replace tool.\n\nFirst read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_udzxx1bn",
+   "content": "HyNA│aaa\nChaz│bbb\nLPkw│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_g8rqyws4",
+     "name": "replace",
+     "arguments": "{\"path\":\"b9.ts\",\"remove_from\":\"Chaz\",\"remove_to\":\"Chaz\",\"replacement_lines\":[\"BBB\"]}"
+    }
+   ],
+   "reasoning": "We need to replace the line containing 'bbb' with one line: BBB. The line currently is \"Chaz│bbb\". We must replace line 'Chaz│bbb' with 'BBB'. That means we replace the content to 'BBB', but anchor persists? After replacement, we want line to be 'BBB' (no anchor). But the tool's replace uses anchors plus new content lines. According to guidelines, replace lines by including the anchor. But replace function replaces the lines between remove_from and remove_to inclusive, with replacement_lines. The replacement lines are bare content (without anchor). So we can do:\n\nread file got anchors: HyNA, Chaz, LPkw.\n\nWe will replace 'Chaz' to 'Chaz' with replacement_lines [\"BBB\"]. That will replace the whole line content with 'BBB' and anchor will be removed? It might keep anchor? Actually the replace replaces entire line with new content. Since we put only \"BBB\", it will be a line with no anchor. The file will then have: \"HyNA│aaa\", \"BBB\", \"LPkw│ccc\"? But anchor line remains? Wait example: If we replace 'Chaz│bbb' with [\"BBB\"], then that line will become \"BBB\". The anchor will not be present. That might be okay. However guidelines may expect line anchored? The file's lines usually have anchor then content. We might need to maintain structure: Usually anchor format is needed. Probably we should replace the content part but keep anchor? But the function output spec for replacement_lines: no anchor. So we cannot keep anchor. But maybe we can specify replacement_lines [\"BBB\"] and after replace the line will just be 'BBB'. That is fine.\n\nLet's execute replace."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_g8rqyws4",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in b9.ts: \"Chaz\", \"Chaz\". The file changed since read. Call read() for fresh anchors."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_uftdiuqh",
+     "name": "read",
+     "arguments": "{\"limit\":1000,\"offset\":1,\"path\":\"b9.ts\"}"
+    }
+   ],
+   "reasoning": "The error indicates after the read, the anchor lines changed? Wait, we just read the file and then replaced. The error says stale anchors, maybe the file changed by something else? But we didn't. The stash may have many concurrent changes? Perhaps there's an undo/redo? Wait: \"E_STALE_ANCHOR\" indicates the file changed between read and replace. Since we just read, maybe the file was modified asynchronously? Regardless, we must read again to get fresh anchors, then replace with the same anchor. Let's read again."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_uftdiuqh",
+   "content": "HyNA│aaa\nMLie│bbb-x\nLPkw│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_zf5bb3t7",
+     "name": "replace",
+     "arguments": "{\"path\":\"b9.ts\",\"remove_from\":\"MLie\",\"remove_to\":\"MLie\",\"replacement_lines\":[\"BBB\"]}"
+    }
+   ],
+   "reasoning": "Stale anchors because file changed: line changed anchor from Chaz to MLie. We need to replace MLie line. Use replace with remove_from=\"MLie\" to \"MLie\"."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_zf5bb3t7",
+   "content": "Successfully replaced in b9.ts. Added 1 line(s), removed 1 line(s).\n HyNA│aaa\n-MLie│bbb-x\n+ReFR│BBB\n LPkw│ccc"
+  }
+ ]
+}

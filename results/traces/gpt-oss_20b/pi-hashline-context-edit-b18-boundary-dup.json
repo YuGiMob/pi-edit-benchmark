@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-context-edit",
+ "scenarioId": "b18-boundary-dup",
+ "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:06:29.643Z",
+ "durationMs": 14507,
+ "tokensIn": 6143,
+ "tokensOut": 1277,
+ "costUsd": 0.00081311,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\naaa\nBBB\nccc\n",
+ "actualContent": "aaa\naaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires normal (non-raw) read anchors\n- edit: Make precise file edits at LINE#HASH anchors copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse normal read before edit whenever you do not hold current LINE#HASH anchors for the file.\nUse `raw: true` only for inspection/token saving; raw output has no anchors.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse edit with LINE#HASH anchors from normal (non-raw) read for all file changes; batch every change to one file into a single edit call.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nAnchors are contextual; if a neighboring line changed, old anchors may go stale.\nOn [E_STALE_ANCHOR], retry with the >>> lines quoted in the error instead of re-reading the whole file.\n\nCurrent working directory: /tmp/pi-llm-bench-rYY5yW/pi-hashline-context-edit-b18-boundary-dup"
+  },
+  {
+   "role": "user",
+   "content": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_1aw5ruwk",
+     "name": "read",
+     "arguments": "{\"path\":\"b18.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to modify b18.ts. Let's open file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_1aw5ruwk",
+   "content": "1#BV:aaa\n2#ZB:bbb\n3#ZS:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_ithyn2y9",
+     "name": "edit",
+     "arguments": "{\"path\":\"b18.ts\",\"edits\":[{\"lines\":[\"aaa\",\"BBB\"],\"op\":\"replace\",\"pos\":\"2#ZB\"}]}"
+    }
+   ],
+   "reasoning": "We need to replace line containing 'bbb' (line 2). We want two lines: \"aaa\" and \"BBB\". Replace the single line. Use replace at line 2. Anchors: line 2 is \"2#ZB:bbb\". So edit call: path b18.ts, edits: [{op:\"replace\",pos:\"2#ZB\",\"lines\":[\"aaa\",\"BBB\"]}]. Should produce new anchors."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_ithyn2y9",
+   "content": "--- Anchors 1-4 ---\n1#HQ:aaa\n2#WS:aaa\n3#KM:BBB\n4#PM:ccc\n\nWarnings:\nSingle-anchor replace at replace 2#ZB swapped only line 2, but you supplied 2 replacement lines. If you meant to replace a range, add end. If you meant to expand one line into many, ignore this.\nPotential boundary duplication before replace 2#ZB: the replacement starts with a line that matches the preceding surviving line after trim.\n 1#HQ:aaa\n-2    bbb\n+2#WS:aaa\n+3#KM:BBB\n 4#PM:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_z52tdfxg",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b18.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "We have a mistake: They used replace op without specifying end; we need to replace a span (line 2 only) but providing 2 lines. According to guidelines, use replace with end to replace range. Actually we only want replace line 2 with two lines: 'aaa' and 'BBB'. Should do a replace from pos 2#ZB to end 2#ZB? No, we need to replace a span. But line 2 only. We should use replace with end also, but same line? The guidelines: \"Without `end`, exactly one line is replaced no matter how many entries `lines` has.\" So if we want to replace line 2 with two lines, we should specify end pos same as pos? It says \"replace the single line at pos, or the inclusive span pos..end\". So should we set end: \"2#ZB\"? probably would error. But also we see warning about single-anchor replace with multiple lines is ambiguous. Better to use replace with start and end: pos \"2#ZB\" end \"2#ZB\" lines [\"aaa\",\"BBB\"]. Additionally need to consider duplication: line 1 is \"aaa\". Replacement starts with \"aaa\" duplicates previous line. But that's fine? The warning says potential boundary duplication. We could use prepend? Actually we want to replace line 2 with two lines, first should be \"aaa\" but we already have preceding line \"aaa\". The result will have consecutive same lines. That's okay. We just need to patch with correct anchors. We must re-read the file to get new anchors. We have the result: lines after edit anchors 1-4. Let's re-read again from start with new anchors. Then apply edit. We'll avoid duplicate warnings? Actually duplicate may warn but allowed. Let's check if previous output: after edit, we have new anchors: 1#HQ:aaa, 2#WS:aaa, 3#KM:BBB, 4#PM:ccc. We need to replace line 2's original anchor 2#WS? However 2#WS is the line we added \"aaa\". We want to keep it. We want to replace line 2, but now line 2 is the new \"aaa\". Actually we want to replace original bbb line with two lines: \"aaa\" and \"BBB\". We want final file: lines: aaa (original line1), aaa (new line introduced), BBB (new line), ccc (original line3). That's fine.\n\nNow we need to construct edit: we need to replace span lines 2 (original bbb now replaced with 2#WS...). But we intend to replace that line with two lines; but our built file now has 4 lines, and we have added two new lines. Perhaps we should just do final file with four lines and no duplicates? Wait initial requested: replace line containing 'bbb' with exactly two lines: \"aaa\" and \"BBB\". That means remove bbb line, and insert \"aaa\" then \"BBB\" at that position. So final file should be: aaa, aaa, BBB, ccc. That's exactly what we have after error. Let's do a new edit to ensure properly using anchor for replacement. Let's re-read the file after edit to avoid stale anchor when editing again. Wait we did edit; but we didn't confirm success. We got a warning about single-anchor replace but operation applied. But we might produce duplicate boundary warning but it's okay. However the safe route: use replace with end pos same as pos but separate anchor after re-read.\n\nLet's re-read file to get new anchors:\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_z52tdfxg",
+   "content": "1#HQ:aaa\n2#WS:aaa\n3#KM:BBB\n4#PM:ccc"
+  }
+ ]
+}

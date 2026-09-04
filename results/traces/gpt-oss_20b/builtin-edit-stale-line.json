@@ -1,0 +1,61 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "builtin-edit",
+ "scenarioId": "stale-line",
+ "task": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:00:18.485Z",
+ "durationMs": 5230,
+ "tokensIn": 2049,
+ "tokensOut": 278,
+ "costUsd": 0.00022683000000000002,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "silent-wrong-line",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB-external\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-NP9zly/builtin-edit-stale-line"
+  },
+  {
+   "role": "user",
+   "content": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_vrfwyn29",
+     "name": "read",
+     "arguments": "{\"path\":\"stale-line.ts\",\"limit\":2000,\"offset\":1}"
+    }
+   ],
+   "reasoning": "We need to read the file. Let's read it (limit large?)."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_vrfwyn29",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_s6r3thy5",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"newText\":\"BBB\",\"oldText\":\"bbb\"}],\"path\":\"stale-line.ts\"}"
+    }
+   ],
+   "reasoning": "We need to replace the line containing 'bbb' with \"BBB\". So the content should become:\n\n```\naaa\nBBB\nccc\n```\n\nWe want to use edit tool. Use exact oldText: 'bbb'.\n\nWe need to produce edit call:\n\n{\n  edits: [\n    {oldText: 'bbb', newText: 'BBB'}\n  ],\n  path: 'stale-line.ts'\n}\n\nBut need to consider that edit tool expects oldText match unique. The content is 'bbb' on its own line. We'll use that. Should we preserve newline? That may be tricky. The edit tool will replace oldText text. We'll supply oldText as 'bbb' and that will replace 'bbb' with 'BBB'. That will not change surrounding newlines.\n\nLet's do edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_s6r3thy5",
+   "content": "Successfully replaced 1 block(s) in stale-line.ts."
+  }
+ ]
+}

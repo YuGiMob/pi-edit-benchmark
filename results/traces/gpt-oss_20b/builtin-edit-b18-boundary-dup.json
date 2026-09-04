@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "builtin-edit",
+ "scenarioId": "b18-boundary-dup",
+ "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T11:58:03.119Z",
+ "durationMs": 19935,
+ "tokensIn": 2825,
+ "tokensOut": 1337,
+ "costUsd": 0.00059885,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\naaa\nBBB\nccc\n",
+ "actualContent": "aaa\naaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-JylkdR/builtin-edit-b18-boundary-dup"
+  },
+  {
+   "role": "user",
+   "content": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_wlesh58x",
+     "name": "read",
+     "arguments": "{\"path\":\"b18.ts\",\"offset\":1,\"limit\":40}"
+    }
+   ],
+   "reasoning": "We need to read b18.ts. Let's read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_wlesh58x",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_i0r2u2g8",
+     "name": "read",
+     "arguments": "{\"limit\":5,\"offset\":1,\"path\":\"b18.ts\"}"
+    }
+   ],
+   "reasoning": "We need to edit b18.ts. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Before editing, we read. We need to edit file. The line 'bbb' appears as second line. Replace this line entirely with aaa and BBB. So resulting content should be:\n\naaa\naaa\nBBB\nccc\n\nBut note that the original content had 'aaa' first line. The line containing 'bbb' second line replaced with two lines. So final lines: line1 'aaa', then new lines 'aaa' and 'BBB', then original line3 'ccc'. Yes.\n\nWe must use edit tool with oldText and newText replacements. We can provide edits array with one edit: oldText: 'bbb', newText: 'aaa\\nBBB'. Need to ensure the exact oldText is matched exactly. The file content is plain, with newline at end of file? Let's read again with offset? We'll read entire file lines to check newline at end-of-file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_i0r2u2g8",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_jua4u260",
+     "name": "edit",
+     "arguments": "{\"path\":\"b18.ts\",\"edits\":[{\"newText\":\"aaa\\nBBB\",\"oldText\":\"bbb\"}]}"
+    }
+   ],
+   "reasoning": "We need to replace the line containing 'bbb' with exactly two lines: 'aaa' and 'BBB'. That means we delete line with 'bbb' and replace with two lines 'aaa' (lowercase aaa?) and 'BBB' uppercase BBB? The spec: \"Replace the line containing 'bbb' with exactly two lines: aaa and BBB.\" So original file: line1 'aaa', line2 'bbb', line3 'ccc'. After change: line1 'aaa', line2 'aaa', line3 'BBB', line4 'ccc'? Wait we need to replace the 'bbb' line. So original 'bbb' replaced by two lines: 'aaa' and 'BBB'. So final file: line1 'aaa', line2 'aaa', line3 'BBB', line4 'ccc'. That's consistent. Let's edit file.\n\nWe need to match 'bbb' line exactly: 'bbb'. Use edit: oldText: 'bbb', newText: 'aaa\\nBBB'. But need to ensure line boundaries. We can match line with newline? We can replace 'bbb\\n' with 'aaa\\nBBB\\n'. Or match only 'bbb' (without newline) and just replace. Probably simplest: edit oldText 'bbb' with 'aaa\\nBBB'.\n\nBut we need to keep that the original line 'bbb' will be replaced by two lines; newline handling: The file has lines separated by \\n; after editing we will introduce two lines. The edit tool will replace exactly matched oldText; if we match 'bbb\\n', we need to preserve following newline? Suppose file content: \"aaa\\nbbb\\nccc\\n\". The edit would replace \"bbb\\n\" with \"aaa\\nBBB\\n\". But that would create 'aaa', 'BBB', 'ccc'? Wait: original: 'aaa\\nbbb\\nccc\\n'. If we replace 'bbb\\n' with 'aaa\\nBBB\\n', we get 'aaa\\naaa\\nBBB\\nccc\\n'. That's good. That yields 'aaa', 'aaa', 'BBB', 'ccc'. But we need to be careful that we don't duplicate last newline? The trailing newline at end of file remains.\n\nAlternatively, match just 'bbb' and replace with 'aaa\\nBBB'. That would produce 'aaa\\naaa\\nBBB\\nccc\\n'? Actually if editing 'bbb' -> 'aaa\\nBBB', full content: 'aaa\\naaa\\nBBB\\nccc\\n'? Wait sequence: replace 'bbb' inside text: 'aaa\\nbbb\\nccc\\n' becomes 'aaa\\naaa\\nBBB\\nccc\\n'. Yes same. But might delete newline after 'BBB'? Actually we replace only the string 'bbb', but we keep newline after it;  newline stays. The 'bbb' token replaced by 'aaa\\nBBB', so the original newline after 'bbb' remains. The result after 'BBB' is newline, then 'ccc'. So we get 'aaa\\naaa\\nBBB\\nccc\\n'. Works.\n\nThus editing: oldText: 'bbb' newText: 'aaa\\nBBB'.\n\nLet's do edit.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_jua4u260",
+   "content": "Successfully replaced 1 block(s) in b18.ts."
+  }
+ ]
+}

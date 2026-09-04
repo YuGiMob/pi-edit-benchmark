@@ -1,0 +1,190 @@
+import type { Scenario } from "../types";
+
+const NO_UNDO = [
+  "builtin-edit",
+  "pi-hashline-edit",
+  "pi-hashline-context-edit",
+  "pi-hashline-readmap",
+  "@oh-my-pi/hashline",
+  "@cortexkit/aft-pi",
+  "@xynogen/pix-edit",
+];
+
+const NO_ANCHORS = [
+  "builtin-edit",
+  "@xynogen/pix-edit",
+  "@cortexkit/aft-pi",
+  "@oh-my-pi/hashline",
+];
+
+const LARGE_FIXTURE = Array.from({ length: 200 }, (_, i) => `line${i + 1}`).join("\n") + "\n";
+
+export const betterEditScenarios: Scenario[] = [
+  {
+    id: "b6-change-then-revert",
+    fileName: "b6.ts",
+    category: "safety",
+    focus: "staleness",
+    name: "interior change then revert (B6)",
+    description:
+      "A line inside the range changed and was reverted before the edit; the file matches what was served, so the edit must apply.",
+    fixture: "aaa\nbbb\nccc\nddd\n",
+    target: { kind: "range", from: "bbb", to: "ddd" },
+    replacement: ["B", "D"],
+    mutateAfterRead: (content) =>
+      content.replace("ccc", "ccc-temp").replace("ccc-temp", "ccc"),
+    expected: { outcome: "applied", content: "aaa\nB\nD\n" },
+  },
+  {
+    id: "b7-paged-read-gap",
+    fileName: "b7.ts",
+    category: "safety",
+    focus: "served-state",
+    name: "never-served interior via paged read (B7)",
+    description:
+      "The model read only the first two lines; the edit targets a line that was never shown. Served-state tools must reject.",
+    fixture: "aaa\nbbb\nccc\nddd\neee\nfff\n",
+    readOptions: { offset: 1, limit: 2 },
+    target: { kind: "line", match: "eee" },
+    replacement: ["E"],
+    expected: { outcome: "either", content: "aaa\nbbb\nccc\nddd\nE\nfff\n" },
+  },
+  {
+    id: "b8-blind-edit",
+    fileName: "b8.ts",
+    category: "safety",
+    focus: "served-state",
+    name: "blind edit without any read (B8)",
+    description:
+      "The model edits with anchors it never received from a read of this file (simulated by reading a copy at another path). Served-state tools must reject.",
+    fixture: "aaa\nbbb\nccc\n",
+    blindEdit: true,
+    target: { kind: "line", match: "bbb" },
+    replacement: ["BBB"],
+    expected: { outcome: "either", content: "aaa\nBBB\nccc\n" },
+  },
+  {
+    id: "b9-boundary-changed",
+    fileName: "b9.ts",
+    category: "safety",
+    focus: "staleness",
+    name: "boundary line changed after read (B9)",
+    description:
+      "The exact anchor line changed on disk; the edit must be refused as stale.",
+    fixture: "aaa\nbbb\nccc\n",
+    target: { kind: "line", match: "bbb" },
+    replacement: ["BBB"],
+    mutateAfterRead: (content) => content.replace("bbb", "bbb-x"),
+    expected: { outcome: "rejected" },
+  },
+  {
+    id: "b10-duplicate-drift",
+    fileName: "b10.ts",
+    category: "safety",
+    focus: "staleness",
+    name: "duplicate-content drift must still reject (B10)",
+    description:
+      "Two identical blocks; a line inside the second block drifted after read. The edit of the second block must be refused, not silently overwrite the drift.",
+    fixture:
+      "function a() {\n  return 1;\n}\nfunction b() {\n  return 2;\n}\n",
+    target: { kind: "line-nth", match: "}", nth: 2 },
+    replacement: ["};"],
+    mutateAfterRead: (content) => content.replace("  return 2;", "  return 2; // drifted"),
+    expected: { outcome: "rejected" },
+  },
+  {
+    id: "b12-noop-with-drift",
+    fileName: "b12.ts",
+    category: "safety",
+    focus: "staleness",
+    name: "noop replace with out-of-range drift (B12)",
+    description:
+      "A noop edit (identical replacement) with an unrelated external change must leave the file untouched.",
+    fixture: "aaa\nbbb\nccc\n",
+    target: { kind: "line", match: "bbb" },
+    replacement: ["bbb"],
+    mutateAfterRead: (content) => content.replace("aaa", "aaa-x"),
+    expected: { outcome: "either", content: "aaa-x\nbbb\nccc\n" },
+  },
+  {
+    id: "b13-chained-diff-edit",
+    fileName: "b13.ts",
+    category: "robustness",
+    focus: "served-state",
+    name: "chained edit from post-edit diff rows (B13)",
+    description:
+      "After the first edit, the second edit anchors on the post-edit diff rows without a re-read.",
+    fixture: "aaa\nbbb\nccc\nddd\neee\n",
+    chained: true,
+    chainedSecondTarget: { kind: "line", match: "ddd" },
+    chainedSecondReplacement: ["DDD"],
+    target: { kind: "line", match: "ccc" },
+    replacement: ["CCC"],
+    expected: { outcome: "applied", content: "aaa\nbbb\nCCC\nDDD\neee\n" },
+    skipFor: ["@cortexkit/aft-pi", "@oh-my-pi/hashline"],
+  },
+  {
+    id: "b15-large-range-drift",
+    fileName: "b15.ts",
+    category: "safety",
+    focus: "staleness",
+    name: "large-range drift must reject (B15)",
+    description:
+      "A 200-line range with a drifted interior line; the edit must be refused, not silently overwrite the drift.",
+    fixture: LARGE_FIXTURE,
+    target: { kind: "range", from: "line10", to: "line190" },
+    replacement: ["X"],
+    mutateAfterRead: (content) => content.replace("line100", "line100-drifted"),
+    expected: { outcome: "rejected" },
+  },
+  {
+    id: "b16b-undo-stale",
+    fileName: "b16b.ts",
+    category: "robustness",
+    focus: "served-state",
+    name: "undo after external change refused (B16b)",
+    description:
+      "After an applied edit, an external change makes the undo stale; undo must be refused and the file kept.",
+    fixture: "aaa\nbbb\nccc\n",
+    target: { kind: "line", match: "bbb" },
+    replacement: ["BBB"],
+    mutateAfterEdit: true,
+    undoAfterExternalChange: true,
+    mutateAfterEditFn: (content) => content.replace("ccc", "ccc-x"),
+    expected: { outcome: "either", content: "aaa\nBBB\nccc-x\n" },
+    skipFor: NO_UNDO,
+  },
+  {
+    id: "b17-reversed-range",
+    fileName: "b17.ts",
+    category: "correctness",
+    focus: "served-state",
+    name: "reversed range autocorrect (B17)",
+    description:
+      "remove_from/remove_to were swapped by mistake; anchor tools should autocorrect and apply.",
+    fixture: "aaa\nbbb\nccc\nddd\n",
+    target: { kind: "range", from: "bbb", to: "ddd" },
+    replacement: ["B", "C", "D"],
+    reversedRange: true,
+    expected: { outcome: "either", content: "aaa\nB\nC\nD\n" },
+    skipFor: NO_ANCHORS,
+  },
+  {
+    id: "b18-boundary-dup",
+    fileName: "b18.ts",
+    category: "correctness",
+    focus: "served-state",
+    name: "boundary line duplicated in replacement (B18)",
+    description:
+      "The replacement re-includes the boundary line. Tools with boundary anti-duplication strip it; others apply literally.",
+    fixture: "aaa\nbbb\nccc\n",
+    target: { kind: "line", match: "bbb" },
+    replacement: ["aaa", "BBB"],
+    expected: { outcome: "applied", content: "aaa\naaa\nBBB\nccc\n" },
+    expectedByContender: {
+      "pi-hashline-edit-pro": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
+      "pi-better-edit": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
+      "pi-hashline-readmap": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
+    },
+  },
+];

@@ -1,0 +1,173 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-readmap",
+ "scenarioId": "b16b-undo-stale",
+ "task": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:20:20.121Z",
+ "durationMs": 31890,
+ "tokensIn": 8416,
+ "tokensOut": 1981,
+ "costUsd": 0.0011834200000000001,
+ "pass": true,
+ "outcome": "undo",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nBBB\nccc-x\n",
+ "actualContent": "aaa\nbbb\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-zjK7m1/pi-hashline-readmap-b16b-undo-stale"
+  },
+  {
+   "role": "user",
+   "content": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_mxfzyxuo",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"path\":\"b16b.ts\",\"limit\":\"all\"}"
+    }
+   ],
+   "reasoning": "We have to modify the file b16b.ts. The user wants us to replace the line containing 'bbb' with 'BBB', then undo that change. So basically we need to first edit the file: replace 'bbb' line with 'BBB'; then undo: revert it back to original.\n\nWe should use read, edit twice. The file is in current directory.\n\nLet's inspect file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_mxfzyxuo",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_9wzzv0fu",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":200,\"path\":\"b16b.ts\"}"
+    }
+   ],
+   "reasoning": "We need to use read with correct arguments. The schema: \n\n{\n  bundle: string,\n  limit: number|string,\n  // Append map; valid with...)\n  map: boolean,\n  offset: number|string,\n  path: string,\n  symbol: string,\n}\n\nWe maybe don't need offset or map. Provide atleast bundle, limit, path. Limit want number or string, but constant? In schema, it's just number|string. So limit: \"all\"? It expects number or string, not constant. Provide limit = \"all\" as string is fine. But got error \"must be equal to constant\". Maybe 'limit' must be a number? Let's check spec: In schema, \"limit\" is number|string. They said limit must be a number or string. Why error? Might require to be number or string but the tool expects 'limit' to be \"all\" exactly? Let's enter limit=all? Maybe the library expects a string \"all\" but incorrectly typed? Let's test with limit=5? Better to use limit=100? Provide numeric limit to avoid \"constant\" error. Use limit=1? But we want entire file. We'll use limit=200. That covers file length. So call read with path, limit:200."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_9wzzv0fu",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_tched9ri",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":200,\"path\":\"b16b.ts\"}"
+    }
+   ],
+   "reasoning": "The read function requires certain parameters but got back errors complaining about moving beyond limit? The required keys include exactly those: bundle, limit, path; optional offset, map, symbol. I used limit:'all', that may not be valid. limit must be a number or string that represent a limit. Let's see an example: In similar tasks, they used limit: \"all\"? But error says \"must be equal to constant\". Maybe limit has a default. Let's check signature: type read = (_: { bundle: string, limit: number | string, // Append ... map: boolean, offset: number | string, path: string, symbol: string, }) => any;\n\nRegular parameters: bundle, limit, path. The error says limit must be equal to constant. Possibly they expect a string \"all\" but maybe must be of type string but 'all' only allowed? But seems complaining. Let's try just \"limit\":\"200\". Ok. Use offset skip? I'm not sure. Let's just call with limit: 200."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_tched9ri",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_2b8w8jez",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":\"all\",\"map\":false,\"offset\":0,\"path\":\"b16b.ts\",\"symbol\":\"b16b\"}"
+    }
+   ],
+   "reasoning": "The read function requires specific fields. According to definition: bundle: string, limit: number|string, map: boolean, offset: number|string, path: string, symbol: string. These are all required? Let's revisit: They listed fields but maybe only certain must be present: No field is marked optional except map. Probably all required. Let's check their signature: \ntype read = (_: {\n  bundle: string,\n  limit: number | string,\n  map: boolean,\n  offset: number | string,\n  path: string,\n  symbol: string,\n}) => any; \nSo all six fields mandatory, with map optional? Actually map has no default so must be boolean. Let's set map: false. offset maybe 0. limit \"all\" or 0, but we can use 200? okay. symbol maybe empty? Probably must be non-empty; given comment \"# Non-empty; may combine with limit, map, or local bundle\". So symbol can't be empty; maybe use some identifier for the file? We can use symbol: \"b16b\" Maybe. Let's try.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_2b8w8jez",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_61mcrjco",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":500,\"map\":false,\"offset\":0,\"path\":\"b16b.ts\",\"symbol\":\"b16b\"}"
+    }
+   ],
+   "reasoning": "We need correct parameters. The read tool requires bundle string, limit number|string, map boolean, offset number|string, path string, symbol string. Must include all? It says \"local; requires symbol; valid with limit and map\". So maybe need to include symbol. Provide numeric limit? Maybe limit can be number or string. We can use limit:500. But need map and offset. Provide boolean map: false, offset:0. Ensure symbol present. Try again.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_61mcrjco",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00v9reop",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":200,\"map\":false,\"offset\":0,\"path\":\"b16b.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00v9reop",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_1vpn6242",
+     "name": "…?",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":\"all\",\"map\":false,\"offset\":0,\"path\":\"b16b.ts\",\"symbol\":\"b16b\"}"
+    }
+   ]
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_0p9eqgwt",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":\"all\",\"map\":false,\"offset\":0,\"path\":\"b16b.ts\",\"symbol\":\"unused\"}"
+    }
+   ],
+   "reasoning": "The tool signature says: type read = (_: { bundle: string, limit: number | string, map: boolean, offset: number | string, path: string, symbol: string, }) => any;\n\nIt requires bundle, limit, map, offset, path, symbol all set? It seems all fields required: bundle, limit, map, offset, path, symbol. That's weird. We need to provide all keys. Let's include them as required.\n\nFor reading, maybe 'symbol' could be unused but must be string. Provide an empty string? but doc says non-empty. I'll provide a placeholder like \"unused\". The read call must provide all keys. Let's try.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_0p9eqgwt",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_y4l33bns",
+     "name": "read",
+     "arguments": "{\"bundle\":\"workdir\",\"limit\":200,\"map\":false,\"offset\":0,\"path\":\"b16b.ts\",\"symbol\":\"b16b\"}"
+    }
+   ],
+   "reasoning": "We need to read file. The read schema requires specific keys: bundle, limit, path, symbol? Let's check the schema spec: In prompt: \"Read text files/images by path; text has LINE:HASH anchors, images return attachments.\" The arguments: bundle: string, limit: number|string, map: boolean, offset: number|string, path: string, symbol: string. All required? Possibly all are required but we can supply null? Requirement: Non-empty may combine with limit, map, etc. But we should include all keys; missing ones cause error. So we need to provide all required keys. According to schema, all are needed: bundle, limit, map, offset, path, symbol. Let's provide them. Use limit \"all\" string, map maybe false, offset 0, symbol perhaps anything non-empty; we need to use symbol meaning maybe key for hash? But we can give empty string? Must be non-empty. We can set symbol \"any\". Let's try:\n\n{\n  bundle: \"workdir\",\n  limit: \"all\",\n  map: false,\n  offset: 0,\n  path: \"b16b.ts\",\n  symbol: \"b16b\"\n}\n\nWe already tried symbol: \"b16b\". But we got errors each time. Maybe the schema requires limit of type number or string but must be equal to constant? Actually the error says \"must be equal to constant\" maybe some values are invalid. Let's open the schema? Not given. Could be that limit must be a number not string \"all\". Maybe limit is numeric line count. But there is special \"all\" allowed? The spec \"limit: number|string\" maybe \"all\" is not accepted. But we had \"all\" previously and got error. Maybe limit must be integer count. Use 0 or 200. Let's try limit 200. We'll include map false, offset 0. Let's try again."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_y4l33bns",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  }
+ ]
+}

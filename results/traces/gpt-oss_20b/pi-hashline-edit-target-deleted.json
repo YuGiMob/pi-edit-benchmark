@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-edit",
+ "scenarioId": "target-deleted",
+ "task": "Modify deleted.ts in the current working directory. target line deleted externally after read. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:04:18.137Z",
+ "durationMs": 16225,
+ "tokensIn": 5720,
+ "tokensOut": 1195,
+ "costUsd": 0.0007589000000000001,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "silent-wrong-line",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nccc-Modified\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires these anchors\n- edit: Make precise file edits at LINE#HASH anchors (e.g. 5#MQ) copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read before edit whenever you do not hold current LINE#HASH anchors for the file.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse raw: true when reading for context only; anchors are required for edit.\nUse edit with LINE#HASH anchors from the latest read, grep, or edit result for all file changes; batch every change to one file into a single edit call.\nNever reuse anchors from an earlier read or edit response once a newer one exists for the same file; treat only the most recent response as carrying valid anchors.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nOn [E_STALE_ANCHOR], the error lists the stale refs and any content-matched candidate anchors; re-read the file to get current anchors before retrying.\n\nCurrent working directory: /tmp/pi-llm-bench-FiEUz8/pi-hashline-edit-target-deleted"
+  },
+  {
+   "role": "user",
+   "content": "Modify deleted.ts in the current working directory. target line deleted externally after read. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_mh2f9c8y",
+     "name": "read",
+     "arguments": "{\"path\":\"deleted.ts\",\"offset\":1,\"limit\":200,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to modify deleted.ts in current working directory. But it's deleted externally after read. So likely file is missing now. We need to check presence. Use read? If file deleted, read will error. We should provide solution: maybe recreate file with modifications? The user says modify deleted.ts, target line deleted externally after read. So we need to read first, but file missing. We could read and catch error. Provide instructions or create file? Let's attempt reading file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_mh2f9c8y",
+   "content": "1#TS:aaa\n2#PJ:bbb\n3#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_akz5dj7a",
+     "name": "read",
+     "arguments": "{\"limit\":200,\"offset\":1,\"path\":\"deleted.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "We read entire file; three lines. We need to modify deleted.ts. But target line was deleted externally after read. So we must edit and handle staleness? The problem states: \"target line deleted externally after read.\" So after we read, an external deletion occurred; we should attempt to edit? Of course we need to re-read to get fresh anchors. But we also have to modify the file perhaps to add or replace lines.\n\nWe need user instruction: \"Modify deleted.ts in the current working directory. target line deleted externally after read.\" So we should adapt to staleness. Use read again. Let's re-read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_akz5dj7a",
+   "content": "1#WP:aaa\n2#ZJ:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_ak45bsyx",
+     "name": "edit",
+     "arguments": "{\"path\":\"deleted.ts\",\"edits\":[{\"lines\":[\"ccc-Modified\"],\"op\":\"replace\",\"pos\":\"2#ZJ\"}]}"
+    }
+   ],
+   "reasoning": "We read deleted.ts first time: 3 lines old. Then we read again after deletion: now only 2 lines? The file's content changed from 3 to 2 lines. The instruction: modified deleted.ts. target line deleted externally after read. So we should edit but need anchors from latest read. We see anchors: line1 #WP:aaa line2 #ZJ:ccc. We need to modify something? The user says \"Modify deleted.ts in the current working directory. target line deleted externally after read. Use the provided tools; always read the file before editing.\" So we need to modify file. But which modification? Nothing specific. Probably just add something or change existing. Maybe we want to insert a new line or replace line? We can just insert a new line or modify existing. Maybe add a new line with content \"modified\". Use edit. Use anchors from latest read. Let's replace line2 or append a new line. Let's replace line2's content: change ccc to \"ccc-Modified\". Use replace with pos: \"2#ZJ\". But the anchor's content for line2 is \"ZJ:ccc\". We can use that. Provide new lines array with \"ccc-Modified\". That will modify. Let's do edit.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_ak45bsyx",
+   "content": "--- Anchors 1-2 ---\n1#TV:aaa\n2#HB:ccc-Modified\n 1#TV:aaa\n-2    ccc\n+2#HB:ccc-Modified"
+  }
+ ]
+}

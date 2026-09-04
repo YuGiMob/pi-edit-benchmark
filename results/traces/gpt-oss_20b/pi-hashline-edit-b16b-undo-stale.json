@@ -1,0 +1,129 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-edit",
+ "scenarioId": "b16b-undo-stale",
+ "task": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:02:04.900Z",
+ "durationMs": 32130,
+ "tokensIn": 11285,
+ "tokensOut": 1583,
+ "costUsd": 0.00126485,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "applied-wrong",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nBBB\nccc-x\n",
+ "actualContent": "aaa\nbbb\nccc-x\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires these anchors\n- edit: Make precise file edits at LINE#HASH anchors (e.g. 5#MQ) copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read before edit whenever you do not hold current LINE#HASH anchors for the file.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse raw: true when reading for context only; anchors are required for edit.\nUse edit with LINE#HASH anchors from the latest read, grep, or edit result for all file changes; batch every change to one file into a single edit call.\nNever reuse anchors from an earlier read or edit response once a newer one exists for the same file; treat only the most recent response as carrying valid anchors.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nOn [E_STALE_ANCHOR], the error lists the stale refs and any content-matched candidate anchors; re-read the file to get current anchors before retrying.\n\nCurrent working directory: /tmp/pi-llm-bench-6i0Lwf/pi-hashline-edit-b16b-undo-stale"
+  },
+  {
+   "role": "user",
+   "content": "Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_n3dwhay5",
+     "name": "read",
+     "arguments": "{\"path\":\"b16b.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to read b16b.ts. Let's read the file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_n3dwhay5",
+   "content": "1#TS:aaa\n2#PJ:bbb\n3#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_92eqf2zd",
+     "name": "edit",
+     "arguments": "{\"path\":\"b16b.ts\",\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#PJ\"}]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_92eqf2zd",
+   "content": "--- Anchors 1-3 ---\n1#RK:aaa\n2#ZZ:BBB\n3#PX:ccc\n 1#RK:aaa\n-2    bbb\n+2#ZZ:BBB\n 3#PX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_nk4e5rw8",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"bbb\"],\"op\":\"replace\",\"pos\":\"2#ZZ\"}],\"path\":\"b16b.ts\"}"
+    }
+   ],
+   "reasoning": "We replaced line 2 with BBB. Now need to undo that change. That means replace the line \"BBB\" back to original \"bbb\". Use same anchors. After first edit, we have new anchors 1-3: 1#RK:aaa, 2#ZZ:BBB, 3#PX:ccc. To undo, we replace line 2 with original content. Undo: replace line at anchor 2#ZZ with \"bbb\". Let's edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_nk4e5rw8",
+   "content": "Error: [E_STALE_ANCHOR] 1 stale anchor: 2#ZZ. Re-read the file to get current anchors; keep both endpoints for range replaces.\n(Recovery attempted: your anchors match an older read of this file, but replaying that edit conflicts with changes made since. Re-read to get current anchors.)"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_lyqk1c9g",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b16b.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "We modified b16b.ts: replaced bbb with BBB. Then we want to undo that change: revert to original line 'bbb'. We attempted to edit using stale anchor 2#ZZ, but lost anchors. We need to re-read file to get current anchors. Let's read the current file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_lyqk1c9g",
+   "content": "1#RK:aaa\n2#MQ:BBB\n3#PS:ccc-x"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_u2g98bzp",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"bbb\"],\"op\":\"replace\",\"pos\":\"2#MQ\"}],\"path\":\"b16b.ts\"}"
+    }
+   ],
+   "reasoning": "We need to undo the change. The file after first edit. Now we need to replace the line containing 'BBB' with original content 'bbb'. We read file. We have anchors: 1#RK: aaa, 2#MQ: BBB, 3#PS: ccc-x. We want to replace line 2 with original 'bbb'. The new line string is 'bbb'. Use edit replace on pos \"2#MQ\". Also we don't need to preserve content. Provide edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_u2g98bzp",
+   "content": "--- Anchors 1-3 ---\n1#TS:aaa\n2#ZN:bbb\n3#KB:ccc-x\n 1#TS:aaa\n-2    BBB\n+2#ZN:bbb\n 3#KB:ccc-x"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_b9sa6z0t",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b16b.ts\",\"raw\":true}"
+    }
+   ],
+   "reasoning": "We need to interpret. The user wants: \"Modify b16b.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB, then undo that change.\" So edit to replace line 'bbb' with 'BBB', then undo change. But we already replaced it. Undo: revert to original 'bbb'. We need to use anchors from latest read.\n\nWe did: first read, then edit replace with BBB. Then re-read, attempted undo with replace from 2#ZZ but stale. Then re-read, then applied edit with replace 2#MQ. That replaced line with 'bbb'. Great. So now file back to 'bbb'. We have successfully undone. Probably confirm. We might want to show final file: use read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_b9sa6z0t",
+   "content": "aaa\nbbb\nccc-x"
+  }
+ ]
+}

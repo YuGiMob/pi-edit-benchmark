@@ -1,0 +1,128 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-readmap",
+ "scenarioId": "bom",
+ "task": "Modify bom.txt in the current working directory. Replace the line containing 'beta' with exactly one line: BETA. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:23:33.461Z",
+ "durationMs": 28818,
+ "tokensIn": 5208,
+ "tokensOut": 2046,
+ "costUsd": 0.00097836,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "﻿alpha\nBETA\ngamma\n",
+ "actualContent": "﻿alpha\nBETA\ngamma\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-oMU77H/pi-hashline-readmap-bom"
+  },
+  {
+   "role": "user",
+   "content": "Modify bom.txt in the current working directory. Replace the line containing 'beta' with exactly one line: BETA. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_mko1rutx",
+     "name": "read",
+     "arguments": "{\"bundle\":\"./\",\"path\":\"bom.txt\",\"limit\":\"all\"}"
+    }
+   ],
+   "reasoning": "User wants to modify bom.txt to replace line containing 'beta' with 'BETA'. Need to read bom.txt, find hash anchor for line 'beta', then edit to replace with BETA. Let's inspect file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_mko1rutx",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_k53fkjpx",
+     "name": "read",
+     "arguments": "{\"bundle\":\"./\",\"limit\":\"all\",\"map\":false,\"offset\":0,\"path\":\"bom.txt\"}"
+    }
+   ],
+   "reasoning": "The read function signature requires bundle, limit, path, etc. We need to provide all required fields. Based on signature:\n```\ntype read = (_: {\n  bundle: string,\n  limit: number | string,\n  map: boolean,\n  offset: number | string,\n  path: string,\n  symbol: string,\n}) => any;\n```\nBut we can probably omit optional ones? The signature indicates all fields required but some maybe optional? The error shows that we must match required fields.\n\nWe must provide bundle, limit, path, maybe map and offset and symbol; but symbol not required. However the error says must be equal to constant? Let's check required fields: Possibly all are required unless optional. The error \"must be equal to constant\" maybe due to missing required fields? Actually earlier guidelines: Use read for file contents, images/screenshots, ranges, symbols, etc. The signature indicates fields; but maybe some are optional? Usually in this environment, some fields like map, offset, symbol can be omitted if not needed. But maybe the tool config expects all? The earlier error indicates strict validation: all fields present? Let's examine typical usage: Usually people call read as {\"path\":\"foo\"} but here they'd need bundle, limit, map, offset, path, symbol. But which those are optional?\n\nGiven the error, it says \"must be equal to constant\". Maybe the \"bundle\" or \"path\" must be a constant string? Or maybe \"limit\" must be a number or string but we gave \"all\"? That might be invalid. Maybe limit expects a number string? Let's try use \"limit\":\"all\" maybe not allowed? The documentation says limit: number | string. Could be \"all\" as string? But the constraint may require a number or string matching pattern. Probably limit expects a numeric string or integer? Let's use limit: \"all\" is okay but maybe the tool expects a number? We'll try a numeric limit: \"limit\":\"\" maybe or limit= \"1\"? We want all lines. Could use \"limit\":60000? But simpler: maybe using \"limit\":\"all\" is correct but the failure for \"must be equal to constant\" suggests something else. Wait \"must be equal to constant\" indicates that one of the fields has an enum constraint requiring a particular constant. Perhaps bundle must be \"./\"? That we gave \"./\". Maybe map and offset are required but can default to false, 0? Let's add map: false, offset:0, and maybe symbol omitted? Let's try.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_k53fkjpx",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"read\" after prepareArguments.\n  - must be equal to constant"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_4mo5c7sp",
+     "name": "read",
+     "arguments": "{\"path\":\"bom.txt\"}"
+    }
+   ],
+   "reasoning": "We need to figure required fields. The schema: name read requires:\n- bundle: string\n- limit: number|string\n- // Append map; valid with symbol, limit, and local bundle\n  map: boolean,\n  offset: number|string,\n  // File path\n  path: string,\n  // Non-empty; may combine with limit, map, or local bundle\n  symbol: string,\n\nBut they might be optional? Actually schema might require exactly these fields. In the earlier error: \"must be equal to constant\" indicates maybe a field with a fixed value? Possibly \"bundle\": \"./\" must be constant? Or limit must be constant number? Not sure. Check tool signature: read(...). They might require \"bundle\", \"limit\", \"path\", but not \"map\", \"offset\", \"symbol\". Or maybe the tool expects only \"path\" and \"limit\" possibly.\n\nGiven instruction, we need to read the file. Try simpler: provide path, limit: \"all\"? Let's try read with path only."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_4mo5c7sp",
+   "content": "1:3c8|alpha\n2:589|beta\n3:56d|gamma\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_v5g4hd69",
+     "name": "edit",
+     "arguments": "{\"path\":\"bom.txt\",\"edits\":[{\"line\":2,\"replace\":\"BETA\"}],\"postEditVerify\":true}"
+    }
+   ],
+   "reasoning": "The output shows hex hashes? It shows artifact lines with hash? Ok.\n\nWe need to replace line containing 'beta' with exactly one line 'BETA'. In the file lines are:\n\n1:3c8|alpha\n2:589|beta\n3:56d|gamma\n4:d05|\n\nWe replace line 2 content. Need to edit with 'edit' tool.\n\nWe must provide edits array with at least one edit. Use edit format: presumably replace changes anchored by line:hash? Provide each edit: {anchor: {line:..., hash:'...'}, replace: 'BETA'} or something. Let's inspect likely structure. The instructions: edit: edits: any[], path, postEditVerify. We need to produce FULL edits. Let's guess structure: Each edit can be like {line:'2', replace:'BETA'}? Also anchor by hash. The read returned lines: \"2:589|beta\". The anchor is line:hash? Let's produce edit with {line:2, replace:'BETA'}.\n\nBut guidelines: \"Edit existing text files using fresh LINE:HASH anchors from read...\". So we should specify anchor by line number? Or by hash? We might need to refer to anchor \"2:589\". Let's guess the tool expects edits: [{\"old\":\"2:589|beta\",\"new\":\"2:589|BETA\"}]? Might be ambiguous.\n\nLet's inspect the content: maybe we need to provide new anchor for replacement: {hash:'589', replace:'BETA'}.\n\nLet's produce:\n\n{\n  \"edits\":[\n    {\n      \"line\":2,\n      \"replace\":\"BETA\"\n    }\n  ],\n  \"path\":\"bom.txt\",\n  \"postEditVerify\":true\n}\n\nLet's try."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_v5g4hd69",
+   "content": "Error: [E_BAD_SHAPE] Schema validation failed for tool \"edit\" after prepareArguments.\n  - must have required properties set_line\n  - must have required properties replace_lines\n  - must have required properties insert_after\n  - must be object\n  - must have required properties replace_symbol\n  - must have required properties old_text, new_text\n  - must match a schema in anyOf"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_rs9cu608",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"new_text\":\"BETA\",\"old_text\":\"beta\"}],\"path\":\"bom.txt\",\"postEditVerify\":true}"
+    }
+   ],
+   "reasoning": "We need to use correct format for edit. The schema says edits array must contain objects with certain properties: set_line, replace_lines, insert_after, replace_symbol, old_text, new_text. So we need to use old_text and new_text: old_text = 'beta', new_text = 'BETA'. Also need to use fresh anchors: our read shape returned anchors like \"1:3c8|alpha\". We need to reference the anchor ID for the line we want to replace. But we could use old_text/new_text as long as the text truly exists. So we need to produce edit with a single edit: {old_text:\"beta\", new_text:\"BETA\"}. The path already known. Since we read and have anchor numbers for the line, but old_text approach is fine. Let's send edit patches.\n\nAlso postEditVerify true.\n\nLet's produce:\n\n{\n  edits: [\n    {old_text:\"beta\", new_text:\"BETA\"}\n  ],\n  path:\"bom.txt\",\n  postEditVerify:true\n}\n\nLet's call edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_rs9cu608",
+   "content": "Error: edits[0] has top-level 'old_text'/'new_text'. Use {replace: {old_text, new_text}} or {set_line}, {replace_lines}, {insert_after}."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_w48wx056",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"replace\":{\"new_text\":\"BETA\",\"old_text\":\"beta\"}}],\"path\":\"bom.txt\",\"postEditVerify\":true}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_w48wx056",
+   "content": "Edited bom.txt (1 change, +1 -1 line)\n[info: this edit used replace (unverified). For safer future edits, prefer set_line/replace_lines with an anchor from read/grep/ast_search.]\n2:589|beta → 2:a21|BETA"
+  }
+ ]
+}

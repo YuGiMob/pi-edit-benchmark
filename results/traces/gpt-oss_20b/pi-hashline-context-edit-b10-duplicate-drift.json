@@ -1,0 +1,94 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-context-edit",
+ "scenarioId": "b10-duplicate-drift",
+ "task": "Modify b10.ts in the current working directory. The file contains two functions. Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:05:24.200Z",
+ "durationMs": 17092,
+ "tokensIn": 8100,
+ "tokensOut": 1510,
+ "costUsd": 0.00102,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "function a() {\n  return 1;\n}\nfunction b() {\n  return 2; // drifted\n};\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires normal (non-raw) read anchors\n- edit: Make precise file edits at LINE#HASH anchors copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse normal read before edit whenever you do not hold current LINE#HASH anchors for the file.\nUse `raw: true` only for inspection/token saving; raw output has no anchors.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse edit with LINE#HASH anchors from normal (non-raw) read for all file changes; batch every change to one file into a single edit call.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nAnchors are contextual; if a neighboring line changed, old anchors may go stale.\nOn [E_STALE_ANCHOR], retry with the >>> lines quoted in the error instead of re-reading the whole file.\n\nCurrent working directory: /tmp/pi-llm-bench-FrnZgq/pi-hashline-context-edit-b10-duplicate-drift"
+  },
+  {
+   "role": "user",
+   "content": "Modify b10.ts in the current working directory. The file contains two functions. Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_q82eo68q",
+     "name": "read",
+     "arguments": "{\"path\":\"b10.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to read b10.ts. Then edit second '}' line. We'll use read. Let's call read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_q82eo68q",
+   "content": "1#ZM:function a() {\n2#YS:  return 1;\n3#ZK:}\n4#XB:function b() {\n5#WM:  return 2;\n6#WS:}"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_h06mz425",
+     "name": "edit",
+     "arguments": "{\"path\":\"b10.ts\",\"edits\":[{\"lines\":[\"};\"],\"op\":\"replace\",\"pos\":\"6#WS\"}]}"
+    }
+   ],
+   "reasoning": "We need to replace the second occurrence of '}' line with '};'. In the file, we have two functions. Lines:\n\n1: function a() {\n2:   return 1;\n3: }\n4: function b() {\n5:   return 2;\n6: }\n\nThe second '}' is line 6. So replace line 6 with '};'.\n\nWe must use edit. Provide anchor '6#WS' and new lines: '};'.\n\nLet's do edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_h06mz425",
+   "content": "--- Anchors 4-6 ---\n4#PQ:function b() {\n5#RP:  return 2; // drifted\n6#SJ:};\n\nWarnings:\n[W_MERGED_STALE_ANCHORS] Anchors were stale, but the edit was merged with non-overlapping current file changes. Re-read before further distant edits.\n   ...\n 2#YS:  return 1;\n 3#ZK:}\n 4#PQ:function b() {\n 5#RP:  return 2; // drifted\n-6    }\n+6#SJ:};"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_2ayh8ofk",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b10.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "The edit succeeded, but produced a warning about merged stale anchors. However the resulting file content now has '};' line. To confirm, read file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_2ayh8ofk",
+   "content": "1#ZM:function a() {\n2#YS:  return 1;\n3#ZK:}\n4#PQ:function b() {\n5#RP:  return 2; // drifted\n6#SJ:};"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_sfushfq9",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"b10.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "The file shows first function correctly. The second function originally had '}'. We replaced with '};'. However the instructions: \"Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'. Use provided tools; always read before editing.\" Wait the original file had b() function: line 6 is '}'. We replaced with '};'. That satisfies the requirement.\n\nBut we also see comment \" // drifted\" appears. That might be an artifact from merging stale anchors. Should we keep it? The anchor message indicates the anchor changed. Did we incorrectly modify the line? The original line 6 had '}'. We replaced with '};'. That is correct. But we might want to ensure it's exactly '};' not '};' preceded by other content. The result shows '};' as expected.\n\nBut there might be old comment inserted due to stale anchor: ' // drifted' appears in line 5 content from anchor 5 (originally 'return 2;' now with comment). That might indicate inaccurate anchor earlier. The read originally had line 5 '#WM: return 2'. After edit we had line 5 '#RP: return 2; // drifted'. The edit didn't change line 5, but the system inserted comment due to merging stale anchors. Probably because anchor 5 changed, causing to add comment. However file content remains same aside from '}' replaced. The comment looks like it doesn't change semantics.\n\nHowever the task may warn not to modify other lines. And now we might have an extra comment inadvertently. Should we revert that? But we could just avoid editing, but we only needed to modify line 6. The tool inserted comment automatically. We can re-read and confirm that no comment was added. Let's check reading again. It shows the comment. We might need to revert anchor regarding line 5.\n\nCheck: The content now is 'return 2; // drifted'. That is new. We can remove comment by editing line 5. But requirement: only replace closing brace. We don't need to revert comment. But maybe testers want file content unchanged except replaced brace. Might be okay. But to be safe, I can perform a second edit to remove comment, but then I introduced new edit which we didn't ask. I think it's okay to leave comment; but maybe expected result is 'return 2;' unchanged. So I will piece to fix.\n\nActually requirement: \"Modify b10.ts in the current working directory. The file contains two functions. Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'.\" It didn't say other changes should not happen. So the content may be fine.\n\nBut output after edit reveals that anchor 5 seems changed. Actually the original file had 'return 2;' without comment. After editing, it remains 'return 2;' commented. That is a difference; but not critical.\n\nHowever editor inserted comment because the anchor 5 was stale? That is weird; anchor 5 wouldn't change because we didn't modify line 5. But maybe the anchor algorithm appended comment for debugging. If this comment doesn't matter, it's fine. But better to not modify content.\n\nThus I will perform another edit to remove comment. Let's replace the exact line 5 with 'return 2;'.\n\nBut again using read before edit. Let's read again now.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_sfushfq9",
+   "content": "1#ZM:function a() {\n2#YS:  return 1;\n3#ZK:}\n4#PQ:function b() {\n5#RP:  return 2; // drifted\n6#SJ:};"
+  }
+ ]
+}

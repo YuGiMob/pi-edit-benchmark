@@ -1,0 +1,95 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-edit",
+ "scenarioId": "shift-above",
+ "task": "Modify shift-above.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:04:40.241Z",
+ "durationMs": 16104,
+ "tokensIn": 7685,
+ "tokensOut": 1410,
+ "costUsd": 0.00096095,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nNEW\nBBB\nccc\n",
+ "actualContent": "aaa\nNEW\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires these anchors\n- edit: Make precise file edits at LINE#HASH anchors (e.g. 5#MQ) copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read before edit whenever you do not hold current LINE#HASH anchors for the file.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse raw: true when reading for context only; anchors are required for edit.\nUse edit with LINE#HASH anchors from the latest read, grep, or edit result for all file changes; batch every change to one file into a single edit call.\nNever reuse anchors from an earlier read or edit response once a newer one exists for the same file; treat only the most recent response as carrying valid anchors.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nOn [E_STALE_ANCHOR], the error lists the stale refs and any content-matched candidate anchors; re-read the file to get current anchors before retrying.\n\nCurrent working directory: /tmp/pi-llm-bench-KjTnu8/pi-hashline-edit-shift-above"
+  },
+  {
+   "role": "user",
+   "content": "Modify shift-above.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_t6wpo10f",
+     "name": "read",
+     "arguments": "{\"path\":\"shift-above.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to read shift-above.ts. Let's list files."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_t6wpo10f",
+   "content": "1#TS:aaa\n2#PJ:bbb\n3#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_38en7svl",
+     "name": "edit",
+     "arguments": "{\"path\":\"shift-above.ts\",\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#PJ:bbb\"}]}"
+    }
+   ],
+   "reasoning": "We need to replace line containing 'bbb' (line 2). We must provide anchor for that line. The read output shows anchor '2#PJ:bbb'. We want to replace line 2 with just 'BBB'. So edit replace with lines [\"BBB\"].\n\nConstruct edit call: path shift-above.ts, edits: [{\"op\":\"replace\",\"pos\":\"2#PJ\",\"lines\":[\"BBB\"]}]\n\nBut need to include anchor suffix? Per guidelines, can include content suffix optional. To be safe copy anchor as is: \"2#PJ:bbb\". But actual spec: anchor syntax is \"LINE#HASH\" optionally with :content. E.g. \"2#PJ:bbb\". Should we include content? We can. The example shows \"12#MQ:\" as anchor string either with or without content. For safety include entire anchor string \"2#PJ:bbb\". Use pos as exact string. So: \"pos\":\"2#PJ:bbb\". Probably okay.\n\nLet's produce edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_38en7svl",
+   "content": "Error: [E_STALE_ANCHOR] 1 stale anchor: 2#PJ. Re-read the file to get current anchors; keep both endpoints for range replaces.\n\nDid you mean (content-matched candidates for stale anchors):\n  3#MW:bbb   ← for stale 2#PJ\n(Recovery attempted: your anchors match an older read of this file, but replaying that edit conflicts with changes made since. Re-read to get current anchors.)"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_s0x1nt0p",
+     "name": "read",
+     "arguments": "{\"limit\":2000,\"offset\":1,\"path\":\"shift-above.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to re-read file to get current anchors after previous edit fails. We just did a read, got anchors 1#TS:aaa 2#PJ:bbb 3#JX:ccc. The error says stale anchor 2#PJ, maybe its hash changed? Eh maybe we need to read again because content hasn't changed yet? We need to use same read output? Wait we already have read output; that is what we used. But the error shows stale 2#PJ and recovery: 3#MW:bbb as candidate. Maybe the content changed between read and we attempted to edit? In environment after our previous edit presumably file content was not updated because edit failed. But the error indicates anchor might have changed due to previous edit? Wait no. Actually last edit didn't succeed due to stale anchor. So file still unchanged. We re-read again; the read output didn't change. But the system complaining stale anchor because maybe we used the wrong \"pos\" locked? The content 'bbb' was matched but the anchor check fails due to hash. We might need to supply both endpoints as range? But we just replace a single line. Maybe we need to use replace with both start and end to guard? Actually we can use replace with pos \"2#PJ:bbb\" and no end; lines array: [\"BBB\"]. That should work. But causing stale anchor indicates something else. Wait the error says: \n\"Did you mean (content-matched candidates for stale anchors):\n  3#MW:bbb   ← for stale 2#PJ\"\n\nThat means anchor 2#PJ is stale, but the content 'bbb' matches anchor 3#MW:bbb. So \"bbb\" line perhaps moved? The anchor changed from 2#PJ to 3#MW, maybe due to earlier edit? But file unchanged? Perhaps our previous read got a shift? But the file hasn't changed. But maybe the system's internal header indicates that we changed the file earlier? Actually we attempted edit earlier; it failed, but still not applied.\n\nBut the system may require we read again to confirm fresh anchors. So we should read again in case the file changed. Let's re-read shift-above.ts with raw? But we need pinned anchors again. Let's read again."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_s0x1nt0p",
+   "content": "1#VJ:aaa\n2#ZK:NEW\n3#MW:bbb\n4#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_rego0zym",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"3#MW:bbb\"}],\"path\":\"shift-above.ts\"}"
+    }
+   ],
+   "reasoning": "We see after earlier edit attempt, file changed to:\n\nline1: aaa (hash VJ)\nline2: NEW\nline3: bbb (hash MW)\nline4: ccc\n\nWe want replace line containing 'bbb' (line3) with BBB. Anchors: 3#MW:bbb.\n\nLet's retry edit with that anchor."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_rego0zym",
+   "content": "--- Anchors 1-4 ---\n1#VJ:aaa\n2#QM:NEW\n3#ZR:BBB\n4#PX:ccc\n 1#VJ:aaa\n 2#QM:NEW\n-3    bbb\n+3#ZR:BBB\n 4#PX:ccc"
+  }
+ ]
+}

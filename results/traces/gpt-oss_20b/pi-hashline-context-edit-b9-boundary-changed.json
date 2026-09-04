@@ -1,0 +1,94 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-context-edit",
+ "scenarioId": "b9-boundary-changed",
+ "task": "Modify b9.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:05:11.717Z",
+ "durationMs": 12480,
+ "tokensIn": 7695,
+ "tokensOut": 821,
+ "costUsd": 0.00078495,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires normal (non-raw) read anchors\n- edit: Make precise file edits at LINE#HASH anchors copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse normal read before edit whenever you do not hold current LINE#HASH anchors for the file.\nUse `raw: true` only for inspection/token saving; raw output has no anchors.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse edit with LINE#HASH anchors from normal (non-raw) read for all file changes; batch every change to one file into a single edit call.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nAnchors are contextual; if a neighboring line changed, old anchors may go stale.\nOn [E_STALE_ANCHOR], retry with the >>> lines quoted in the error instead of re-reading the whole file.\n\nCurrent working directory: /tmp/pi-llm-bench-HqBi6K/pi-hashline-context-edit-b9-boundary-changed"
+  },
+  {
+   "role": "user",
+   "content": "Modify b9.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_1t3gmefj",
+     "name": "read",
+     "arguments": "{\"path\":\"b9.ts\",\"offset\":1,\"limit\":200,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to read b9.ts then edit. Let's read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_1t3gmefj",
+   "content": "1#BV:aaa\n2#ZB:bbb\n3#ZS:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_b2jxb98p",
+     "name": "edit",
+     "arguments": "{\"path\":\"b9.ts\",\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#ZB\"}]}"
+    }
+   ],
+   "reasoning": "We have file b9.ts with 3 lines. We need to replace line containing 'bbb' (line 2). Replace with exactly one line: BBB. So we create edit with replace op targeting line 2 anchor id. Use anchor 2#ZB. Since replace with lines: [\"BBB\"]. No closing. Must specify end? Not needed because replacing single line. Then that's it.\n\nLet's prepare edit.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_b2jxb98p",
+   "content": "Error: [E_STALE_ANCHOR] 1 stale anchor. Retry with the >>> LINE#HASH lines below; keep both endpoints for range replaces.\nStale refs: 2#ZB\n\n    1#QK:aaa\n>>> 2#PZ:bbb-x\n    3#TY:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_l2uei9un",
+     "name": "read",
+     "arguments": "{\"limit\":200,\"offset\":1,\"path\":\"b9.ts\",\"raw\":false}"
+    }
+   ],
+   "reasoning": "We got stale anchor error because line content changed: original 'bbb' anchor changed. The file hasn't changed between read and edit? Wait: I read b9.ts giving anchors: line1#BV:aaa, line2#ZB:bbb, line3#ZS:ccc\n\nBut stale anchor indicates anchor is now 2#PZ:bbb-x. Perhaps there is optional context modifications? There is a difference: anchor lines have changed due to something else? Maybe the file was edited between read and edit by some external process? Or the anchor changed because content might have changed? The stale anchor has \"bbb-x\" indicates something changed.\n\nWe should read again to get up-to-date anchors. Then perform edit. Use error instructions: \"Retry with the >>> LINE#HASH lines below; keep both endpoints for range replaces.\" So we can use the stale anchors: 2#PZ:bbb-x? But the line we want to replace is 'bbb-x'. We want to replace it with BBB. So we need to use the stale anchor 2#PZ. The instructions say to keep both endpoints for range replaces. But here we only have single line replace. We can use anchor 2#PZ directly.\n\nLet's do read again:\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_l2uei9un",
+   "content": "1#QK:aaa\n2#PZ:bbb-x\n3#TY:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_w3q5ikru",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"BBB\"],\"op\":\"replace\",\"pos\":\"2#PZ\"}],\"path\":\"b9.ts\"}"
+    }
+   ],
+   "reasoning": "We need to edit line containing 'bbb-x' to 'BBB'. Anchor is 2#PZ. The error says stale anchor. We had one stale anchor. Use new anchor from read.\n\nSo issue: we must read file first. Already read; we have anchors. The newline keys: 1#QK:aaa; 2#PZ:bbb-x; 3#TY:ccc.\n\nWe need to replace line 2#PZ.\n\nUse edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_w3q5ikru",
+   "content": "--- Anchors 1-3 ---\n1#HV:aaa\n2#MB:BBB\n3#WS:ccc\n 1#HV:aaa\n-2    bbb-x\n+2#MB:BBB\n 3#WS:ccc"
+  }
+ ]
+}

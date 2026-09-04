@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "@cortexkit/aft-pi",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:31:06.883Z",
+ "durationMs": 20409,
+ "tokensIn": 3345,
+ "tokensOut": 1187,
+ "costUsd": 0.0005902500000000001,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents (supports offset/limit for large files)\n- edit: Partial file edits via appendContent, edits[], or symbol plus content (exactly one mode per call).\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nPrefer edit over write when changing part of an existing file.\nUse edit with appendContent when adding text to the end of a file.\nUse edits[] for multiple atomic changes in one file.\nInclude enough surrounding context in an edits[] find/replace item to make the match unique, or set replaceAll/occurrence explicitly.\n\nCurrent working directory: /tmp/pi-llm-bench-D6Dm2g/@cortexkit/aft-pi-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_am9s6jz7",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\",\"startLine\":1,\"endLine\":200,\"limit\":200}"
+    }
+   ],
+   "reasoning": "We need to modify insert.ts. Let's read that file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_am9s6jz7",
+   "content": "1: aaa\n2: bbb\n3: ccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_8mr6waoj",
+     "name": "edit",
+     "arguments": "{\"path\":\"insert.ts\",\"edits\":[{\"content\":\"bbb\\nB1\\nB2\",\"endLine\":\"2\",\"startLine\":\"2\"}]}"
+    }
+   ],
+   "reasoning": "We need to add two lines after 'bbb': B1 and B2. Use edit. We must read the file first; we did. Now edit insert.ts with edits array: we need to find line 2 and add after. Since we use edits array, we need to specify startLine 2, endLine 2? But we want to insert after. The edit tool supports format: { startLine, endLine, content } -> replace lines from startLine to endLine with content? But that's replacement. To insert, maybe use appendContent or edits with separate? But there is no explicit insert operation. Could use edit with substitutions: find \"bbb\" and replace with \"bbb\\nB1\\nB2\". That would modify line2. That would match exactly \"bbb\". So use symbol mode? That expects symbol name though. Instead we can use edits array with startLine 2, endLine 2 content \"bbb\\nB1\\nB2\". That will replace line2 with three lines. That inserts B1 and B2. But requirement: bbb must stay. That will be indeed preserved. Then result is:\n\n1 aaa\n2 bbb\n3 B1\n4 B2\n5 ccc\n\nBut we need bbb line count to stay at line2. But with replacement, line2 becomes 'bbb\\nB1\\nB2' which includes bbb, so line2 contains 'bbb', line3 B1, line4 B2. That's fine. Alternatively we could use append? Use appendContent: no.\n\nLet's use edits. Provide unique context maybe. But find line 2. Our edits: [{startLine:\"2\", endLine:\"2\", content:\"bbb\\nB1\\nB2\"}].\n\nBut check that edit tool expects string indices? It likely accepts number.\n\nLet's proceed."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_8mr6waoj",
+   "content": "Edited (+2/-0).\n 1 aaa\n 2 bbb\n+3 B1\n+4 B2\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_98jp3fdm",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\",\"startLine\":1,\"limit\":200}"
+    }
+   ],
+   "reasoning": "We need to insert B1 and B2 after line containing 'bbb'. The current file had lines 1: aaa 2: bbb 3: ccc. We need to modify file to insert B1 and B2 after bbb, so the order: aaa, bbb, B1, B2, ccc.\n\nWe wrote edit: we used edits with content \"bbb\\nB1\\nB2\" replacing line 2? That replaced the content of line 2 (bbb) to bbb\\nB1\\nB2 (multi-line) but folder? Wait the edits array expects objects with either startLine/endLine/content or oldString/newString. We used content with startLine endLine? Actually pass: {\"content\":\"bbb\\nB1\\nB2\",\"endLine\":\"2\",\"startLine\":\"2\"} That will replace lines 2 to 2 with the new content. That replaced line 2 with multi-line string, but the editor output shows 1 aaa; 2 bbb; +3 B1; +4 B2; 3 ccc. Wait but original 3 ccc became line 3 after changes? Actually with this editing, we inserted B1 and B2 separately; 3 ccc is original but since we replaced line2 with mult line, lines shift? The output shows: 1 aaa; 2 bbb; +3 B1; +4 B2; 3 ccc. That seems to have inserted lines after bbb and kept original ccc at line 3. Actually the numbering is weird. But the final file includes 'aaa', 'bbb', 'B1', 'B2', 'ccc'.\n\nLet's double check by reading file again.\n\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_98jp3fdm",
+   "content": "1: aaa\n2: bbb\n3: B1\n4: B2\n5: ccc\n"
+  }
+ ]
+}

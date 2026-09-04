@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "@cortexkit/aft-pi",
+ "scenarioId": "b13-chained-diff-edit",
+ "task": "Modify b13.ts in the current working directory. Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD. Use the anchors from the first edit's result for the second edit; do not re-read the whole file.. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:29:36.159Z",
+ "durationMs": 18568,
+ "tokensIn": 3500,
+ "tokensOut": 1095,
+ "costUsd": 0.0005735,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nCCC\nDDD\neee\n",
+ "actualContent": "aaa\nbbb\nCCC\nDDD\neee\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents (supports offset/limit for large files)\n- edit: Partial file edits via appendContent, edits[], or symbol plus content (exactly one mode per call).\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nPrefer edit over write when changing part of an existing file.\nUse edit with appendContent when adding text to the end of a file.\nUse edits[] for multiple atomic changes in one file.\nInclude enough surrounding context in an edits[] find/replace item to make the match unique, or set replaceAll/occurrence explicitly.\n\nCurrent working directory: /tmp/pi-llm-bench-UU868b/@cortexkit/aft-pi-b13-chained-diff-edit"
+  },
+  {
+   "role": "user",
+   "content": "Modify b13.ts in the current working directory. Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD. Use the anchors from the first edit's result for the second edit; do not re-read the whole file.. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_gkxiniwb",
+     "name": "read",
+     "arguments": "{\"path\":\"b13.ts\",\"startLine\":1,\"endLine\":400,\"limit\":400}"
+    }
+   ],
+   "reasoning": "We need to modify b13.ts in current cwd /tmp/pi-llm-bench-UU868b/@cortexkit/aft-pi-b13-chained-diff-edit. First read the file to find context."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_gkxiniwb",
+   "content": "1: aaa\n2: bbb\n3: ccc\n4: ddd\n5: eee\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_6km83mf4",
+     "name": "edit",
+     "arguments": "{\"path\":\"b13.ts\",\"edits\":[{\"content\":\"CCC\",\"endLine\":\"3\",\"startLine\":\"3\"}]}"
+    }
+   ],
+   "reasoning": "File b13.ts at /tmp/pi-llm-bench-UU868b/@cortexkit/aft-pi-b13-chained-diff-edit. Need to replace line containing 'ccc' with 'CCC' and line containing 'ddd' with 'DDD'. Use anchors from first edit's result for second edit; do not re-read the whole file. So we must read once, then edit twice, using anchor context from first edit. Use 'edits[]' for multiple changes? But requirement: Replace line containing 'ccc' with exactly one line 'CCC', then replace the one containing 'ddd' with 'DDD', using anchors from first edit's result for second edit. \"Use the anchors from the first edit's result for the second edit; do not re-read the whole file.\" How to implement? We can perform two sequential edit calls. First edit: replace line containing 'ccc' with 'CCC' using string replace? The content is small. Use 'edits' array? For first edit, we need to edit that line. We can use a symbol? No symbol. We can use 'edits':[{startLine:3,endLine:3,content:\"CCC\"}]. That will replace that line. Then second edit will use anchor from first edit's result? However we don't have file content after first edit unless we read again or keep track. But we can edit the same file again. The anchor requirement likely means we should use offset / startLine based on original file? Actually \"Use the anchors from the first edit's result for the second edit; do not re-read the whole file.\" So we cannot re-read file; we must rely on the edit tool to handle anchors? I think we can use anchored edits: specify startLine and endLine relative to the file after first edit? If we use offset? We can do the second edit with startLine relative to startLine of the first edit result? Hmm.\n\nSimpler: do both edits in one 'edits' array. But they want us to use anchors from first edit's result. Maybe that's to showcase ability to use offset to refer to position after previous edit. In 'edits' array we can include two items: first replacing line 3, second replacing line 4? But after first edit, line numbers may shift? But only replacing lines, no length change so line numbers remain same. So 3 and 4 remain. But the requirement \"anchors from the first edit's result\" maybe is to illustrate incremental editing. We can perform first edit with 'edits' array: replace 'ccc' line. That will modify file. Then second edit should refer to updated content; we can use 'edits' array again with 'startLine', 'endLine' positions from first edit? But we already know it's line 4. Could use pattern match? Could use startLine:4 provided that after first edit file's line4 is 'ddd'. So we can just second edit replace line 4.\n\nWe must not re-read file, but the edit tool doesn't need to read file again (internally). So okay.\n\nImplement two sequential edit calls: first replace line 3, second replace line 4.\n\nLet's do that."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_6km83mf4",
+   "content": "Edited (+1/-1).\n 1 aaa\n 2 bbb\n-3 ccc\n+3 CCC\n 4 ddd\n 5 eee"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_66jbulma",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"content\":\"DDD\",\"endLine\":\"4\",\"startLine\":\"4\"}],\"path\":\"b13.ts\"}"
+    }
+   ],
+   "reasoning": "We now need to address second edit: replace line containing 'ddd' with DDD. We should use the anchors from first edit's result for the second edit; do not re-read the whole file. That likely means we should refer to the line numbers from the previous edit result. That is now line 4 contains 'ddd'. We can perform edit specifying startLine 4 and endLine 4 with content \"DDD\". No need to re-read. Let's apply."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_66jbulma",
+   "content": "Edited (+1/-1).\n 1 aaa\n 2 bbb\n 3 CCC\n-4 ddd\n+4 DDD\n 5 eee"
+  }
+ ]
+}

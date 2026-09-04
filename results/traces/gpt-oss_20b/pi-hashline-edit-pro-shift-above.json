@@ -1,0 +1,78 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-edit-pro",
+ "scenarioId": "shift-above",
+ "task": "Modify shift-above.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:15:32.117Z",
+ "durationMs": 14603,
+ "tokensIn": 6338,
+ "tokensOut": 788,
+ "costUsd": 0.00068006,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nNEW\nBBB\nccc\n",
+ "actualContent": "aaa\nNEW\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines via bare 4-char anchor `Hasu` from `Hasu│content`: `remove_from`/`remove_to` are `Hasu` only, `replacement_lines` is bare lines without `│`; one edit per call\n- insert: Insert `lines` after/before bare anchor `Hasu` from `Hasu│content`: anchor stays, lines are bare without `│`, one per element\n- undo_last_change: Undo last `replace`/`insert` on a file; restores deleted file, keeps record on `[E_UNDO_STALE]`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call before `replace` when you need fresh anchors.\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: use the same anchor for `remove_from` and `remove_to` to change one line.\n`replace`: `replacement_lines` takes bare lines without `│`; `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically.\n`replace`: keep the range tight — only lines that actually change — and copy leading spaces exactly.\n`replace`: post-edit diff `+anchor│`/` anchor│` rows are fresh anchors for the next edit — no new `read` needed. One edit per turn; check the diff before the next edit on that file.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically.\n`insert`: the anchor must have been shown by `read`, a post-edit diff (`+anchor│`/` anchor│`), or any served `anchor│content` row. Empty file: `read` shows one `anchor│` row — insert `after` it.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff (check the `-anchor│` lines you wanted to keep).\n\nCurrent working directory: /tmp/pi-llm-bench-86K4PY/pi-hashline-edit-pro-shift-above"
+  },
+  {
+   "role": "user",
+   "content": "Modify shift-above.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_vwlvlr52",
+     "name": "read",
+     "arguments": "{\"path\":\"shift-above.ts\",\"offset\":1,\"limit\":1000}"
+    }
+   ],
+   "reasoning": "We need to modify shift-above.ts replacing line containing 'bbb' with \"BBB\". We call read first. The cwd given contains shift-above.ts. Let's read it."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_vwlvlr52",
+   "content": "HyNA│aaa\nChaz│bbb\nLPkw│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_v0qdetu7",
+     "name": "replace",
+     "arguments": "{\"path\":\"shift-above.ts\",\"remove_from\":\"Chaz\",\"remove_to\":\"Chaz\",\"replacement_lines\":[\"BBB\"]}"
+    }
+   ],
+   "reasoning": "We read shift-above.ts; it had 3 lines: anchors 4 chars: HyNA, Chaz, LPkw. Need to replace line containing 'bbb' which is Chaz line. Replace with exactly one line: BBB. That means replacement_lines should be [\"BBB\"]. We must preserve anchor? Replace: remove_from:\"Chaz\", remove_to:\"Chaz\", replacement_lines:[\"BBB\"]. But the anchor is used to specify line range. The content will replace that line. It doesn't mention anchor inside replacement_lines. The replacement lines will replace the entire line, including anchor? In replace tool, remove_from and remove_to refer to anchors; replacement_lines are bare content without | anchor or before? It will replace entire line including the anchor, I think. Actually when replacing, the anchor line stays? Let's think: In replace, specifying remove_from and remove_to indicates the lines to remove. Replacement_lines are inserted in place of removed lines. The anchor line will be removed. So resulting line won't have anchor. But anchors are needed for diff. It's typical that replace removes the line and writes new lines without anchor. But what if we want to keep anchor? We don't need anchor in result? Actually the anchor is used for navigation; output file won't have anchors. The diff report from the tool will show new lines appended with +anchor. But we just replace content. So we will produce output file content with same number of lines? Actually replace will produce new content without anchors. But our desired file content: likely `HyNA│aaa` anchor??? Wait we read it with anchors added artificially by tool; actual file has content: \"aaa\", \"bbb\", \"ccc\". After replacement, content: \"aaa\", \"BBB\", \"ccc\". Yes.\n\nThus we call replace with remove_from:\"Chaz\", remove_to:\"Chaz\", replacement_lines:[\"BBB\"].\n\nLet's call replace."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_v0qdetu7",
+   "content": "Successfully replaced in shift-above.ts. Added 1 line(s), removed 1 line(s).\n ...\n CTio│NEW\n-Chaz│bbb\n+ReFR│BBB\n LPkw│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_h0wb7040",
+     "name": "read",
+     "arguments": "{\"limit\":10,\"offset\":1,\"path\":\"shift-above.ts\"}"
+    }
+   ],
+   "reasoning": "Need to review diff? The diff shows? It shows after diff: +ReFR│BBB, -Chaz│bbb, but anchor changed? Actually replace uses anchor \"Chaz\". That anchor is removed. Replacement_line added \"BBB\" but anchor changes? Hmm. Replace inserted a line? We might need to re-read file to confirm. Probably okay. But it changed anchor? The tool replaced anchor line removed but didn't add anchor. We replaced content \"bbb\"? Wait file content: HyNA│aaa; Chaz│bbb; LPkw│ccc. replace call: remove_from and remove_to: \"Chaz\". replacement_lines: [\"BBB\"], output shows added new line with anchor ReFR? That seems wrong. Replacement should preserve same anchor? According to guidelines: Replace lines via bare anchor. Replacement lines are content without anchor; inserted lines get same anchor as first line? Actually the diff shows anchor changed? Might be something wrong. But we can open file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_h0wb7040",
+   "content": "HyNA│aaa\nCTio│NEW\nReFR│BBB\nLPkw│ccc"
+  }
+ ]
+}

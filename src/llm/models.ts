@@ -1,0 +1,102 @@
+import type { LlmModelSpec } from "../types";
+
+export const LLM_MODELS: LlmModelSpec[] = [
+  {
+    id: "deepseek-v4-flash:0731",
+    name: "DeepSeek V4 Flash 0731",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "ollama-cloud",
+    baseUrl: "https://ollama.com/v1",
+  },
+  {
+    id: "gemma-4-26b-a4b-it",
+    name: "Gemma 4 26B A4B",
+    reasoning: true,
+    maxTokens: 16384,
+    reasoningEffort: "max",
+  },
+  {
+    id: "glm-5.3-flash",
+    name: "GLM 5.3 Flash",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "opencode-go",
+    baseUrl: "https://opencode.ai/zen/go/v1",
+    reasoningEffort: "max",
+  },
+  {
+    id: "qwen3.8-27b",
+    name: "Qwen3.8-27B",
+    reasoning: true,
+    maxTokens: 16384,
+    reasoningEffort: "max",
+  },
+  {
+    id: "qwen3.8-flash",
+    name: "Qwen3.8-Flash",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "opencode-go",
+    baseUrl: "https://opencode.ai/zen/go/v1",
+    reasoningEffort: "max",
+  },
+  {
+    id: "muse-spark-1.2-contributor",
+    name: "Muse Spark 1.2 Contributor",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "opencode-go",
+    baseUrl: "https://opencode.ai/zen/go/v1",
+    api: "openai-responses",
+    reasoningEffort: "xhigh",
+  },
+  {
+    id: "muse-spark-1.3-contributor",
+    name: "Muse Spark 1.3 Contributor",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "opencode-go",
+    baseUrl: "https://opencode.ai/zen/go/v1",
+    api: "openai-responses",
+    reasoningEffort: "xhigh",
+  },
+  {
+    id: "gemma4:31b",
+    name: "Gemma 4 (31B)",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "ollama-cloud",
+    baseUrl: "https://ollama.com/v1",
+  },
+  {
+    id: "nemotron-3-nano:30b",
+    name: "Nemotron 3 Nano (30B)",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "ollama-cloud",
+    baseUrl: "https://ollama.com/v1",
+  },
+  {
+    id: "gpt-oss:20b",
+    name: "GPT-OSS (20B)",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "ollama-cloud",
+    baseUrl: "https://ollama.com/v1",
+  },
+];
+
+export const DEFAULT_LLM_SCENARIOS: string[] = [];
+
+export const LLM_TOOL_FILTERS: Record<string, string[]> = {
+  "builtin-edit": ["read", "edit"],
+  "pi-hashline-edit": ["read", "edit"],
+  "pi-hashline-context-edit": ["read", "edit"],
+  "pi-hashline-edit-pro": ["read", "replace", "insert", "undo_last_change"],
+  "pi-hashline-readmap": ["read", "edit"],
+  "@cortexkit/aft-pi": ["read", "edit"],
+  "@xynogen/pix-edit": ["read", "edit"],
+  "pi-semantic-edit": ["read", "edit"],
+  "@oh-my-pi/hashline": [],
+};

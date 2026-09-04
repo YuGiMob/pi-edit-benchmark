@@ -1,0 +1,61 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "@xynogen/pix-edit",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:37:55.357Z",
+ "durationMs": 12439,
+ "tokensIn": 2148,
+ "tokensOut": 793,
+ "costUsd": 0.00038825999999999997,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-AvOnur/@xynogen/pix-edit-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_asmenfd7",
+     "name": "read",
+     "arguments": "{\"path\":\"insert.ts\",\"offset\":1,\"limit\":2000}"
+    }
+   ],
+   "reasoning": "We need to read insert.ts. Let's view file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_asmenfd7",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_4ikdc0yc",
+     "name": "edit",
+     "arguments": "{\"path\":\"insert.ts\",\"edits\":[{\"newText\":\"bbb\\nB1\\nB2\",\"oldText\":\"bbb\"}]}"
+    }
+   ],
+   "reasoning": "We need to edit insert.ts such that after line 'bbb' we insert two lines 'B1' and 'B2', keeping the original 'bbb' line. Current content:\n\n```\naaa\nbbb\nccc\n```\n\nAfter edit, we expect:\n\n```\naaa\nbbb\nB1\nB2\nccc\n```\n\nWe must ensure only two lines inserted exactly after 'bbb'.\n\nWe need to use edit function. We replace nothing; we need to insert. But the edit tool expects replacement: we need to replace 'bbb\\n' or 'bbb' with 'bbb\\nB1\\nB2\\n'. In edit, we provide oldText and newText.\n\nWe should match the exact text of 'bbb'. In the file, line 'bbb' stands alone (no trailing spaces). So we can match 'bbb' replaced with 'bbb\\nB1\\nB2'. But we need to avoid messing up file content. The edit function signature: edits: [{oldText, newText}]. The new text should replace oldText. We need to keep newline properly. Let's propose editing 'bbb' to 'bbb\\nB1\\nB2'. This will result in lines: 'bbb', 'B1', 'B2', then following lines remain 'ccc'. That should be correct.\n\nLet's verify the original contains newlines: 'aaa\\nbbb\\nccc\\n'? Usually after last line maybe no newline. But using read we saw 'aaa\\nbbb\\nccc' with no trailing newline. We'll use the replacement 'bbb\\nB1\\nB2' which will produce output:\n\n```\naaa\nbbb\nB1\nB2\nccc\n```\n\nWe need to ensure newline between B2 and ccc. We get that because after replacement of 'bbb' with 'bbb\\nB1\\nB2', the surrounding text remains from original: after 'bbb' there was an implicit '\\n' then 'ccc'. Wait original file after 'bbb' had newline then 'ccc'. When we replace 'bbb' with 'bbb\\nB1\\nB2', due to the original text still having newline after 'bbb' ? Actually original file has content: 'aaa\\nbbb\\nccc'. So replacing 'bbb' with 'bbb\\nB1\\nB2' will produce 'aaa\\nbbb\\nB1\\nB2\\nccc'. Good.\n\nSo we need edit with line 'bbb' replaced by 'bbb\\nB1\\nB2'. Provide newText string exactly. Since we want new lines for B1 and B2, using \\n. Let's use escape properly: \"bbb\\nB1\\nB2\". That should produce correct content.\n\nLet's produce edit command."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_4ikdc0yc",
+   "content": "Successfully replaced 1 block(s) in /tmp/pi-llm-bench-AvOnur/@xynogen/pix-edit-insert-after/insert.ts.\n 1 aaa\n 2 bbb\n+3 B1\n+4 B2\n 3 ccc"
+  }
+ ]
+}

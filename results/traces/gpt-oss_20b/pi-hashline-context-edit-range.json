@@ -1,0 +1,61 @@
+{
+ "modelId": "gpt-oss:20b",
+ "contenderId": "pi-hashline-context-edit",
+ "scenarioId": "range",
+ "task": "Modify range.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly three lines: B, C, D. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T12:06:29.644Z",
+ "durationMs": 5720,
+ "tokensIn": 4443,
+ "tokensOut": 438,
+ "costUsd": 0.00044241,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nB\nC\nD\neee\n",
+ "actualContent": "aaa\nB\nC\nD\neee\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires normal (non-raw) read anchors\n- edit: Make precise file edits at LINE#HASH anchors copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse normal read before edit whenever you do not hold current LINE#HASH anchors for the file.\nUse `raw: true` only for inspection/token saving; raw output has no anchors.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse edit with LINE#HASH anchors from normal (non-raw) read for all file changes; batch every change to one file into a single edit call.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nAnchors are contextual; if a neighboring line changed, old anchors may go stale.\nOn [E_STALE_ANCHOR], retry with the >>> lines quoted in the error instead of re-reading the whole file.\n\nCurrent working directory: /tmp/pi-llm-bench-fh9HuC/pi-hashline-context-edit-range"
+  },
+  {
+   "role": "user",
+   "content": "Modify range.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly three lines: B, C, D. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_jkos0hhc",
+     "name": "read",
+     "arguments": "{\"path\":\"range.ts\",\"offset\":1,\"limit\":2000,\"raw\":false}"
+    }
+   ],
+   "reasoning": "We need to modify range.ts. We need to read the file to get anchors. Let's read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_jkos0hhc",
+   "content": "1#BV:aaa\n2#ZB:bbb\n3#WX:ccc\n4#SK:ddd\n5#YK:eee"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_k0es1wad",
+     "name": "edit",
+     "arguments": "{\"path\":\"range.ts\",\"edits\":[{\"end\":\"4#SK\",\"lines\":[\"B\",\"C\",\"D\"],\"op\":\"replace\",\"pos\":\"2#ZB\"}]}"
+    }
+   ],
+   "reasoning": "Need delete lines 2-4 inclusive and replace with three lines B, C, D. Lines currently 2-4 to replace: 'bbb', 'ccc', 'ddd'. Replace with \"B\", \"C\", \"D\". Should keep same indentation? They are at start no indent. In output, anchors may shift. We'll create edit call with replace pos for line 2? but need to replace span line 2 to 4. Use replace with pos \"2#ZB\" and end \"4#SK\" lines = [\"B\",\"C\",\"D\"]. Pay attention: default replace with end works span. Provide \"lines\" as array.\n\nLet's craft edit call."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_k0es1wad",
+   "content": "--- Anchors 1-5 ---\n1#NN:aaa\n2#KQ:B\n3#ZP:C\n4#JX:D\n5#RP:eee\n 1#NN:aaa\n-2    bbb\n-3    ccc\n-4    ddd\n+2#KQ:B\n+3#ZP:C\n+4#JX:D\n 5#RP:eee"
+  }
+ ]
+}

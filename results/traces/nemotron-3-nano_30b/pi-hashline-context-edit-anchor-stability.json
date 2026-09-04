@@ -1,0 +1,61 @@
+{
+ "modelId": "nemotron-3-nano:30b",
+ "contenderId": "pi-hashline-context-edit",
+ "scenarioId": "anchor-stability",
+ "task": "Modify stability.ts in the current working directory. Replace the line containing 'ccc' with exactly one line: CCC. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-04T09:16:07.216Z",
+ "durationMs": 7712,
+ "tokensIn": 6071,
+ "tokensOut": 924,
+ "costUsd": 0.00058602,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nCCC\nddd\neee\n",
+ "actualContent": "aaa\nbbb\nCCC\nddd\neee\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires normal (non-raw) read anchors\n- edit: Make precise file edits at LINE#HASH anchors copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse normal read before edit whenever you do not hold current LINE#HASH anchors for the file.\nUse `raw: true` only for inspection/token saving; raw output has no anchors.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse edit with LINE#HASH anchors from normal (non-raw) read for all file changes; batch every change to one file into a single edit call.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nAnchors are contextual; if a neighboring line changed, old anchors may go stale.\nOn [E_STALE_ANCHOR], retry with the >>> lines quoted in the error instead of re-reading the whole file.\n\nCurrent working directory: /tmp/pi-llm-bench-kdwUsx/pi-hashline-context-edit-anchor-stability"
+  },
+  {
+   "role": "user",
+   "content": "Modify stability.ts in the current working directory. Replace the line containing 'ccc' with exactly one line: CCC. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_dz10bkvi",
+     "name": "read",
+     "arguments": "{\"path\":\"stability.ts\"}"
+    }
+   ],
+   "reasoning": "We need to modify stability.ts. Operation: replace the line containing 'ccc' with exactly one line: CCC.\n\nWe must read the file first to locate anchor for line containing 'ccc'. Then edit.\n\nPotentially there could be multiple lines; but we need to replace line containing 'ccc' - likely unique.\n\nWe need to output a tool call with edit, using anchors from read.\n\nWe will:\n\n1. Call read on stability.ts (path) with default parameters, raw=false, so we get lines with anchors.\n\n2. Determine which line contains 'ccc'. Then note its anchor.\n\n3. Then call edit with operation replace, pos set to that anchor, lines: [\"CCC\"] (single line). Since we want exactly one line, replace works without end. Or we could use replace_text but anchor-based replace is safer.\n\nThus we need to output tool calls in separate steps: first read, then edit.\n\nThe instructions: \"always read the file before editing\". So we must read first.\n\nThus produce a read call.\n\nWe need to output only the tool call; after that we will get output and then proceed.\n\nThus first call: read with path: \"stability.ts\". Possibly there could be need to specify offset/limit but default fine.\n\nThus produce:\n\n{\n  \"path\": \"stability.ts\"\n}\n\nWe'll do that."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_dz10bkvi",
+   "content": "1#BV:aaa\n2#ZB:bbb\n3#WX:ccc\n4#SK:ddd\n5#YK:eee"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_i513d05y",
+     "name": "edit",
+     "arguments": "{\"path\":\"stability.ts\",\"edits\":[{\"lines\":[\"CCC\"],\"op\":\"replace\",\"pos\":\"3#WX\"}]}"
+    }
+   ],
+   "reasoning": "We need to modify stability.ts. The user wants to replace the line containing 'ccc' with exactly one line: 'CCC'.\n\nWe read the file and saw lines:\n\n1#BV:aaa\n2#ZB:bbb\n3#WX:ccc\n4#SK:ddd\n5#YK:eee\n\nSo line 3 has 'ccc'. The anchor is 3#WX:ccc. Need to replace this line with \"CCC\". Use edit with op replace, pos = \"3#WX\", lines = [\"CCC\"].\n\nBut need to be careful: According to edit spec: replace op replaces the single line at pos, or inclusive span pos..end. lines is the complete new content for the whole span; lines: [] deletes it. Without end, exactly one line is replaced no matter how many entries lines has.\n\nThus we can send edit command with path \"stability.ts\" and edits array containing one edit object: op \"replace\", pos \"3#WX\", lines [\"CCC\"].\n\nWe must use anchors copied verbatim from read. Indeed we have \"3#WX:ccc\". The anchor string is \"3#WX\". Actually the read output shows \"3#WX:ccc\". The anchor part is \"3#WX\". So pos should be \"3#WX\". Use lines [\"CCC\"].\n\nThus call edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_i513d05y",
+   "content": "--- Anchors 1-5 ---\n1#BV:aaa\n2#YB:bbb\n3#ZX:CCC\n4#KK:ddd\n5#YK:eee\n 1#BV:aaa\n 2#YB:bbb\n-3    ccc\n+3#ZX:CCC\n 4#KK:ddd\n 5#YK:eee"
+  }
+ ]
+}
