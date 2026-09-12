@@ -1,10 +1,10 @@
 # pi-edit-benchmark
 
-Deterministic, tool-level benchmark comparing file-editing extensions for [pi-coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent): the built-in `edit` tool, the hashline family (`pi-hashline-edit`, `pi-hashline-edit-pro`, `pi-hashline-context-edit`, `pi-hashline-readmap`), tolerant/semantic matchers (`@cortexkit/aft-pi`, `@xynogen/pix-edit`, `pi-semantic-edit`), and the reference `@oh-my-pi/hashline` engine.
+LLM tool-calling benchmark comparing file-editing extensions for [pi-coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent): the built-in `edit` tool, the hashline family (`pi-hashline-edit`, `pi-hashline-edit-pro`, `pi-hashline-context-edit`, `pi-hashline-readmap`), and tolerant/semantic matchers (`@cortexkit/aft-pi`, `@xynogen/pix-edit`, `pi-semantic-edit`).
 
 ## Why
 
-LLM file editing fails in two ways: edits land on the wrong line, and stale edits are applied silently. Hash-anchored tools (hashline) exist to fix both. This benchmark measures, with deterministic tool-level runs and real-LLM tool-calling runs, how well each tool actually does:
+LLM file editing fails in two ways: edits land on the wrong line, and stale edits are applied silently. Hash-anchored tools (hashline) exist to fix both. This benchmark measures, with real-LLM tool-calling runs, how well each tool actually does:
 
 - **Correctness** — does the edit land exactly where the model pointed?
 - **Safety** — is a stale or ambiguous edit refused instead of silently misapplied?
@@ -12,24 +12,22 @@ LLM file editing fails in two ways: edits land on the wrong line, and stale edit
 
 ## How it works
 
-Each contender is loaded through a fake pi `ExtensionAPI` (the same registration surface pi uses, including `prepareArguments` + TypeBox validation), so the real tool implementations run unmodified. The model is simulated as a *perfect copier*: it reads the file through the contender's own `read` tool, copies the exact anchor (or `oldText`) of the target line from the output, and issues the edit in the contender's native format.
+Each contender is a real pi extension loaded through a fake pi `ExtensionAPI` (the same registration surface pi uses, including `prepareArguments` + TypeBox validation), so the real tool implementations run unmodified. A real model drives each contender's own tools through a tool-calling loop.
 Every scenario runs in an isolated temp dir per contender, so no state leaks between runs.
 
 ```
 npm install --legacy-peer-deps   # peer-dep conflicts between extensions; keep @earendil-works/pi-tui installed
-bun run src/main.ts              # deterministic tool-level benchmark
 bun run src/main-llm.ts          # real-LLM benchmark (multi-provider)
 ```
 
-Output: `results/report.md` + `results/report.json` (tool-level) and `results/llm-report.md` + `results/llm-report.json` (LLM). Traces land in `results/traces/<model>/`.
+Output: `results/llm-report.md` + `results/llm-report.json`; traces land in `results/traces/<model>/`.
 
 Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without `"type": "module"` and only Bun resolves their ESM imports of `pi-coding-agent` correctly.
 
 ## LLM benchmark
 
 `src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from three providers — hyper, opencode-go, and ollama-cloud — each reached at its own endpoint with its own key (`HYPER_API_KEY`, `OPENCODE_API_KEY`, `OLLAMA_API_KEY`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
-
-The model must read the file and issue edits through the tools; the file state afterwards is scored with the same expectations as the tool-level benchmark. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
+The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
 
 ```
 bun run src/main-llm.ts                        # 10 models × 8 tools × 35 scenarios (2,800 runs)
@@ -76,18 +74,16 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | `builtin-edit` | `{ path, edits: [{ oldText, newText }] }` | none (text matching) | no |
 | `pi-hashline-edit` | `{ path, edits: [{ op, pos, end, lines }] }` | `LINE#HASH:` 2-char contextual | no |
 | `pi-hashline-context-edit` | same + `replace_text` | `LINE#HASH:` 2-char contextual | no |
-| `pi-hashline-edit-pro` (3.0.1) | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
+| `pi-hashline-edit-pro` (4.2.6) | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
 | `pi-hashline-readmap` | `{ path, edits: [{ set_line / replace_lines / insert_after }] }` | `LINE:HASH|` 3-char | no |
-| `@oh-my-pi/hashline` | patch language (`[path#tag] PUT A.=B:`) | 4-hex file tag | no |
 | `@cortexkit/aft-pi` | `{ path, edits: [{ oldString, newString, occurrence }] }` | none (fuzzy find/replace, Rust backend) | no |
 | `@xynogen/pix-edit` | `{ path, edits: [{ oldText, newText }] }` | none (unique-text replace + diff) | no |
 | `pi-semantic-edit` | `{ path, edits: [{ oldText, newText, replaceAll? }] }` | none (10-pass semantic fuzzy chain, uniqueness guard) | no |
 
-`@oh-my-pi/hashline` is the reference engine driven directly (no pi tools) — included in the deterministic suite, excluded from LLM rounds.
 
 ## Scenarios (35)
 
-Each scenario carries a `focus` that the reports split by: **core editing** (18), **staleness & concurrency** (10), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
+Each scenario carries a `focus` that the report splits by: **core editing** (18), **staleness & concurrency** (10), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
 
 ### Core editing (18)
 - `single-line` — replace one line
@@ -130,12 +126,12 @@ Each scenario carries a `focus` that the reports split by: **core editing** (18)
 
 ## Scoring
 
-- Pass = the file ended in the expected state, or the edit was refused when refusal was the safe outcome.
+- Pass = the file ended in the expected state, the edit was refused when refusal was the safe outcome, or a stale rejection was recovered from after a re-read (`recovered`).
 - `SILENT WRONG-LINE EDIT` — the tool wrote when it should have refused, or landed on the wrong occurrence. The worst failure class.
 - `applied wrong content` — applied, but the result differs from the intent (e.g. BOM dropped, blank line left behind).
 - `rejected a valid edit` — refused an edit that should have applied.
 
-Both reports split every score by the three focus groups above.
+The report splits every score by the three focus groups above.
 
 ## Results — latest LLM round (8 models × 8 tools × 34 scenarios, `results/llm-report.md`, 2,176 runs, $3.34)
 
@@ -188,15 +184,10 @@ Per-tool process (all models):
 - **Served-state is the hardest group for text tools** (52-57/64): without served anchors, `b7`/`b8`/`b13`/`b16b` are guesswork.
 - **Stale-rejection + recovery is observable**: hashline tools reject stale edits and models re-read and re-apply (`recovered`) — text tools have no such safety net.
 
-## Deterministic tool-level suite
-
-`bun run src/main.ts` runs the same battery without an LLM (the model is simulated as a perfect copier). Its last full run predates the current roster (it included since-removed forks); regenerate it after roster changes with `bun run src/main.ts`.
-
 ## Ecosystem popularity (npm + GitHub, snapshot 2026-09)
 
 | Package | Downloads/mo | Stars |
 | --- | --- | --- |
-| `@oh-my-pi/hashline` (reference engine) | 329,522 | 29,296 |
 | **`pi-hashline-edit-pro`** | **20,403** | 74 |
 | `@cortexkit/aft-pi` | 4,362 | 275 |
 | `@xynogen/pix-edit` | 2,599 | 62 |
@@ -215,21 +206,20 @@ Per-tool process (all models):
 
 ```
 src/
-  contenders/   per-tool adapters (read → parse → build request → execute)
+  main-llm.ts   benchmark entry point
+  types.ts      shared types
+  contenders/   per-tool adapters (expose the real pi tools to the LLM loop)
   scenarios/    the scenario battery (35, tagged core/staleness/served-state)
-  harness/      runner + scoring
-  llm/          multi-provider client + LLM runner (pi-mirror system prompt)
-  report/       markdown/JSON report generation
-  registry.ts   fake pi ExtensionAPI
+  llm/          multi-provider client + tool-calling runner + report rendering
 results/        generated reports + per-run traces (committed)
 ```
 
 ## Adding a contender
 
 1. `npm install <package>` (use `--legacy-peer-deps`; keep `@earendil-works/pi-tui` installed — extensions peer-depend on it).
-2. Add an adapter in `src/contenders/` implementing the `Contender` interface: `read` (return parsed `anchor│content` lines), `buildEditRequest` (translate a scenario target into the tool's native request), `executeEdit`. If the tool defines `promptSnippet`/`promptGuidelines`, pass them through — they are rendered into the pi-mirror system prompt.
+2. Add an adapter in `src/contenders/` implementing the `Contender` interface: `info` plus `listTools()`, which loads the extension through the fake pi `ExtensionAPI` and returns its tools. `promptSnippet`/`promptGuidelines` are rendered into the pi-mirror system prompt.
 3. Register it in `src/contenders/index.ts` and add its tool filter to `LLM_TOOL_FILTERS` in `src/llm/models.ts`.
-4. Add per-contender expectations in `src/scenarios/index.ts` (`expectedByContender`) where the tool's contract genuinely differs (e.g. no empty-file seeding).
+4. Add a `taskDescriptions` entry in `src/llm/runner.ts` for any new scenario id, and per-contender expectations (`expectedByContender`) where the tool's contract genuinely differs (e.g. no empty-file seeding).
 
 ## License
 

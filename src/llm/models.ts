@@ -98,5 +98,4 @@ export const LLM_TOOL_FILTERS: Record<string, string[]> = {
   "@cortexkit/aft-pi": ["read", "edit"],
   "@xynogen/pix-edit": ["read", "edit"],
   "pi-semantic-edit": ["read", "edit"],
-  "@oh-my-pi/hashline": [],
 };

@@ -1,12 +1,5 @@
 import type { Scenario } from "../types";
 
-const NO_ANCHORS = [
-  "builtin-edit",
-  "@xynogen/pix-edit",
-  "@cortexkit/aft-pi",
-  "@oh-my-pi/hashline",
-];
-
 const LARGE_FIXTURE = Array.from({ length: 200 }, (_, i) => `line${i + 1}`).join("\n") + "\n";
 
 export const betterEditScenarios: Scenario[] = [
@@ -19,8 +12,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "A line inside the range changed and was reverted before the edit; the file matches what was served, so the edit must apply.",
     fixture: "aaa\nbbb\nccc\nddd\n",
-    target: { kind: "range", from: "bbb", to: "ddd" },
-    replacement: ["B", "D"],
     mutateAfterRead: (content) =>
       content.replace("ccc", "ccc-temp").replace("ccc-temp", "ccc"),
     expected: { outcome: "applied", content: "aaa\nB\nD\n" },
@@ -34,9 +25,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "The model read only the first two lines; the edit targets a line that was never shown. Served-state tools must reject.",
     fixture: "aaa\nbbb\nccc\nddd\neee\nfff\n",
-    readOptions: { offset: 1, limit: 2 },
-    target: { kind: "line", match: "eee" },
-    replacement: ["E"],
     expected: { outcome: "either", content: "aaa\nbbb\nccc\nddd\nE\nfff\n" },
   },
   {
@@ -48,9 +36,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "The model edits with anchors it never received from a read of this file (simulated by reading a copy at another path). Served-state tools must reject.",
     fixture: "aaa\nbbb\nccc\n",
-    blindEdit: true,
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     expected: { outcome: "either", content: "aaa\nBBB\nccc\n" },
   },
   {
@@ -62,8 +47,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "The exact anchor line changed on disk; the edit must be refused as stale.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     mutateAfterRead: (content) => content.replace("bbb", "bbb-x"),
     expected: { outcome: "rejected" },
   },
@@ -77,8 +60,6 @@ export const betterEditScenarios: Scenario[] = [
       "Two identical blocks; a line inside the second block drifted after read. The edit of the second block must be refused, not silently overwrite the drift.",
     fixture:
       "function a() {\n  return 1;\n}\nfunction b() {\n  return 2;\n}\n",
-    target: { kind: "line-nth", match: "}", nth: 2 },
-    replacement: ["};"],
     mutateAfterRead: (content) => content.replace("  return 2;", "  return 2; // drifted"),
     expected: { outcome: "rejected" },
   },
@@ -91,8 +72,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "A noop edit (identical replacement) with an unrelated external change must leave the file untouched.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["bbb"],
     mutateAfterRead: (content) => content.replace("aaa", "aaa-x"),
     expected: { outcome: "either", content: "aaa-x\nbbb\nccc\n" },
   },
@@ -105,13 +84,7 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "After the first edit, the second edit anchors on the post-edit diff rows without a re-read.",
     fixture: "aaa\nbbb\nccc\nddd\neee\n",
-    chained: true,
-    chainedSecondTarget: { kind: "line", match: "ddd" },
-    chainedSecondReplacement: ["DDD"],
-    target: { kind: "line", match: "ccc" },
-    replacement: ["CCC"],
     expected: { outcome: "applied", content: "aaa\nbbb\nCCC\nDDD\neee\n" },
-    skipFor: ["@cortexkit/aft-pi", "@oh-my-pi/hashline"],
   },
   {
     id: "b15-large-range-drift",
@@ -122,8 +95,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "A 200-line range with a drifted interior line; the edit must be refused, not silently overwrite the drift.",
     fixture: LARGE_FIXTURE,
-    target: { kind: "range", from: "line10", to: "line190" },
-    replacement: ["X"],
     mutateAfterRead: (content) => content.replace("line100", "line100-drifted"),
     expected: { outcome: "rejected" },
   },
@@ -136,11 +107,7 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "remove_from/remove_to were swapped by mistake; anchor tools should autocorrect and apply.",
     fixture: "aaa\nbbb\nccc\nddd\n",
-    target: { kind: "range", from: "bbb", to: "ddd" },
-    replacement: ["B", "C", "D"],
-    reversedRange: true,
     expected: { outcome: "either", content: "aaa\nB\nC\nD\n" },
-    skipFor: NO_ANCHORS,
   },
   {
     id: "b18-boundary-dup",
@@ -151,8 +118,6 @@ export const betterEditScenarios: Scenario[] = [
     description:
       "The replacement re-includes the boundary line. Tools with boundary anti-duplication strip it; others apply literally.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["aaa", "BBB"],
     expected: { outcome: "applied", content: "aaa\naaa\nBBB\nccc\n" },
     expectedByContender: {
       "pi-hashline-edit-pro": { outcome: "applied", content: "aaa\nBBB\nccc\n" },

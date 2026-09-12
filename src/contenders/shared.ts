@@ -1,85 +1,12 @@
-import type { ReadLine, ReadResult, TargetSpec, ToolSpec } from "../types";
+import { EventEmitter } from "events";
 import { Compile } from "typebox/compile";
-
-export function parseReadLines(
-  text: string,
-  rowRe: RegExp,
-  kind: "line-hash" | "hash" = "line-hash",
-  stripCr = true,
-): { lines: ReadLine[]; bytes: number } {
-  const lines: ReadLine[] = [];
-  const normalized = stripCr
-    ? text.replace(/\r\n/g, "\n").replace(/\r/g, "")
-    : text;
-  for (const row of normalized.split("\n")) {
-    const match = row.match(rowRe);
-    if (!match) continue;
-    if (kind === "hash") {
-      lines.push({
-        lineNumber: lines.length + 1,
-        anchor: match[1]!,
-        content: match[2] ?? "",
-      });
-      continue;
-    }
-    lines.push({
-      lineNumber: Number(match[1]),
-      anchor: match[2]!,
-      content: match[3] ?? "",
-    });
-  }
-  return { lines, bytes: Buffer.byteLength(text, "utf-8") };
-}
-
-export function resolveTarget(
-  lines: ReadLine[],
-  target: TargetSpec,
-): { start: ReadLine; end: ReadLine } {
-  switch (target.kind) {
-    case "line": {
-      const hit = lines.find((l) =>
-        target.matchRe ? target.matchRe.test(l.content) : l.content.includes(target.match));
-      if (!hit) throw new Error(`target line "${target.match}" not found in read output`);
-      return { start: hit, end: hit };
-    }
-    case "line-nth": {
-      const hits = lines.filter((l) => l.content.includes(target.match));
-      const hit = hits[target.nth - 1];
-      if (!hit) throw new Error(`target occurrence ${target.nth} of "${target.match}" not found`);
-      return { start: hit, end: hit };
-    }
-    case "range": {
-      const from = lines.find((l) => l.content.includes(target.from));
-      const to = lines.find((l) => l.content.includes(target.to));
-      if (!from || !to) throw new Error(`range ${target.from}..${target.to} not found in read output`);
-      return { start: from, end: to };
-    }
-    case "empty-file": {
-      const hit = lines[0];
-      if (!hit) throw new Error("empty-file target requires a read output with one row");
-      return { start: hit, end: hit };
-    }
-    case "eof": {
-      const hit = lines[lines.length - 1];
-      if (!hit) throw new Error("eof target requires a non-empty read output");
-      return { start: hit, end: hit };
-    }
-  }
-}
-
-export function readResult(text: string, lines: ReadLine[]): ReadResult {
-  return { text, lines, bytes: Buffer.byteLength(text, "utf-8") };
-}
+import type { ToolSpec } from "../types";
 
 export function makeRegistry() {
   const tools = new Map<string, any>();
-  const out: Record<string, unknown> = {};
-  const attach = (tool: any) => {
-    out[tool.name] = tool;
-  };
-  return Object.assign(out, {
+  return {
     pi: {
-      events: new (require("events").EventEmitter)(),
+      events: new EventEmitter(),
       registerTool(tool: any) {
         const originalExecute = tool.execute;
         let validator: ReturnType<typeof Compile> | undefined;
@@ -116,7 +43,6 @@ export function makeRegistry() {
           );
         };
         tools.set(tool.name, tool);
-        attach(tool);
       },
       registerCommand() {},
       on() {},
@@ -162,13 +88,7 @@ export function makeRegistry() {
         },
       }));
     },
-  });
-}
-
-
-export function anchorLengthOf(lines: ReadLine[]): number {
-  if (lines.length === 0) return 0;
-  return Math.min(...lines.map((l) => l.anchor.length));
+  };
 }
 
 export function extractResultText(result: unknown): string {

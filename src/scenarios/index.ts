@@ -13,8 +13,6 @@ export const scenarios: Scenario[] = [
     name: "single-line replace",
     description: "Replace one line in the middle of a file; the edit must land on exactly that line.",
     fixture: "aaa\nbbb\nccc\nddd\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     expected: { outcome: "applied", content: "aaa\nBBB\nccc\nddd\n" },
   },
   {
@@ -25,8 +23,6 @@ export const scenarios: Scenario[] = [
     name: "range replace",
     description: "Replace an inclusive range of lines.",
     fixture: "aaa\nbbb\nccc\nddd\neee\n",
-    target: { kind: "range", from: "bbb", to: "ddd" },
-    replacement: ["B", "C", "D"],
     expected: { outcome: "applied", content: "aaa\nB\nC\nD\neee\n" },
   },
   {
@@ -37,8 +33,6 @@ export const scenarios: Scenario[] = [
     name: "delete a line",
     description: "Delete one line; neighbors must stay intact.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: [],
     expected: { outcome: "applied", content: "aaa\nccc\n" },
   },
   {
@@ -57,8 +51,6 @@ export const scenarios: Scenario[] = [
       "  return 2;",
       "}",
     ].join("\n") + "\n",
-    target: { kind: "line-nth", match: "}", nth: 2 },
-    replacement: ["};"],
     expected: {
       outcome: "applied",
       content: "function a() {\n  return 1;\n}\nfunction b() {\n  return 2;\n};\n",
@@ -76,8 +68,6 @@ export const scenarios: Scenario[] = [
     name: "edit the 2nd of two identical import lines",
     description: "Repeated import lines; the model targets the second one.",
     fixture: "import { a } from 'x';\nimport { b } from 'y';\nimport { a } from 'x';\n",
-    target: { kind: "line-nth", match: "import { a }", nth: 2 },
-    replacement: ["import { a2 } from 'x';"],
     expected: {
       outcome: "applied",
       content: "import { a } from 'x';\nimport { b } from 'y';\nimport { a2 } from 'x';\n",
@@ -95,8 +85,6 @@ export const scenarios: Scenario[] = [
     name: "replace a line with trailing whitespace",
     description: "The target line has trailing spaces; the replacement must land on it.",
     fixture: "aaa\nbbb  \nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     expected: { outcome: "applied", content: "aaa\nBBB\nccc\n" },
   },
   {
@@ -108,8 +96,6 @@ export const scenarios: Scenario[] = [
     description: "Replace a line in a CRLF file; the file must stay CRLF.",
     fixture: "alpha\r\nbeta\r\ngamma\r\n",
     fixtureBytes: Buffer.from("alpha\r\nbeta\r\ngamma\r\n"),
-    target: { kind: "line", match: "beta" },
-    replacement: ["BETA"],
     expected: { outcome: "applied", content: "alpha\r\nBETA\r\ngamma\r\n" },
   },
   {
@@ -121,8 +107,6 @@ export const scenarios: Scenario[] = [
     description: "Replace a line in a BOM-prefixed file; the BOM must stay.",
     fixture: "\uFEFFalpha\nbeta\ngamma\n",
     fixtureBytes: Buffer.from("\uFEFFalpha\nbeta\ngamma\n", "utf-8"),
-    target: { kind: "line", match: "beta" },
-    replacement: ["BETA"],
     expected: { outcome: "applied", content: "\uFEFFalpha\nBETA\ngamma\n" },
   },
   {
@@ -133,8 +117,6 @@ export const scenarios: Scenario[] = [
     name: "seed an empty file",
     description: "Insert the first content into an empty file.",
     fixture: "",
-    target: { kind: "empty-file" },
-    replacement: ["first", "second"],
     expected: { outcome: "applied", content: "first\nsecond" },
     expectedByContender: {
       "builtin-edit": { outcome: "rejected" },
@@ -150,12 +132,6 @@ export const scenarios: Scenario[] = [
     description:
       "The target line exceeds the read-output budget; the model only ever saw a truncated row or a marker.",
     fixture: `a\n${LONG_LINE}\nb\n`,
-    target: {
-      kind: "line",
-      match: "x".repeat(64),
-      matchRe: /(x{64}|\[Line 2 is|exceeds 50KB)/,
-    },
-    replacement: ["REPLACED"],
     expected: { outcome: "applied", content: `a\nREPLACED\nb\n` },
     expectedByContender: {
       "builtin-edit": { outcome: "rejected" },
@@ -171,8 +147,6 @@ export const scenarios: Scenario[] = [
     name: "no-op edit keeps the file byte-identical",
     description: "Replace a line with its exact current content; nothing may change.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["bbb"],
     expected: { outcome: "either", content: "aaa\nbbb\nccc\n" },
   },
   {
@@ -183,9 +157,6 @@ export const scenarios: Scenario[] = [
     name: "insert lines after a line",
     description: "Insert new lines below the target; the target line is preserved.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["B1", "B2"],
-    useInsert: true,
     expected: { outcome: "applied", content: "aaa\nbbb\nB1\nB2\nccc\n" },
   },
   {
@@ -196,8 +167,6 @@ export const scenarios: Scenario[] = [
     name: "unicode content survives",
     description: "Replace a line containing multi-byte characters (CJK, emoji, accents); byte-level content must survive the edit.",
     fixture: "h\u00e9llo w\u00f6rld\n\u65e5\u672c\u8a9e\u306e\u884c \ud83c\udf89\n\u0441\u043c\u0435\u0441\u044c\n",
-    target: { kind: "line", match: "\u65e5\u672c\u8a9e" },
-    replacement: ["\u65e5\u672c\u8a9e\u306e\u884c \ud83d\ude80"],
     expected: { outcome: "applied", content: "h\u00e9llo w\u00f6rld\n\u65e5\u672c\u8a9e\u306e\u884c \ud83d\ude80\n\u0441\u043c\u0435\u0441\u044c\n" },
   },
   {
@@ -208,8 +177,6 @@ export const scenarios: Scenario[] = [
     name: "tab indentation preserved",
     description: "Replace a tab-indented line; sibling tab indentation must stay byte-identical.",
     fixture: "function f() {\n\treturn 1;\n\t\t// deeply nested\n}\n",
-    target: { kind: "line", match: "return 1" },
-    replacement: ["\treturn 2;"],
     expected: { outcome: "applied", content: "function f() {\n\treturn 2;\n\t\t// deeply nested\n}\n" },
   },
   {
@@ -220,8 +187,6 @@ export const scenarios: Scenario[] = [
     name: "missing trailing newline stays absent",
     description: "Replace the last line of a file that has no trailing newline; no newline may appear at EOF.",
     fixture: "aaa\nbbb",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     expected: { outcome: "applied", content: "aaa\nBBB" },
   },
   {
@@ -232,8 +197,6 @@ export const scenarios: Scenario[] = [
     name: "target line changed on disk after read",
     description: "The exact line the model targets was modified externally; the edit must be refused.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     mutateAfterRead: (content) => content.replace("bbb", "bbb-external"),
     expected: { outcome: "rejected" },
   },
@@ -245,8 +208,6 @@ export const scenarios: Scenario[] = [
     name: "a line inside the replaced range changed after read",
     description: "One line of a multi-line range was modified externally; the whole edit must be refused.",
     fixture: "aaa\nbbb\nccc\nddd\n",
-    target: { kind: "range", from: "bbb", to: "ddd" },
-    replacement: ["B", "D"],
     mutateAfterRead: (content) => content.replace("ccc", "ccc-external"),
     expected: { outcome: "rejected" },
   },
@@ -259,8 +220,6 @@ export const scenarios: Scenario[] = [
     description:
       "A change far from the target must not block the edit; the result combines both changes.",
     fixture: "aaa\nbbb\nccc\nddd\neee\n",
-    target: { kind: "line", match: "ccc" },
-    replacement: ["CCC"],
     mutateAfterRead: (content) => content.replace("aaa", "aaa-external"),
     expected: { outcome: "applied", content: "aaa-external\nbbb\nCCC\nddd\neee\n" },
   },
@@ -273,8 +232,6 @@ export const scenarios: Scenario[] = [
     description:
       "After editing one line, the anchors of all other lines must be unchanged (no re-read needed).",
     fixture: "aaa\nbbb\nccc\nddd\neee\n",
-    target: { kind: "line", match: "ccc" },
-    replacement: ["CCC"],
     expected: { outcome: "applied", content: "aaa\nbbb\nCCC\nddd\neee\n" },
   },
   {
@@ -285,8 +242,6 @@ export const scenarios: Scenario[] = [
     name: "undo restores the exact previous content",
     description: "After an applied edit, undo must restore the original bytes.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     expected: { outcome: "applied", content: "aaa\nBBB\nccc\n" },
   },
   {
@@ -298,8 +253,6 @@ export const scenarios: Scenario[] = [
     description:
       "When an edit is refused as stale, the error should point at fresh anchors or a re-read.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BBB"],
     mutateAfterRead: (content) => content.replace("bbb", "bbb-external"),
     expected: { outcome: "rejected" },
   },
@@ -311,8 +264,6 @@ export const scenarios: Scenario[] = [
     name: "delete an inclusive range cleanly",
     description: "Replace an inclusive range with nothing; neighbors stay intact with no blank line left behind.",
     fixture: "aaa\nbbb\nccc\nddd\n",
-    target: { kind: "range", from: "bbb", to: "ccc" },
-    replacement: [],
     expected: { outcome: "applied", content: "aaa\nddd\n" },
   },
   {
@@ -323,9 +274,6 @@ export const scenarios: Scenario[] = [
     name: "insert after the last line",
     description: "Insert lines after the final line through the insert path; existing lines stay byte-identical.",
     fixture: "aaa\nbbb\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["CCC"],
-    useInsert: true,
     expected: { outcome: "applied", content: "aaa\nbbb\nCCC\n" },
   },
   {
@@ -337,8 +285,6 @@ export const scenarios: Scenario[] = [
     description: "Replace a line in a BOM-prefixed CRLF file; both the BOM and CRLF endings must survive.",
     fixture: "\uFEFFalpha\r\nbeta\r\ngamma\r\n",
     fixtureBytes: Buffer.from("\uFEFFalpha\r\nbeta\r\ngamma\r\n", "utf-8"),
-    target: { kind: "line", match: "beta" },
-    replacement: ["BETA"],
     expected: { outcome: "applied", content: "\uFEFFalpha\r\nBETA\r\ngamma\r\n" },
   },
   {
@@ -349,9 +295,6 @@ export const scenarios: Scenario[] = [
     name: "insert after a line changed on disk",
     description: "The anchor line for an insert changed externally after read; the insert must be refused, not misplaced.",
     fixture: "aaa\nbbb\nccc\n",
-    target: { kind: "line", match: "bbb" },
-    replacement: ["BB1", "BB2"],
-    useInsert: true,
     mutateAfterRead: (content) => content.replace("bbb", "bbb-x"),
     expected: { outcome: "rejected" },
   },
