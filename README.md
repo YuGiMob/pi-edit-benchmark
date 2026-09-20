@@ -1,6 +1,6 @@
 # pi-edit-benchmark
 
-LLM tool-calling benchmark comparing file-editing extensions for [pi-coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent): the built-in `edit` tool, the hashline family (`pi-hashline-edit`, `pi-hashline-edit-pro`, `pi-hashline-context-edit`, `pi-hashline-readmap`), and tolerant/semantic matchers (`@cortexkit/aft-pi`, `@xynogen/pix-edit`, `pi-semantic-edit`).
+LLM tool-calling benchmark comparing file-editing extensions for [pi-coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent): the built-in `edit` tool, the hashline family (`pi-hashline-edit`, `pi-hashline-edit-pro`, `pi-hashline-context-edit`, `pi-hashline-readmap`), tolerant/semantic matchers (`@cortexkit/aft-pi`, `@xynogen/pix-edit`, `pi-semantic-edit`), snapshot-bound hashline editing (`@agimon-ai/doompi-edit`), and guarded IDE editing (`pi-agent-ide`).
 
 ## Why
 
@@ -26,11 +26,11 @@ Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without
 
 ## LLM benchmark
 
-`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from three remote providers — hyper, opencode-go, and ollama-cloud — each reached at its own endpoint with its own key (`HYPER_API_KEY`, `OPENCODE_API_KEY`, `OLLAMA_API_KEY`), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
+`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from two remote providers — opencode-go and ollama-cloud — each reached at its own endpoint with its own key (`OPENCODE_API_KEY`, `OLLAMA_API_KEY`; the hyper provider is retired from the default matrix), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, any `before_agent_start` system-prompt patches the contender registers, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
 The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
 
 ```
-bun run src/main-llm.ts                        # 10 models × 8 tools × 35 scenarios (2,800 runs)
+bun run src/main-llm.ts                        # 9 models × 11 contenders × 35 scenarios (3,465 runs)
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
@@ -135,56 +135,66 @@ Each scenario carries a `focus` that the report splits by: **core editing** (18)
 
 The report splits every score by the three focus groups above.
 
-## Results — latest LLM round (8 models × 8 tools × 34 scenarios, `results/llm-report.md`, 2,176 runs, $3.34)
+## Results — latest full round (9 models × 11 contenders × 35 scenarios, `results/llm-report.md`, 3,465 runs, $4.54)
 
-Per model (each /272):
+Per model (each /385; three models ran locally on llama.cpp):
 
 | Model | Passed | Rate | Avg tokens/run | Cost |
 | --- | --- | --- | --- | --- |
-| GLM 5.3 Flash | 216 | **79%** | 9,363 | $0.21 |
-| Muse Spark 1.2 Contributor | 214 | 79% | 15,556 | $0.50 |
-| Muse Spark 1.3 Contributor | 214 | 79% | 17,837 | $0.54 |
-| Nemotron 3 Nano (30B) | 205 | 75% | 19,098 | $0.81 |
-| Qwen3.8-Flash | 205 | 75% | 12,886 | $0.61 |
-| Gemma 4 (31B) | 199 | 73% | 5,955 | $0.25 |
-| Gemma 4 26B A4B | 196 | 72% | 7,629 | $0.23 |
-| GPT-OSS (20B) | 190 | 70% | 6,389 | $0.19 |
+| GLM 5.3 Flash | 357 | **93%** | 7,155 | $0.45 |
+| DeepSeek V4.1 Flash | 353 | 92% | 10,722 | $1.48 |
+| Qwen3.8-Flash | 354 | 92% | 13,034 | $0.83 |
+| Muse Spark 1.3 Contributor | 353 | 92% | 10,888 | $0.49 |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 356 | 92% | 10,191 | $0.00 |
+| Gemma 4 (31B) | 338 | 88% | 6,599 | $0.37 |
+| Nemotron 3 Nano (30B) | 331 | 86% | 17,252 | $0.92 |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 324 | 84% | 7,733 | $0.00 |
+| Qwen3.5 9B (Q4_K_M, llama.cpp) | 319 | 83% | 8,262 | $0.00 |
 
 Per tool with the focus split (each cell passed/total across all models):
 
-| Tool | Core (120) | Staleness (88) | Served-state (64) | Overall (272) |
+| Tool | Core (162) | Staleness (90) | Served-state (63) | Overall (315) |
 | --- | --- | --- | --- | --- |
-| **pi-hashline-edit-pro** | **97** | 81 | 56 | **234 (86%)** |
-| pi-hashline-context-edit | 82 | 80 | 55 | 217 (80%) |
-| @cortexkit/aft-pi | 84 | 69 | 57 | 210 (77%) |
-| pi-hashline-edit | 81 | 79 | 55 | 215 (79%) |
-| pi-hashline-readmap | 88 | 72 | 48 | 208 (76%) |
-| @xynogen/pix-edit | 72 | 71 | 53 | 196 (72%) |
-| builtin-edit | 66 | 59 | 52 | 177 (65%) |
-| pi-semantic-edit | 64 | 61 | 57 | 182 (67%) |
+| **pi-hashline-edit-pro** | **161** | 89 | 58 | **308 (98%)** |
+| **pi-hashline-edit-pro-diff0** | 160 | 89 | 59 | **308 (98%)** |
+| @agimon-ai/doompi-edit | 149 | 86 | 62 | 297 (94%) |
+| pi-hashline-readmap | 151 | 85 | 57 | 293 (93%) |
+| pi-hashline-context-edit | 134 | 87 | 63 | 284 (90%) |
+| pi-hashline-edit | 133 | 87 | 63 | 283 (90%) |
+| @cortexkit/aft-pi | 140 | 76 | 62 | 278 (88%) |
+| @xynogen/pix-edit | 142 | 76 | 60 | 278 (88%) |
+| pi-agent-ide | 124 | 77 | 62 | 263 (83%) |
+| builtin-edit | 124 | 66 | 60 | 250 (79%) |
+| pi-semantic-edit | 125 | 59 | 59 | 243 (77%) |
 
 Per-tool process (all models):
 
-| Tool | Avg steps | Avg tokens/run | Avg cost | Max steps |
-| --- | --- | --- | --- | --- |
-| builtin-edit | 3.7 | 8,656 | $0.0014 | 12 |
-| pi-hashline-edit | 3.3 | 11,766 | $0.0014 | 10 |
-| pi-hashline-context-edit | 3.0 | 9,919 | $0.0012 | 10 |
-| pi-hashline-edit-pro | 3.5 | 11,773 | $0.0015 | 12 |
-| pi-hashline-readmap | 5.5 | 11,097 | $0.0015 | 439* |
-| @cortexkit/aft-pi | 3.2 | 7,809 | $0.0010 | 10 |
-| @xynogen/pix-edit | 3.7 | 9,714 | $0.0015 | 13 |
-| pi-semantic-edit | 3.4 | 23,978 | $0.0028 | 10 |
+| Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |
+| --- | --- | --- | --- | --- | --- |
+| builtin-edit | 0.85.1 | 3.4 | 7,301 | $0.0011 | 10 |
+| pi-hashline-edit | 0.8.3 | 2.9 | 10,760 | $0.0011 | 10 |
+| pi-hashline-context-edit | 0.11.0 | 2.6 | 8,878 | $0.0010 | 10 |
+| pi-hashline-edit-pro | 4.3.5 | 2.8 | 9,079 | $0.0010 | 10 |
+| pi-hashline-edit-pro-diff0 | 4.3.5 | 2.9 | 9,500 | $0.0011 | 10 |
+| pi-hashline-readmap | 0.14.0 | 3.2 | 9,534 | $0.0012 | 10 |
+| @cortexkit/aft-pi | 0.56.2 | 3.0 | 10,881 | $0.0012 | 10 |
+| @xynogen/pix-edit | 0.2.5 | 3.3 | 7,307 | $0.0011 | 10 |
+| pi-semantic-edit | 0.4.0 | 2.9 | 12,239 | $0.0021 | 11 |
+| @agimon-ai/doompi-edit | 0.0.1-alpha.49 | 3.5 | 8,874 | $0.0011 | 10 |
+| pi-agent-ide | 0.6.2 | 4.6 | 17,890 | $0.0022 | 12 |
 
-\* one runaway run inflated the max; typical runs stay ≤10.
+Totals across the round: **30.2M prompt tokens in, 5.2M completion tokens out, 11,179 tool calls** (856 failed), 38.3h of summed run time.
 
 **Findings:**
-- **`pi-hashline-edit-pro` leads overall (86%) and wins the core-editing group outright** (97/120 vs 82-88 for every other tool) — with the score achieved under a pi-faithful prompt carrying no benchmark-specific coaching.
-- **The built-in `edit` tool is the worst performer (65%)**: its text matching silently corrupts duplicated content (`duplicate-nth`/`duplicate-import` failed by every model) and externally-changed lines.
-- **`pi-semantic-edit` debuted last (67%)**: drift tolerance doesn't help when the failure mode is ambiguity, and its fuzzy chain is the most token-hungry (23,978/run).
-- **`readmap` wins staleness-adjacent scenarios but collapsed for GPT-OSS (15/34)** — a single-model outlier worth re-testing.
-- **Served-state is the hardest group for text tools** (52-57/64): without served anchors, `b7`/`b8`/`b13`/`b16b` are guesswork.
-- **Stale-rejection + recovery is observable**: hashline tools reject stale edits and models re-read and re-apply (`recovered`) — text tools have no such safety net.
+- **`pi-hashline-edit-pro` 4.3.5 leads at 98% and wins the core-editing group outright** (161/162), with `diff0` matching it overall (308/315) — the two stay tied even at the larger 11-contender matrix.
+- **`@agimon-ai/doompi-edit` debuts 3rd (94%)**: snapshot-bound per-file tags + 3-letter line anchors give it strong staleness defense (86/90) right behind pro.
+- **`pi-agent-ide` debuts at 83%**: its guarded `replace`/`insert`/`delete`/`write` surface is solid on served-state (62/63) but its staleness recovery (77/90) and token appetite (17,890/run) trail the hashline family.
+- **Local llama.cpp lanes are competitive**: the 27B at UD-Q2_K_XL ties the best remote models (92%) for $0; the 26B A4B MoE lands 84% and the 9B Q4_K_M 83%.
+- **The built-in `edit` tool remains worst-in-class on staleness (66/90)**: its text matching silently corrupts duplicated and externally-changed content.
+- **`@cortexkit/aft-pi` scored 88% with its `before_agent_start` workflow hints restored** — earlier rounds ran it without that injected guidance, so its old numbers were understated.
+- **Stale-rejection + recovery is observable at scale**: 72 `recovered` runs in the qwen38 lane alone — hashline tools refuse stale anchors and models re-read and re-apply; text tools have no such safety net.
+- **Served-state is solvable but expensive**: hashline tools score 57-63/63; the gap to text tools has narrowed as models learned to re-read, but `b7`/`b8`-style blind edits remain guesswork without served anchors.
+
 
 ## Ecosystem popularity (npm + GitHub, snapshot 2026-09)
 
