@@ -64,6 +64,11 @@ describe("evaluateLlmOutcome", () => {
     expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, correct, s.fixture).pass).toBe(true);
     expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, wrong, s.fixture).pass).toBe(false);
   });
+  it("applies the pro boundary-dedup expectation to the diff-0 variant", () => {
+    const s = scenario("b18-boundary-dup");
+    expect(evaluateLlmOutcome("pi-hashline-edit-pro-diff0", s, "aaa\nBBB\nccc\n", s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome("pi-hashline-edit-pro-diff0", s, "aaa\naaa\nBBB\nccc\n", s.fixture).pass).toBe(false);
+  });
 });
 
 describe("taskPrompt", () => {

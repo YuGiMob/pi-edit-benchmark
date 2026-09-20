@@ -23,4 +23,10 @@ describe("contender registry", () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(contenders.length).toBeGreaterThanOrEqual(8);
   });
+
+  it("registers both pro diff-context variants", () => {
+    const ids = allContenders().map((c) => c.info.id);
+    expect(ids).toContain("pi-hashline-edit-pro");
+    expect(ids).toContain("pi-hashline-edit-pro-diff0");
+  });
 });

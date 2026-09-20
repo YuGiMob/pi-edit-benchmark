@@ -5,14 +5,14 @@ import {
   createReadToolDefinition,
 } from "@earendil-works/pi-coding-agent";
 import type { Contender, ToolSpec } from "../types";
-import { extractResultText, isErrorResult } from "./shared";
+import { extractResultText, isErrorResult, pkgVersion } from "./shared";
 
 export function builtinContender(): Contender {
   return {
     info: {
       id: "builtin-edit",
       name: "built-in edit (str_replace)",
-      version: "0.84.4",
+      version: pkgVersion("@earendil-works/pi-coding-agent", "0.84.4"),
       description:
         "pi-coding-agent's standard edit tool: path + edits[{oldText, newText}]. Text matching, no anchors, no staleness check.",
       available: true,

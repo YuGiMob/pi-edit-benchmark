@@ -1,7 +1,7 @@
 import { createReadTool, createReadToolDefinition } from "@earendil-works/pi-coding-agent";
 import { join } from "path";
 import type { Contender, ToolSpec } from "../types";
-import { extractResultText, isErrorResult, makeRegistry } from "./shared";
+import { extractResultText, isErrorResult, makeRegistry, pkgVersion } from "./shared";
 
 export function pixEditContender(): Contender {
   const registryRef: { registry?: ReturnType<typeof makeRegistry> } = {};
@@ -17,7 +17,7 @@ export function pixEditContender(): Contender {
     info: {
       id: "@xynogen/pix-edit",
       name: "@xynogen/pix-edit",
-      version: "0.2.2",
+      version: pkgVersion("@xynogen/pix-edit", "0.2.2"),
       description:
         "Precise text-replacement edit with diff rendering: { path, edits: [{ oldText, newText }] }, oldText must be unique. No read tool, no anchors, no staleness check.",
       available: true,

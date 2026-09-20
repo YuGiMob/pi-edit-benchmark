@@ -26,7 +26,7 @@ Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without
 
 ## LLM benchmark
 
-`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from three providers — hyper, opencode-go, and ollama-cloud — each reached at its own endpoint with its own key (`HYPER_API_KEY`, `OPENCODE_API_KEY`, `OLLAMA_API_KEY`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
+`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from three remote providers — hyper, opencode-go, and ollama-cloud — each reached at its own endpoint with its own key (`HYPER_API_KEY`, `OPENCODE_API_KEY`, `OLLAMA_API_KEY`), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
 The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
 
 ```
@@ -37,7 +37,7 @@ bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
 ```
 
-**Pacing for rate limits:** `--concurrency` bounds parallel runs and `--delay-ms` inserts a pause between scenario batches. Providers differ: hyper caps at ~1,000 requests/hour (run one hyper model at a time, paced), ollama-cloud allows concurrency 3, opencode-go has no concurrency limit as long as the same model isn't called concurrently. For full rounds, run one invocation per provider lane in parallel (see `--models`), then merge the JSONs.
+**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`hyper: 16`, `opencode-go: 16`, `ollama-cloud: 5`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). One invocation covers the whole matrix — no manual per-lane runs or report merging.
 
 ### Run traces (validation)
 
@@ -54,16 +54,15 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 
 | Model | Id | Provider | API | Effort | Pricing (per M in/out) |
 | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4 Flash 0731 | `deepseek-v4-flash:0731` | ollama-cloud | chat completions | provider default | $0.44 / $1.32 |
-| Gemma 4 26B A4B | `gemma-4-26b-a4b-it` | hyper | chat completions | `max` | $0.106 / $0.368 |
+| DeepSeek V4.1 Flash | `deepseek-v4.1-flash` | ollama-cloud | chat completions | provider default | $0.30 / $1.20 |
+| Gemma 4 26B A4B | `gemma-4-26b-a4b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.075 / $0.25 |
-| Qwen3.8-27B | `qwen3.8-27b` | hyper | chat completions | `max` | $0.50 / $3.00 |
+| Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
-| Muse Spark 1.2 Contributor | `muse-spark-1.2-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
 | Gemma 4 (31B) | `gemma4:31b` | ollama-cloud | chat completions | provider default | $0.14 / $0.40 |
 | Nemotron 3 Nano (30B) | `nemotron-3-nano:30b` | ollama-cloud | chat completions | provider default | $0.06 / $0.24 |
-| GPT-OSS (20B) | `gpt-oss:20b` | ollama-cloud | chat completions | provider default | $0.07 / $0.30 |
+| Qwen3.5 9B (Q4_K_M, llama.cpp) | `qwen3.5-9b-q4km` | llamacpp | chat completions | provider default | local, $0.00 |
 
 Reported per run: pass/fail against the scenario expectations, outcome class (`applied`, `rejected`, `recovered` — the model re-read after a stale rejection and applied correctly), tool-call trace, tokens, and API cost (prices from `~/.pi/agent/models-store.json`).
 
@@ -75,10 +74,13 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | `pi-hashline-edit` | `{ path, edits: [{ op, pos, end, lines }] }` | `LINE#HASH:` 2-char contextual | no |
 | `pi-hashline-context-edit` | same + `replace_text` | `LINE#HASH:` 2-char contextual | no |
 | `pi-hashline-edit-pro` (4.2.6) | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
+| `pi-hashline-edit-pro-diff0` | same, with `diffContextLines: 0` (post-edit diffs carry no context lines) | `HASH│` 4-char, served-range verification | yes |
 | `pi-hashline-readmap` | `{ path, edits: [{ set_line / replace_lines / insert_after }] }` | `LINE:HASH|` 3-char | no |
 | `@cortexkit/aft-pi` | `{ path, edits: [{ oldString, newString, occurrence }] }` | none (fuzzy find/replace, Rust backend) | no |
 | `@xynogen/pix-edit` | `{ path, edits: [{ oldText, newText }] }` | none (unique-text replace + diff) | no |
 | `pi-semantic-edit` | `{ path, edits: [{ oldText, newText, replaceAll? }] }` | none (10-pass semantic fuzzy chain, uniqueness guard) | no |
+| `@agimon-ai/doompi-edit` | `{ path, hash, edits: [{ from, to, content }] }` | 8-char exact-byte file tag + 3-letter line anchors from a snapshot-bound read/grep | no |
+| `pi-agent-ide` | guarded editing: `replace` (text/line-range/search-match selectors), `insert`, `delete`, `write`, `apply` | line-hash and exact-text selectors with stale-selection recovery | no |
 
 
 ## Scenarios (35)

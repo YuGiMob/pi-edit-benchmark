@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import type { LlmModelSpec, ToolSpec } from "../types";
 
 export interface ChatMessage {
@@ -29,10 +30,12 @@ export interface ClientOptions {
   tools: ToolSpec[];
   maxTokens: number;
   timeoutMs: number;
+  sessionId?: string;
 }
 
 const CHAT_API = "/chat/completions";
 const RESPONSES_API = "/responses";
+const USER_AGENT = "pi-edit-benchmark/0.1.0";
 export async function chat(
   opts: ClientOptions,
   messages: ChatMessage[],
@@ -97,9 +100,9 @@ async function chatCompletions(
   if (toolSchemas.length > 0) body.tools = toolSchemas;
   if (opts.model.reasoningEffort) body.reasoning_effort = opts.model.reasoningEffort;
 
-  const { ok, raw } = await postJson(opts, CHAT_API, body);
+  const { ok, status, raw } = await postJson(opts, CHAT_API, body);
   if (!ok) {
-    throw new Error(`API ${raw.slice(0, 300)}`);
+    throw new Error(`API ${status} ${raw.slice(0, 300)}`);
   }
   const data = JSON.parse(raw) as {
     choices?: Array<{
@@ -151,9 +154,9 @@ async function chatResponses(
   if (toolSchemas.length > 0) body.tools = toolSchemas;
   if (opts.model.reasoningEffort) body.reasoning = { effort: opts.model.reasoningEffort };
 
-  const { ok, raw } = await postJson(opts, RESPONSES_API, body);
+  const { ok, status, raw } = await postJson(opts, RESPONSES_API, body);
   if (!ok) {
-    throw new Error(`API ${raw.slice(0, 300)}`);
+    throw new Error(`API ${status} ${raw.slice(0, 300)}`);
   }
   const data = JSON.parse(raw) as {
     output?: Array<{
@@ -227,7 +230,7 @@ async function postJson(
   opts: ClientOptions,
   path: string,
   body: Record<string, unknown>,
-): Promise<{ ok: boolean; raw: string }> {
+): Promise<{ ok: boolean; status: number; raw: string }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), opts.timeoutMs);
   try {
@@ -238,12 +241,16 @@ async function postJson(
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${opts.apiKey}`,
+          "User-Agent": USER_AGENT,
+          ...(opts.model.provider === "opencode-go"
+            ? { "x-opencode-session": opts.sessionId ?? randomUUID() }
+            : {}),
         },
         body: JSON.stringify(body),
         signal: controller.signal,
       },
     );
-    return { ok: response.ok, raw: await response.text() };
+    return { ok: response.ok, status: response.status, raw: await response.text() };
   } finally {
     clearTimeout(timeout);
   }

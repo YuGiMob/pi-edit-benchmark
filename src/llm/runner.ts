@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
 import { chat, type ChatMessage } from "./client";
@@ -129,6 +130,7 @@ export async function runLlmScenario(
   opts: LlmRunnerOptions,
 ): Promise<LlmRun> {
   const dir = join(opts.cwd, `${contender.info.id}-${scenario.id}`);
+  const sessionId = randomUUID();
   await mkdir(dir, { recursive: true });
   const filePath = join(dir, scenario.fileName);
   const fixtureBytes =
@@ -138,6 +140,7 @@ export async function runLlmScenario(
   const startedAt = Date.now();
   const base: LlmRun = {
     contenderId: contender.info.id,
+    contenderVersion: contender.info.version,
     scenarioId: scenario.id,
     modelId: opts.model.id,
     pass: false,
@@ -163,7 +166,12 @@ export async function runLlmScenario(
     }
 
     const messages: ChatMessage[] = [
-      { role: "system", content: buildSystemPrompt(tools, dir) },
+      {
+        role: "system",
+        content: contender.systemPromptPatch
+          ? contender.systemPromptPatch(buildSystemPrompt(tools, dir))
+          : buildSystemPrompt(tools, dir),
+      },
       { role: "user", content: taskPrompt(scenario) },
     ];
     const traceMessages: LlmTrace["messages"] = messages.map((m) => ({ ...m }));
@@ -180,6 +188,7 @@ export async function runLlmScenario(
           tools,
           maxTokens: opts.model.maxTokens,
           timeoutMs: opts.timeoutMs,
+          sessionId,
         },
         messages,
       );
@@ -273,6 +282,7 @@ export async function runLlmScenario(
       const trace: LlmTrace = {
         modelId: opts.model.id,
         contenderId: contender.info.id,
+        contenderVersion: contender.info.version,
         scenarioId: scenario.id,
         task: taskPrompt(scenario),
         startedAt: new Date(startedAt).toISOString(),

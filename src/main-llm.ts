@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
+import { readFileSync } from "fs";
 import { mkdtemp, rm } from "fs/promises";
 import { tmpdir } from "os";
 import { allContenders } from "./contenders";
@@ -19,8 +20,11 @@ interface CliArgs {
   dryRun: boolean;
   maxSteps: number;
   concurrency: number;
+  concurrencySet: boolean;
+  laneConcurrency: Record<string, number>;
   out: string;
   delayMs: number;
+  timeoutMs?: number;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -32,6 +36,8 @@ function parseArgs(argv: string[]): CliArgs {
     dryRun: false,
     maxSteps: 10,
     concurrency: 2,
+    concurrencySet: false,
+    laneConcurrency: {},
     out: "results/llm-report.md",
     delayMs: 0,
   };
@@ -59,12 +65,22 @@ function parseArgs(argv: string[]): CliArgs {
         break;
       case "--concurrency":
         args.concurrency = Number(next());
+        args.concurrencySet = true;
+        break;
+      case "--lane-concurrency":
+        for (const part of next().split(",")) {
+          const [p, n] = part.split("=");
+          if (p && n) args.laneConcurrency[p] = Number(n);
+        }
         break;
       case "--out":
         args.out = next();
         break;
       case "--delay-ms":
         args.delayMs = Number(next());
+        break;
+      case "--timeout-ms":
+        args.timeoutMs = Number(next());
         break;
       case "--help":
         console.log(`
@@ -76,8 +92,12 @@ Options:
   --scenarios <ids>    Comma-separated scenario ids (default: a curated subset)
   --all                Run every scenario instead of the default subset
   --max-steps <n>      Max tool calls per run (default: 10)
-  --concurrency <n>    Parallel runs per model (default: 2)
-  --delay-ms <n>       Pause between scenario batches (pacing for tight rate limits)
+  --concurrency <n>    Override lane concurrency for every provider
+  --lane-concurrency p=n[,p=n]
+                       Per-provider lane concurrency override (e.g. opencode-go=8)
+  --delay-ms <n>       Pause before starting each provider lane (pacing for tight rate limits)
+  --timeout-ms <n>     Per-API-call timeout (default: 180000)
+
   --dry-run            Print the run matrix without calling the API
   --out <path>         Report output path (default: results/llm-report.md)
 `);
@@ -120,9 +140,42 @@ const PROVIDER_ENV: Record<string, string> = {
   "ollama-cloud": "OLLAMA_API_KEY",
 };
 
+function authJsonKey(provider: string): string | undefined {
+  try {
+    const raw = readFileSync(join(homedir(), ".pi", "agent", "auth.json"), "utf-8");
+    const auth = JSON.parse(raw) as Record<string, { key?: string }>;
+    return auth[provider]?.key;
+  } catch {
+    return undefined;
+  }
+}
+
 function apiKeyFor(model: LlmModelSpec): string | undefined {
+  if (providerOf(model) === "llamacpp") return "local";
   const env = PROVIDER_ENV[providerOf(model)];
-  return env ? process.env[env] : undefined;
+  return (env ? process.env[env] : undefined) ?? authJsonKey(providerOf(model));
+}
+
+const PROVIDER_CONCURRENCY: Record<string, number> = {
+  hyper: 16,
+  "opencode-go": 16,
+  "ollama-cloud": 5,
+  llamacpp: 6,
+};
+
+function laneConcurrencyOf(model: LlmModelSpec, args: CliArgs): number {
+  const override = args.laneConcurrency[providerOf(model)];
+  if (override !== undefined) return override;
+  if (args.concurrencySet) return args.concurrency;
+  return PROVIDER_CONCURRENCY[providerOf(model)] ?? 2;
+}
+
+function logRun(run: LlmRun): void {
+  const mark = run.pass ? "PASS" : "FAIL";
+  const calls = run.toolCalls.map((t) => (t.ok ? t.name : `${t.name}x`)).join(" ");
+  console.log(
+    `[${mark}] ${run.modelId.padEnd(20)} ${run.contenderId.padEnd(26)} ${run.scenarioId.padEnd(30)} ${run.outcome.padEnd(12)} steps=${run.steps} tok=${run.tokensIn + run.tokensOut} ${run.failureKind ?? ""} | ${calls}`,
+  );
 }
 
 function baseUrlOf(model: LlmModelSpec): string {
@@ -150,34 +203,46 @@ async function main(): Promise<void> {
         : true,
   );
 
-  const runs: LlmRun[] = [];
-  let totalCost = 0;
+  const activeModels = models.filter((model) => {
+    if (apiKeyFor(model)) return true;
+    console.error(`[skip] ${model.id}: ${providerOf(model)} API key not set (expected ${PROVIDER_ENV[providerOf(model)]} env or a matching entry in ~/.pi/agent/auth.json)`);
+    return false;
+  });
 
-  for (const model of models) {
-    const apiKey = apiKeyFor(model);
-    if (!apiKey) {
-      console.error(`[skip] ${model.id}: ${providerOf(model)} API key not set (expected ${PROVIDER_ENV[providerOf(model)]})`);
-      continue;
-    }
+  for (const model of activeModels) {
     console.log(`\n=== Model: ${model.name} (${model.id}) ===`);
-    const cost = costs.get(providerOf(model))?.get(model.id) ?? { in: 0, out: 0 };
-    const queue: Array<{ contenderId: string; scenarioId: string }> = [];
-    for (const contender of contenders) {
-      for (const scenario of scenarioList) {
-        queue.push({ contenderId: contender.info.id, scenarioId: scenario.id });
+    console.log(`  ${contenders.length * scenarioList.length} runs, lane concurrency ${laneConcurrencyOf(model, args)}`);
+    if (args.dryRun) {
+      for (const contender of contenders) {
+        for (const scenario of scenarioList) {
+          console.log(`  - ${contender.info.id} / ${scenario.id}`);
+        }
       }
     }
-    if (args.dryRun) {
-      console.log(`  ${queue.length} runs queued`);
-      for (const q of queue) console.log(`  - ${q.contenderId} / ${q.scenarioId}`);
-      continue;
-    }
-    console.log(`  ${queue.length} runs, concurrency ${args.concurrency}`);
-    for (let i = 0; i < queue.length; i += args.concurrency) {
+  }
+
+  if (args.dryRun) {
+    console.log("dry run: no report written");
+    return;
+  }
+
+  const lanes = await Promise.all(
+    activeModels.map(async (model) => {
+      const apiKey = apiKeyFor(model)!;
+      const cost = costs.get(providerOf(model))?.get(model.id) ?? { in: 0, out: 0 };
+      const laneConcurrency = laneConcurrencyOf(model, args);
+      const queue: Array<{ contenderId: string; scenarioId: string }> = [];
+      for (const contender of contenders) {
+        for (const scenario of scenarioList) {
+          queue.push({ contenderId: contender.info.id, scenarioId: scenario.id });
+        }
+      }
+      const laneRuns: LlmRun[] = [];
+      let cursor = 0;
       if (args.delayMs > 0) await new Promise((r) => setTimeout(r, args.delayMs));
-      const batch = queue.slice(i, i + args.concurrency);
-      const results = await Promise.all(
-        batch.map(async (q) => {
+      const worker = async (): Promise<void> => {
+        while (cursor < queue.length) {
+          const q = queue[cursor++]!;
           const contender = contenders.find((c) => c.info.id === q.contenderId)!;
           const scenario = scenarioList.find((s) => s.id === q.scenarioId)!;
           const dir = await mkdtemp(join(tmpdir(), "pi-llm-bench-"));
@@ -189,33 +254,26 @@ async function main(): Promise<void> {
               apiKey,
               toolFilter: LLM_TOOL_FILTERS[q.contenderId] ?? [],
               maxSteps: args.maxSteps,
-              timeoutMs: 180_000,
+              timeoutMs: args.timeoutMs ?? 180_000,
               costPerMIn: cost.in,
               costPerMOut: cost.out,
               traceDir: join(process.cwd(), "results", "traces"),
             });
-            return run;
+            laneRuns.push(run);
+            logRun(run);
           } finally {
             await rm(dir, { recursive: true, force: true });
           }
-        }),
-      );
-      for (const run of results) {
-        runs.push(run);
-        totalCost += run.costUsd;
-        const mark = run.pass ? "PASS" : "FAIL";
-        const calls = run.toolCalls.map((t) => (t.ok ? t.name : `${t.name}x`)).join(" ");
-        console.log(
-          `[${mark}] ${run.contenderId.padEnd(28)} ${run.scenarioId.padEnd(16)} ${run.outcome.padEnd(12)} steps=${run.steps} tok=${run.tokensIn + run.tokensOut} ${run.failureKind ?? ""} | ${calls}`,
-        );
-      }
-    }
-  }
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(laneConcurrency, queue.length) }, () => worker()));
+      return laneRuns;
+    }),
+  );
 
-  if (args.dryRun) {
-    console.log("dry run: no report written");
-    return;
-  }
+  const runs = lanes.flat();
+  const totalCost = runs.reduce((sum, run) => sum + run.costUsd, 0);
+
 
   const report: LlmReport = {
     generatedAt: new Date().toISOString(),
@@ -298,15 +356,16 @@ export function renderLlmReport(report: LlmReport, totalCost: number, outPath?: 
   out.push("");
   out.push("## Per-tool process (all models)");
   out.push("");
-  out.push("| Tool | Avg steps | Avg tokens/run | Avg cost | Max steps |");
-  out.push("| --- | --- | --- | --- | --- |");
+  out.push("| Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |");
+  out.push("| --- | --- | --- | --- | --- | --- |");
   for (const id of contenderIds) {
     const runs = report.runs.filter((r) => r.contenderId === id);
+    const version = runs[0]?.contenderVersion ?? "-";
     const avgSteps = runs.length > 0 ? (runs.reduce((s, r) => s + r.steps, 0) / runs.length).toFixed(1) : "-";
     const avgTokens = runs.length > 0 ? Math.round(runs.reduce((s, r) => s + r.tokensIn + r.tokensOut, 0) / runs.length) : 0;
     const avgCost = runs.length > 0 ? runs.reduce((s, r) => s + r.costUsd, 0) / runs.length : 0;
     const maxSteps = runs.length > 0 ? Math.max(...runs.map((r) => r.steps)) : 0;
-    out.push(`| ${id} | ${avgSteps} | ${avgTokens} | $${avgCost.toFixed(4)} | ${maxSteps} |`);
+    out.push(`| ${id} | ${version} | ${avgSteps} | ${avgTokens} | $${avgCost.toFixed(4)} | ${maxSteps} |`);
   }
   out.push("");
   out.push("## Scenario detail");

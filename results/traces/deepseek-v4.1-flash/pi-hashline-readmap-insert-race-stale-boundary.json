@@ -1,0 +1,112 @@
+{
+ "modelId": "deepseek-v4.1-flash",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "insert-race-stale-boundary",
+ "task": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-20T05:58:26.708Z",
+ "durationMs": 50427,
+ "tokensIn": 10612,
+ "tokensOut": 1559,
+ "costUsd": 0.0050544,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nbbb-x\nBB1\nBB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_1nfcmtgc",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_1nfcmtgc",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_7e3zgybh",
+     "name": "edit",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary/insert-race.ts\",\"edits\":[{\"insert_after\":{\"anchor\":\"2:467\",\"new_text\":\"BB1\\nBB2\"}}]}"
+    }
+   ],
+   "reasoning": "The file has lines: aaa, bbb, ccc, and empty line. I need to insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' must stay.\n\nLet me use insert_after with anchor of line 2. But note the task mentions \"insert-race\" and \"stale boundary\" - possibly there's a trap. Let me just do a single insert_after on line 2 with text \"BB1\\nBB2\".\n\nI should be careful about the anchor freshness. Let me dothe edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_7e3zgybh",
+   "content": "Error: Edit rejected — nothing was written. The anchor hash did not match the current file content.\n1 line has changed since last read. Auto-relocation checks only within ±20 lines of each anchor. Use the updated LINE:HASH references shown below (>>> marks changed lines).\n\n    1:55f|aaa\n>>> 2:205|bbb-x\n    3:c00|ccc\n    4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_iztniju5",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "The file changed concurrently. I need to re-read and re-edit. The line now is 'bbb-x' which contains 'bbb'. The requirement: line containing 'bbb'; the line 'bbb' itself must stay. Hmm, the file was modified by a race. Now line 2 is 'bbb-x'. The instruction says insert after the line containing 'bbb'; the line 'bbb' itself must stay. The line containing 'bbb' is 'bbb-x' now. But \"the line 'bbb' itself must stay\" — maybe means the line with bbb content. Let me re-read fresh and edit. Let me read again to get fresh anchors.\n\nActually the read result already gives updated anchor 2:205 for 'bbb-x'. But the tool says always read before editing; I already got updated references. But to be safe, re-read.\n\nThe race test: file changes between read and edit. We must handle stale boundary. Let me readagain."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_iztniju5",
+   "content": "1:55f|aaa\n2:205|bbb-x\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_06dxwokj",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"insert_after\":{\"anchor\":\"2:205\",\"new_text\":\"BB1\\nBB2\"}}],\"path\":\"/tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "The line changed from 'bbb' to 'bbb-x'. The task says insert after the line containing 'bbb'. The line now contains 'bbb' (bbb-x contains bbb), so insert after line 2. Good.\n\nBut wait — the instruction says \"the line 'bbb' itself must stay\". The line is now 'bbb-x'. Hmm, this is the race condition. The original intent: line containing 'bbb'. Current content has 'bbb-x'. Line containing 'bbb' is line 2. Insert after it.\n\nI should not modify line 2, just insert. Let me do that withfresh anchor."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_06dxwokj",
+   "content": "Edited /tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary/insert-race.ts (1 change, +2 -0 lines)\n 1 aaa\n 2 bbb-x\n+3 BB1\n+4 BB2\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_962iskyg",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-XfBZRx/pi-hashline-readmap-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "There was a race: the file changed while I was reading. The line containing 'bbb' is now 'bbb-x'. The instruction said insert after the line containing 'bbb', and the line itself must stay. I inserted BB1/BB2 after 'bbb-x'. Good. Letme verify."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_962iskyg",
+   "content": "1:55f|aaa\n2:205|bbb-x\n3:d35|BB1\n4:db0|BB2\n5:c00|ccc\n6:d05|"
+  }
+ ]
+}

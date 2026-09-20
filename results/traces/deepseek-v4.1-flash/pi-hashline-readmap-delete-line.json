@@ -1,0 +1,79 @@
+{
+ "modelId": "deepseek-v4.1-flash",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "delete-line",
+ "task": "Modify delete.ts in the current working directory. Delete the line containing 'bbb'; the surrounding lines must stay intact with no blank line left behind. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-20T05:56:35.090Z",
+ "durationMs": 25348,
+ "tokensIn": 6080,
+ "tokensOut": 583,
+ "costUsd": 0.0025236,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nccc\n",
+ "actualContent": "aaa\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-K2O4aU/pi-hashline-readmap-delete-line"
+  },
+  {
+   "role": "user",
+   "content": "Modify delete.ts in the current working directory. Delete the line containing 'bbb'; the surrounding lines must stay intact with no blank line left behind. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_vxd40943",
+     "name": "read",
+     "arguments": "{\"path\":\"delete.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_vxd40943",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_becyzb6n",
+     "name": "edit",
+     "arguments": "{\"path\":\"delete.ts\",\"edits\":[{\"replace_lines\":{\"end_anchor\":\"3:c00\",\"new_text\":\"ccc\",\"start_anchor\":\"2:467\"}}]}"
+    }
+   ],
+   "reasoning": "I need to delete line 2. Use replace_lines with start and end anchors. Actually delete a line: replace_lines start_anchor 2:467 end_anchor 2:467 with new_text \"\" — but that might leave an empty line? The instruction says no blank line left behind. Let me use edit with replace_lines covering lines 1-3 and replace with \"aaa\\nccc\"? Or set_line? Let me think.\n\nThe safest: replace_lines with start_anchor 2:467 end_anchor 2:467 and new_text \"\" would likely produce an empty line (blank line). Hmm.\n\nBetter to use replace_lines from line 2 to line 3 with new_text \"ccc\" — that deletes line 2 and replaces line 3 with \"ccc\", effectively removing line 2 and keeping line 3. That yields aaa\\nccc\\n. That works.\n\nActually need to include line 3's content. new_text \"ccc\". Let's do that.\n\nAlternatively replace from anchor 1 to 3 with \"aaa\\nccc\". Either works. Let me use start 2 end 3,new_text \"ccc\"."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_becyzb6n",
+   "content": "Edited delete.ts (1 change, +0 -1 line)\n2:467|bbb → [deleted]"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_ptc420ea",
+     "name": "read",
+     "arguments": "{\"path\":\"delete.ts\"}"
+    }
+   ],
+   "reasoning": "Letme verify."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_ptc420ea",
+   "content": "1:55f|aaa\n2:c00|ccc\n3:d05|"
+  }
+ ]
+}

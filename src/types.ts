@@ -33,6 +33,7 @@ export interface ContenderInfo {
 export interface Contender {
   info: ContenderInfo;
   listTools(): Promise<ToolSpec[]>;
+  systemPromptPatch?: (basePrompt: string) => string;
 }
 
 export interface ToolSpec {
@@ -77,6 +78,7 @@ export interface LlmRun {
   errorMessage?: string;
   actualContent?: string;
   tracePath?: string;
+  contenderVersion?: string;
 }
 
 export interface LlmTraceMessage {
@@ -90,6 +92,7 @@ export interface LlmTraceMessage {
 export interface LlmTrace {
   modelId: string;
   contenderId: string;
+  contenderVersion?: string;
   scenarioId: string;
   task: string;
   startedAt: string;

@@ -1,0 +1,96 @@
+{
+ "modelId": "deepseek-v4.1-flash",
+ "contenderId": "pi-hashline-edit",
+ "contenderVersion": "0.8.3",
+ "scenarioId": "b12-noop-with-drift",
+ "task": "Modify b12.ts in the current working directory. Replace the line containing 'bbb' with exactly the same line 'bbb' (the file should end up unchanged). Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-20T05:46:26.687Z",
+ "durationMs": 26852,
+ "tokensIn": 12046,
+ "tokensOut": 532,
+ "costUsd": 0.004252199999999999,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa-x\nbbb\nccc\n",
+ "actualContent": "aaa-x\nbbb\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents as LINE#HASH-anchored lines; edit requires these anchors\n- edit: Make precise file edits at LINE#HASH anchors (e.g. 5#MQ) copied from read, batching all edits to a file in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read before edit whenever you do not hold current LINE#HASH anchors for the file.\nIf read output is truncated, continue with the offset it names — never guess unseen lines.\nUse raw: true when reading for context only; anchors are required for edit.\nUse edit with LINE#HASH anchors from the latest read, grep, or edit result for all file changes; batch every change to one file into a single edit call.\nNever reuse anchors from an earlier read or edit response once a newer one exists for the same file; treat only the most recent response as carrying valid anchors.\nAfter a successful edit, the returned --- Anchors --- block replaces a re-read for nearby follow-up edits.\nOn [E_STALE_ANCHOR], the error lists the stale refs and any content-matched candidate anchors; re-read the file to get current anchors before retrying.\n\nCurrent working directory: /tmp/pi-llm-bench-8VJNtk/pi-hashline-edit-b12-noop-with-drift"
+  },
+  {
+   "role": "user",
+   "content": "Modify b12.ts in the current working directory. Replace the line containing 'bbb' with exactly the same line 'bbb' (the file should end up unchanged). Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_3lpk76fs",
+     "name": "read",
+     "arguments": "{\"path\":\"b12.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_3lpk76fs",
+   "content": "1#TS:aaa\n2#PJ:bbb\n3#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_9ep2c26r",
+     "name": "edit",
+     "arguments": "{\"path\":\"b12.ts\",\"edits\":[{\"lines\":[\"bbb\"],\"op\":\"replace\",\"pos\":\"2#PJ\"}]}"
+    }
+   ],
+   "reasoning": "The task: replace line containing 'bbb' with exactly same line. So no-op edit. Line 2#PJ:bbb."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_9ep2c26r",
+   "content": "Error: [E_STALE_ANCHOR] 1 stale anchor: 2#PJ. Re-read the file to get current anchors; keep both endpoints for range replaces."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_ngwoeqeh",
+     "name": "read",
+     "arguments": "{\"path\":\"b12.ts\"}"
+    }
+   ],
+   "reasoning": "The file drifted. Re-read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_ngwoeqeh",
+   "content": "1#PY:aaa-x\n2#ZT:bbb\n3#JX:ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_s4q2pflo",
+     "name": "edit",
+     "arguments": "{\"edits\":[{\"lines\":[\"bbb\"],\"op\":\"replace\",\"pos\":\"2#ZT\"}],\"path\":\"b12.ts\"}"
+    }
+   ],
+   "reasoning": "The file changed (drift) but line 2 is still 'bbb'. Replace with same content. Now anchors are fresh."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_s4q2pflo",
+   "content": "No changes made to b12.ts\nClassification: noop\nEdit 0: replacement for 2#ZT is identical to current content:\n  2#ZT: bbb"
+  }
+ ]
+}

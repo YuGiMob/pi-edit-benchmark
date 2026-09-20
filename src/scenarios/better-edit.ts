@@ -121,6 +121,7 @@ export const betterEditScenarios: Scenario[] = [
     expected: { outcome: "applied", content: "aaa\naaa\nBBB\nccc\n" },
     expectedByContender: {
       "pi-hashline-edit-pro": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
+      "pi-hashline-edit-pro-diff0": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
       "pi-hashline-readmap": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
     },
   },

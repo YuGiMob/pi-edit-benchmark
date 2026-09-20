@@ -1,5 +1,5 @@
 import type { Contender, ToolSpec } from "../types";
-import { makeRegistry } from "./shared";
+import { makeRegistry, pkgVersion } from "./shared";
 
 export function aftContender(): Contender {
   const registryRef: { registry?: ReturnType<typeof makeRegistry> } = {};
@@ -20,11 +20,18 @@ export function aftContender(): Contender {
     }
     throw new Error("aft-pi did not register read/edit tools within 15s");
   };
+  const systemPromptPatch = (basePrompt: string): string => {
+    let prompt = basePrompt;
+    for (const handler of registryRef.registry!.getHandlers("before_agent_start")) {
+      prompt = handler({ systemPrompt: prompt })?.systemPrompt ?? prompt;
+    }
+    return prompt;
+  };
   return {
     info: {
       id: "@cortexkit/aft-pi",
       name: "@cortexkit/aft-pi",
-      version: "0.54.0",
+      version: pkgVersion("@cortexkit/aft-pi", "0.54.0"),
       description:
         "Agent File Tools: Rust-backed read/edit with occurrence-targeted find/replace, symbol edits, and fuzzy matching. No anchors, no staleness check.",
       available: true,
@@ -33,5 +40,6 @@ export function aftContender(): Contender {
       const registry = await getRegistry();
       return registry.listTools();
     },
+    systemPromptPatch,
   };
 }

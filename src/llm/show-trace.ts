@@ -11,7 +11,7 @@ const trace = JSON.parse(readFileSync(path, "utf-8")) as LlmTrace;
 
 console.log("=".repeat(72));
 console.log(
-  `${trace.contenderId} / ${trace.scenarioId} / ${trace.modelId}`,
+  `${trace.contenderId}${trace.contenderVersion ? ` ${trace.contenderVersion}` : ""} / ${trace.scenarioId} / ${trace.modelId}`,
 );
 console.log(
   `${trace.pass ? "PASS" : "FAIL"} — ${trace.outcome}${trace.failureKind ? ` (${trace.failureKind})` : ""}`,

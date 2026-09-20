@@ -1,5 +1,5 @@
 import type { Contender, ToolSpec } from "../types";
-import { makeRegistry } from "./shared";
+import { makeRegistry, pkgVersion } from "./shared";
 
 export function readmapContender(): Contender {
   const registryRef: { registry?: ReturnType<typeof makeRegistry> } = {};
@@ -15,7 +15,7 @@ export function readmapContender(): Contender {
     info: {
       id: "pi-hashline-readmap",
       name: "pi-hashline-readmap",
-      version: "0.14.0",
+      version: pkgVersion("pi-hashline-readmap", "0.14.0"),
       description:
         "Unified extension: hash-anchored read/edit (LINE:HASH| rows), code maps, AST-grep, and more.",
       available: true,

@@ -1,24 +1,24 @@
 {
  "modelId": "qwen3.8-flash",
  "contenderId": "pi-hashline-edit-pro",
+ "contenderVersion": "4.3.5",
  "scenarioId": "b18-boundary-dup",
  "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing.",
- "startedAt": "2026-09-04T09:03:46.464Z",
- "durationMs": 15107,
- "tokensIn": 10882,
- "tokensOut": 737,
- "costUsd": 0.00197869,
- "pass": false,
+ "startedAt": "2026-09-20T05:40:49.286Z",
+ "durationMs": 52779,
+ "tokensIn": 8429,
+ "tokensOut": 1668,
+ "costUsd": 0.0020483100000000002,
+ "pass": true,
  "outcome": "applied",
- "failureKind": "applied-wrong",
  "readFirst": true,
  "editedBlind": false,
  "expectedContent": "aaa\naaa\nBBB\nccc\n",
- "actualContent": "aaa\naaa\nBBB\nccc\n",
+ "actualContent": "aaa\nBBB\nccc\n",
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines via bare 4-char anchor `Hasu` from `Hasu│content`: `remove_from`/`remove_to` are `Hasu` only, `replacement_lines` is bare lines without `│`; one edit per call\n- insert: Insert `lines` after/before bare anchor `Hasu` from `Hasu│content`: anchor stays, lines are bare without `│`, one per element\n- undo_last_change: Undo last `replace`/`insert` on a file; restores deleted file, keeps record on `[E_UNDO_STALE]`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call before `replace` when you need fresh anchors.\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: use the same anchor for `remove_from` and `remove_to` to change one line.\n`replace`: `replacement_lines` takes bare lines without `│`; `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically.\n`replace`: keep the range tight — only lines that actually change — and copy leading spaces exactly.\n`replace`: post-edit diff `+anchor│`/` anchor│` rows are fresh anchors for the next edit — no new `read` needed. One edit per turn; check the diff before the next edit on that file.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically.\n`insert`: the anchor must have been shown by `read`, a post-edit diff (`+anchor│`/` anchor│`), or any served `anchor│content` row. Empty file: `read` shows one `anchor│` row — insert `after` it.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff (check the `-anchor│` lines you wanted to keep).\n\nCurrent working directory: /tmp/pi-llm-bench-y1jmAh/pi-hashline-edit-pro-b18-boundary-dup"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-4F5H9G/pi-hashline-edit-pro-b18-boundary-dup"
   },
   {
    "role": "user",
@@ -29,7 +29,7 @@
    "content": "",
    "toolCalls": [
     {
-     "id": "call_9dff932b08a94249abbd8fa7",
+     "id": "call_a9f9ca156ac54549b1322195",
      "name": "read",
      "arguments": "{\"path\": \"b18.ts\"}"
     }
@@ -37,47 +37,31 @@
   },
   {
    "role": "tool",
-   "toolCallId": "call_9dff932b08a94249abbd8fa7",
-   "content": "HyNA│aaa\nChaz│bbb\nLPkw│ccc"
+   "toolCallId": "call_a9f9ca156ac54549b1322195",
+   "content": "ENqr│aaa\nlaEW│bbb\nPNga│ccc"
   },
   {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "call_f0536c91aab74f9e9308bdbb",
+     "id": "call_e886e36aceea46d9aad76aa9",
      "name": "replace",
-     "arguments": "{\"path\": \"b18.ts\", \"remove_from\": \"Chaz\", \"remove_to\": \"Chaz\", \"replacement_lines\": \n[\"aaa\", \"BBB\"]\n\n}"
+     "arguments": "{\"remove_from\": \"laEW\", \"remove_to\": \"laEW\", \"replacement_lines\": \n[\"aaa\", \"BBB\"]\n\n}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_f0536c91aab74f9e9308bdbb",
-   "content": "Successfully replaced in b18.ts. Added 1 line(s), removed 1 line(s).\n\nWarnings:\nBoundary dedup: \"aaa\" already exists next to the edited range, so it was not added again.\n HyNA│aaa\n-Chaz│bbb\n+ReFR│BBB\n LPkw│ccc"
+   "toolCallId": "call_e886e36aceea46d9aad76aa9",
+   "content": "Successfully replaced in b18.ts. Added 1 line(s), removed 1 line(s).\n\nWarnings:\nBoundary dedup: 1 line not added again (see dedup│ row).\n ENqr│aaa\ndedup│aaa\n-laEW│bbb\n+dsPo│BBB\n PNga│ccc"
   },
   {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "call_f7c3c0d53193422ca63e2d5d",
-     "name": "insert",
-     "arguments": "{\"path\": \"b18.ts\", \"anchor\": \"ReFR\", \"direction\": \"before\", \"lines\": \n[\"aaa\"]\n\n}"
-    }
-   ]
-  },
-  {
-   "role": "tool",
-   "toolCallId": "call_f7c3c0d53193422ca63e2d5d",
-   "content": "Successfully inserted in b18.ts. Added 1 line(s), removed 1 line(s).\n HyNA│aaa\n+Latd│aaa\n ReFR│BBB\n ..."
-  },
-  {
-   "role": "assistant",
-   "content": "",
-   "toolCalls": [
-    {
-     "id": "call_823b92a81db444a3a5a1ba22",
+     "id": "call_cbd5f3ffc46c40169952e664",
      "name": "read",
      "arguments": "{\"path\": \"b18.ts\"}"
     }
@@ -85,8 +69,8 @@
   },
   {
    "role": "tool",
-   "toolCallId": "call_823b92a81db444a3a5a1ba22",
-   "content": "HyNA│aaa\nLatd│aaa\nReFR│BBB\nLPkw│ccc"
+   "toolCallId": "call_cbd5f3ffc46c40169952e664",
+   "content": "ENqr│aaa\ndsPo│BBB\nPNga│ccc"
   }
  ]
 }

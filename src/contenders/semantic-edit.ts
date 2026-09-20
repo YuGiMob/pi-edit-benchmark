@@ -1,6 +1,6 @@
 import { createReadTool, createReadToolDefinition } from "@earendil-works/pi-coding-agent";
 import type { Contender, ToolSpec } from "../types";
-import { extractResultText, isErrorResult, makeRegistry } from "./shared";
+import { extractResultText, isErrorResult, makeRegistry, pkgVersion } from "./shared";
 
 export function semanticEditContender(): Contender {
   const registryRef: { registry?: ReturnType<typeof makeRegistry> } = {};
@@ -16,7 +16,7 @@ export function semanticEditContender(): Contender {
     info: {
       id: "pi-semantic-edit",
       name: "pi-semantic-edit",
-      version: "0.4.0",
+      version: pkgVersion("pi-semantic-edit", "0.4.0"),
       description:
         "Tolerant-matching edit: { path, edits: [{ oldText, newText, replaceAll? }] } with a 10-pass fuzzy chain (whitespace/indent/escape/Unicode drift) and a uniqueness guard that refuses ambiguous matches with line positions. No anchors, no staleness check. Replaces the built-in edit.",
       available: true,

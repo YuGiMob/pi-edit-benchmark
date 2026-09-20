@@ -1,12 +1,54 @@
 import { EventEmitter } from "events";
+
+function makeEvents() {
+  const emitter = new EventEmitter();
+  return {
+    on: (event: string, handler: (...args: any[]) => void) => {
+      emitter.on(event, handler);
+      return () => emitter.off(event, handler);
+    },
+    once: (event: string, handler: (...args: any[]) => void) => {
+      emitter.once(event, handler);
+      return () => emitter.off(event, handler);
+    },
+    off: (event: string, handler: (...args: any[]) => void) => emitter.off(event, handler),
+    emit: (event: string, ...args: unknown[]) => emitter.emit(event, ...args),
+  };
+}
 import { Compile } from "typebox/compile";
 import type { ToolSpec } from "../types";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+export function pkgVersion(name: string, fallback: string): string {
+  try {
+    const resolved = import.meta.resolve(name);
+    let dir = dirname(resolved.startsWith("file:") ? fileURLToPath(resolved) : resolved);
+    for (let i = 0; i < 6; i++) {
+      try {
+        const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf-8")) as { name?: string; version?: string };
+        if (pkg.name === name && pkg.version) return pkg.version;
+      } catch {
+      }
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  } catch {
+  }
+  return fallback;
+}
 
 export function makeRegistry() {
   const tools = new Map<string, any>();
+  const eventHandlers = new Map<string, ((...args: any[]) => any)[]>();
   return {
     pi: {
-      events: new EventEmitter(),
+      events: makeEvents(),
+      registerFlag() {},
+      getFlag() {},
+      registerEntryRenderer() {},
       registerTool(tool: any) {
         const originalExecute = tool.execute;
         let validator: ReturnType<typeof Compile> | undefined;
@@ -45,12 +87,24 @@ export function makeRegistry() {
         tools.set(tool.name, tool);
       },
       registerCommand() {},
-      on() {},
+      on(event: string, handler: (...args: any[]) => any) {
+        const list = eventHandlers.get(event) ?? [];
+        list.push(handler);
+        eventHandlers.set(event, list);
+        return () => {
+          const l = eventHandlers.get(event) ?? [];
+          const idx = l.indexOf(handler);
+          if (idx >= 0) l.splice(idx, 1);
+        };
+      },
       getActiveTools() {
         return [];
       },
       setActiveTools() {},
     } as any,
+    getHandlers(event: string) {
+      return eventHandlers.get(event) ?? [];
+    },
     getTool(name: string) {
       const tool = tools.get(name);
       if (!tool) throw new Error(`Tool not registered: ${name}`);
