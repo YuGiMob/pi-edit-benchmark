@@ -28,6 +28,15 @@ export const LLM_MODELS: LlmModelSpec[] = [
     reasoningEffort: "max",
   },
   {
+    id: "mimo-v2.6-flash",
+    name: "MiMo 2.6 Flash",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "opencode-go",
+    baseUrl: "https://opencode.ai/zen/go/v1",
+    reasoningEffort: "max",
+  },
+  {
     id: "muse-spark-1.3-contributor",
     name: "Muse Spark 1.3 Contributor",
     reasoning: true,

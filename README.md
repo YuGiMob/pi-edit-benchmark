@@ -31,7 +31,7 @@ The model must read the file and issue edits through the tools; the file state a
 
 ```
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
-bun run src/main-llm.ts                        # 9 models × 10 contenders × 39 scenarios (3,510 runs)
+bun run src/main-llm.ts                        # 10 models × 10 contenders × 39 scenarios (3,900 runs)
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
@@ -60,6 +60,7 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 | Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
+| MiMo 2.6 Flash | `mimo-v2.6-flash` | opencode-go | chat completions | `max` | $0.14 / $0.28 |
 | Gemma 4 (31B) | `gemma4:31b` | ollama-cloud | chat completions | provider default | $0.14 / $0.40 |
 | Nemotron 3 Nano (30B) | `nemotron-3-nano:30b` | ollama-cloud | chat completions | provider default | $0.06 / $0.24 |
 | Qwen3.5 9B (Q4_K_M, llama.cpp) | `qwen3.5-9b-q4km` | llamacpp | chat completions | provider default | local, $0.00 |
