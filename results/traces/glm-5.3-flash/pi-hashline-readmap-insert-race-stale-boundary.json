@@ -1,0 +1,125 @@
+{
+ "modelId": "glm-5.3-flash",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "insert-race-stale-boundary",
+ "task": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:45:52.777Z",
+ "durationMs": 23110,
+ "tokensIn": 10441,
+ "tokensOut": 624,
+ "costUsd": 0.00187815,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nbbb-x\nBB1\nBB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-mEchGh/pi-hashline-readmap-insert-race-stale-boundary"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "toolu_6ff1872fc32b4e598566d9fda3548280",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "toolu_6ff1872fc32b4e598566d9fda3548280",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "toolu_394e0d98ae6e49b5b430c66f9d4ae0ef",
+     "name": "edit",
+     "arguments": "{\"edits\": [{\"insert_after\": {\"anchor\": \"2:467\", \"new_text\": \"BB1\"}}], \"path\": \"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "toolu_394e0d98ae6e49b5b430c66f9d4ae0ef",
+   "content": "Error: Edit rejected — nothing was written. The anchor hash did not match the current file content.\n1 line has changed since last read. Auto-relocation checks only within ±20 lines of each anchor. Use the updated LINE:HASH references shown below (>>> marks changed lines).\n\n    1:55f|aaa\n>>> 2:205|bbb-x\n    3:c00|ccc\n    4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "toolu_d17be6d1dd0244b9a9f06b968da2f186",
+     "name": "edit",
+     "arguments": "{\"edits\": [{\"insert_after\": {\"anchor\": \"2:205\", \"new_text\": \"BB1\"}}], \"path\": \"insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "The file changed: line 2 is now 'bbb-x'. The task says insert after line containing 'bbb'. 'bbb-x' contains 'bbb'. Insert after line 2 with new anchor."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "toolu_d17be6d1dd0244b9a9f06b968da2f186",
+   "content": "Edited insert-race.ts (1 change, +1 -0 line)\n 1 aaa\n 2 bbb-x\n+3 BB1\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "toolu_971054ea61e04a6f90a4c3c4a2c67647",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "toolu_971054ea61e04a6f90a4c3c4a2c67647",
+   "content": "1:55f|aaa\n2:205|bbb-x\n3:d35|BB1\n4:c00|ccc\n5:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "toolu_df0e0f5d4d794b7981ea0b37ebc94c96",
+     "name": "edit",
+     "arguments": "{\"edits\": [{\"insert_after\": {\"anchor\": \"3:d35\", \"new_text\": \"BB2\"}}], \"path\": \"insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "The line containing 'bbb' is 'bbb-x', which stays. Insert BB2 immediately after that line — \"immediately after the line containing 'bbb'\". So BB2 should go right after line 2, i.e., before BB1? The instruction: insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'. So order: bbb-x, BB1, BB2. Currently BB1 is at line 3. Insert BB2 after line 2 (before BB1)? That would put BB2 before BB1. Better: insert BB2 after BB1 line 3? But then BB1 is between bbb and BB2... Order bbb, BB1, BB2 satisfies \"BB1 and BB2 immediately after the line containing bbb\" loosely. The safest interpretation: BB1 directly after bbb, then BB2. So insert after line 3 (BB1). But actually \"immediately after the line containing 'bbb'\" — inserting BB2 after line 2 gives bbb, BB2, BB1, which breaks the pair order. I'll insert BB2 after line 3."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "toolu_df0e0f5d4d794b7981ea0b37ebc94c96",
+   "content": "Edited insert-race.ts (1 change, +1 -0 line)\n 1 aaa\n 2 bbb-x\n 3 BB1\n+4 BB2\n 4 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "toolu_5c3de535e25a4dd0b9e187527834a14c",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "toolu_5c3de535e25a4dd0b9e187527834a14c",
+   "content": "1:55f|aaa\n2:205|bbb-x\n3:d35|BB1\n4:db0|BB2\n5:c00|ccc\n6:d05|"
+  }
+ ]
+}

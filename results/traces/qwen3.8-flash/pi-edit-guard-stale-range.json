@@ -1,0 +1,78 @@
+{
+ "modelId": "qwen3.8-flash",
+ "contenderId": "pi-edit-guard",
+ "contenderVersion": "0.1.4",
+ "scenarioId": "stale-range",
+ "task": "Modify stale-range.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:58:37.086Z",
+ "durationMs": 18816,
+ "tokensIn": 6332,
+ "tokensOut": 1049,
+ "costUsd": 0.00144283,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nB\nD\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n- undo: Revert the most recent edit-tool change on a file\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\nIf edits[].oldText appears in more than one place, add an anchor: text copied verbatim from the file immediately above or below the lines being replaced — a heading, comment, or distinctive line. The anchor identifies which copy to change, so oldText can stay short and exact.\nFor renames where the same text appears in multiple places, set replaceAll: true to replace every occurrence in the file.\nWhen your last edit to a file turns out wrong, use undo to take it back instead of hand-reverting or rewriting the file.\n\nCurrent working directory: /tmp/pi-llm-bench-CWkHXJ/pi-edit-guard-stale-range"
+  },
+  {
+   "role": "user",
+   "content": "Modify stale-range.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_45a6b39173354513a1dd19e5",
+     "name": "read",
+     "arguments": "{\"path\": \"/tmp/pi-llm-bench-CWkHXJ/pi-edit-guard-stale-range/stale-range.ts\"}"
+    }
+   ],
+   "reasoning": "I'll read through the file to get a sense of what we're working with."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_45a6b39173354513a1dd19e5",
+   "content": "aaa\nbbb\nccc\nddd\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_f9b86a7db1614b888e7e0456",
+     "name": "edit",
+     "arguments": "{\"path\": \"/tmp/pi-llm-bench-CWkHXJ/pi-edit-guard-stale-range/stale-range.ts\", \"edits\": \n[{\"oldText\": \"bbb\\nccc\\nddd\", \"newText\": \"B\\nD\", \"anchor\": \"aaa\"}]\n\n}"
+    }
+   ],
+   "reasoning": "The file has 4 lines: aaa, bbb, ccc, ddd. Replace lines 2-4 with two lines: B, D.\n\nWait — \"from the line containing 'bbb' through the line containing 'ddd'\" is lines 2-4, replace with exactly two lines B and D. Result: aaa, B, D.\n\nHmm, but that seems odd — B, D suggests keeping bbb→B and ddd→D, dropping ccc. Anyway, do the edit.\n\nLet me use edit with oldText being \"bbb\\nccc\\nddd\" and newText \"B\\nD\". That should work. But careful about the trailing newline — file may end with newline after ddd."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_f9b86a7db1614b888e7e0456",
+   "content": "Successfully replaced 1 block(s) in /tmp/pi-llm-bench-CWkHXJ/pi-edit-guard-stale-range/stale-range.ts.\nApplied: 1 | Failed: 0 | Skipped: 0\n 1 aaa\n-2 bbb\n-3 ccc-external\n-4 ddd\n+2 B\n+3 D"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_65eddb9818d54156bb5bc007",
+     "name": "read",
+     "arguments": "{\"path\": \"/tmp/pi-llm-bench-CWkHXJ/pi-edit-guard-stale-range/stale-range.ts\"}"
+    }
+   ],
+   "reasoning": "Interesting — the diff shows \"ccc-external\" meaning the file changed externally between my read and edit (line 3 was \"ccc-external\", not \"ccc\"). But the edit succeeded? It says successfully replaced 1 block. Hmm, but oldText was \"bbb\\nccc\\nddd\" which wouldn't match \"ccc-external\"... yet the diff shows lines removed: bbb, ccc-external, ddd and added B, D. So it apparently did a fuzzy/line-range match and clobbered the external change? Let me read the file to verify current state.\n\nActually the task name is \"pi-edit-guard-stale-range\" — testing whether the guard catches stale ranges. Let me read the file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_65eddb9818d54156bb5bc007",
+   "content": "aaa\nB\nD\n"
+  }
+ ]
+}

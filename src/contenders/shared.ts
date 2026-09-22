@@ -76,6 +76,9 @@ export function makeRegistry() {
               `[E_BAD_SHAPE] Schema validation failed for tool "${tool.name}" after prepareArguments.\n${errors}`,
             );
           }
+          if (typeof tool.beforeExecute === "function") {
+            await tool.beforeExecute(prepared, ctx);
+          }
           return originalExecute.call(
             this,
             toolCallId,

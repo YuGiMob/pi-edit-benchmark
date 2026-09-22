@@ -1,0 +1,79 @@
+{
+ "modelId": "mimo-v2.6-pro",
+ "contenderId": "@agimon-ai/doompi-edit",
+ "contenderVersion": "0.0.1-alpha.52",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T18:01:34.632Z",
+ "durationMs": 21226,
+ "tokensIn": 5212,
+ "tokensOut": 565,
+ "costUsd": 0.00275877,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents with snapshot-bound line anchors\n- grep: Search file contents and return editable hashline anchors\n- edit: Edit files with snapshot-bound hashline ranges\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read before edit. When hashline metadata is present, preserve the @file hash and anchors such as 5#abc exactly.\nContinue large reads with offset until the required anchored lines are visible.\nCopy path, hash, and anchors from the latest compatible read or grep result. Re-read after every successful edit.\nPass one anchor such as 5#abc in each from and to value. Do not paste tagged lines or multiline blocks.\nPut multiple disjoint changes to one file in one edit call. All anchors must describe the original snapshot.\nOmit content or pass an empty string to delete an inclusive range. Merge overlapping ranges before calling edit.\n\nCurrent working directory: /tmp/pi-llm-bench-U2G6cc/@agimon-ai/doompi-edit-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_7d008391dae44a6c9e518424",
+     "name": "read",
+     "arguments": "{\"path\": \"insert.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_7d008391dae44a6c9e518424",
+   "content": "@file insert.ts#53Ip_dzU\n1#nqg|aaa\n2#wyn|bbb\n3#aro|ccc\n4#zyb|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_14b7b554446f48a2a34a4a44",
+     "name": "edit",
+     "arguments": "{\"path\": \"insert.ts\", \"hash\": \"53Ip_dzU\", \"edits\": [{\"from\": \"2#wyn\", \"to\": \"3#aro\", \"content\": \"bbb\\nB1\\nB2\\nccc\"}]}"
+    }
+   ],
+   "reasoning": "Insert after line 2. Use edit with from and to both 2#wyn, content replaces... wait, inserting after a line: use from=3#aro to=2#wyn? No — ranges are inclusive and non-overlapping. To insert after line 2, I could use from=2#wyn to=2#wyn with content \"bbb\\nB1\\nB2\" — but the instruction says \"the line 'bbb' itself must stay\" — replacing line 2 with bbb + B1 + B2 keeps it. Alternatively use empty range? Anchors must be present. Actually a trick: from=3#aro to=2#wyn is invalid ordering. Better: edit range 3#aro-3#aro replaced with \"B1\\nB2\\nccc\"? That inserts before ccc which is same as after bbb. But ccc must stay presumably. Content \"B1\\nB2\\nccc\" keeps it.\n\nHmm, but maybe cleanest: from 2#wyn to 3#aro with content \"bbb\\nB1\\nB2\\nccc\". Let's do that."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_14b7b554446f48a2a34a4a44",
+   "content": "Edited insert.ts (1 range). Re-read before editing it again.\n 1 aaa\n 2 bbb\n+3 B1\n+4 B2\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_6d81a3ea811942c78bd2bbb3",
+     "name": "read",
+     "arguments": "{\"path\": \"insert.ts\"}"
+    }
+   ],
+   "reasoning": "Re-read to verify."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_6d81a3ea811942c78bd2bbb3",
+   "content": "@file insert.ts#U2UJ3qGU\n1#nqg|aaa\n2#wyn|bbb\n3#xiy|B1\n4#zqz|B2\n5#aro|ccc\n6#zyb|"
+  }
+ ]
+}

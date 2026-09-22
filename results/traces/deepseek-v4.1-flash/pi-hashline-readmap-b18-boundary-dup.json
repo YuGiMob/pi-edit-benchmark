@@ -1,0 +1,114 @@
+{
+ "modelId": "deepseek-v4.1-flash",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "b18-boundary-dup",
+ "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:27:51.875Z",
+ "durationMs": 13004,
+ "tokensIn": 11897,
+ "tokensOut": 1369,
+ "costUsd": 0.0026059499999999997,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "applied-wrong",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\naaa\nBBB\nccc\n",
+ "actualContent": "aaa\naaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-tRf1tP/pi-hashline-readmap-b18-boundary-dup"
+  },
+  {
+   "role": "user",
+   "content": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_g62pdR60nf6lvLXhfQAa8985",
+     "name": "read",
+     "arguments": "{\"path\": \"b18.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_g62pdR60nf6lvLXhfQAa8985",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_1Akzs98uz3VIgaNrftn35536",
+     "name": "edit",
+     "arguments": "{\"path\": \"b18.ts\", \"edits\": [{\"replace_lines\": {\"start_anchor\": \"2:467\", \"end_anchor\": \"2:467\", \"new_text\": \"aaa\\nBBB\"}}]}"
+    }
+   ],
+   "reasoning": "I need to replace line 2 (bbb) with two lines: aaa and BBB. Use edit with replace_lines or set_line. I'll use replace_lines from anchor 2:467 to 2:467."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_1Akzs98uz3VIgaNrftn35536",
+   "content": "Edited b18.ts (1 change, +1 -1 line)\n2:467|bbb → 2:4c5|BBB"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_T4V5gERGEqLSIcdOFZt47309",
+     "name": "read",
+     "arguments": "{\"path\": \"b18.ts\"}"
+    }
+   ],
+   "reasoning": "Let me verify the file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_T4V5gERGEqLSIcdOFZt47309",
+   "content": "1:55f|aaa\n2:4c5|BBB\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_38BwSnqNciHJ8AN1rhS53340",
+     "name": "edit",
+     "arguments": "{\"edits\": [{\"insert_after\": {\"anchor\": \"1:55f\", \"new_text\": \"aaa\"}}], \"path\": \"b18.ts\"}"
+    }
+   ],
+   "reasoning": "Wait, the result shows only \"BBB\" on line 2, but I expected \"aaa\" then \"BBB\". The new_text was \"aaa\\nBBB\" but it seems the \"aaa\" got... hmm. The read shows:\n1: aaa\n2: BBB\n3: ccc\n4: (empty)\n\nBut before edit, line 1 was aaa, line 2 bbb, line 3 ccc, line 4 empty. Now line 1 aaa, line 2 BBB, line 3 ccc, line 4 empty. So it replaced bbb with just BBB, not aaa\\nBBB. Wait but there's already aaa on line 1. Hmm.\n\nThe desired result: replace the line containing 'bbb' with exactly two lines: aaa and BBB. So the file should be:\naaa\naaa\nBBB\nccc\n\nBut we got:\naaa\nBBB\nccc\n\nSo the \"aaa\\n\" part didn't get inserted? Or maybe the read is misreporting? Let me re-read. It shows line 1 aaa (55f hash, unchanged from original), line 2 BBB, line 3 ccc, line 4 empty. So only one line replaced.\n\nHmm, the edit reported \"+1 -1 line\" which suggests only replacing one line with one line. That's odd. Maybe the new_text \"\\n\" wasn't interpreted. Actually maybe there's an issue with the tool: set_line/replace_lines new_text with newline... Let me think.\n\nActually wait, maybe the hashes: original line 1 was 55f|aaa. Now still 55f|aaa. So line 1 unchanged. Line 2 now BBB. So the inserted \"aaa\" is missing.\n\nPerhaps the tool expects me to use two separate operations, or the newline handling failed. Let me try again to insert \"aaa\" before BBB, or use replace to put the whole thing.\n\nActually the task: \"Replace the line containing 'bbb' with exactly two lines: aaa and BBB.\" So result should be aaa, aaa, BBB, ccc. Let me fix.\n\nI'll add a line \"aaa\" before BBB. Use insert_after? No, I need to insert before line 2. Or replace line 2 (BBB) with \"aaa\\nBBB\" again. Let me try set_line with anchor.\n\nHmm but if newline didn't work the first time, it won't work again. Maybe the issue is the tool interpreted \"\\n\" literally? Let me check the raw bytes. Read shows no literal backslash-n. Let me try a different approach: use replace_lines with actual newline embedded. Actually in JSON I passed \"aaa\\nBBB\" which becomes aaaa newline BBB as a string. But the tool apparently only took the last line? Odd.\n\nLet me try using replace with old_text \"BBB\" new_text \"aaa\\nBBB\". Or maybe use multiple edits: replace_lines line2 with \"aaa\" then insert_after to add BBB.\n\nLet me do it sequentially. First change line 2 BBB -> aaa, then insert BBB after.\n\nActually simpler: use two edits in one call but overlapping might reject. Let me just do replace_lines to set line 2 to \"aaa\\nBBB\" again but verify. Maybe it works this time? Unlikely.\n\nLet me investigate by trying insert_after on line 1 with new_text \"aaa\". That inserts a line aaa after line 1, giving aaa, aaa, BBB. Let me try.\n\nActually let me reconsider: maybe the tool's replace_lines new_text only supports single-line and the newline causes it to take... hmm it took \"BBB\" (the second part). Perhaps it split and used last line. Let's just do insert_after.\n\nCurrent:\n1:55f|aaa\n2:4c5|BBB\n3:c00|ccc\n4:d05|\n\nI need to insert \"aaa\" after line 1 anchor 1:55f. Then file: aaa, aaa, BBB, ccc.\n\nBut wait, do we want two aaa lines? Yes \"replace bbb with exactly two lines: aaa and BBB\", and original line 1 already aaa. So yes two aaa.\n\nLet me use insert_after."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_38BwSnqNciHJ8AN1rhS53340",
+   "content": "Edited b18.ts (1 change, +1 -0 line)\n 1 aaa\n+2 aaa\n 2 BBB\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_kATC2snbQy2qr3rdiGKk9592",
+     "name": "read",
+     "arguments": "{\"path\": \"b18.ts\"}"
+    }
+   ],
+   "reasoning": "Now verify."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_kATC2snbQy2qr3rdiGKk9592",
+   "content": "1:55f|aaa\n2:55f|aaa\n3:4c5|BBB\n4:c00|ccc\n5:d05|"
+  }
+ ]
+}

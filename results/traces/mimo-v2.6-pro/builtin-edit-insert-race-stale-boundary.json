@@ -1,0 +1,113 @@
+{
+ "modelId": "mimo-v2.6-pro",
+ "contenderId": "builtin-edit",
+ "contenderVersion": "0.87.0",
+ "scenarioId": "insert-race-stale-boundary",
+ "task": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:27:41.059Z",
+ "durationMs": 23820,
+ "tokensIn": 6023,
+ "tokensOut": 635,
+ "costUsd": 0.003172455,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "silent-wrong-line",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nbbb\nBB1\nBB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-eWa24k/builtin-edit-insert-race-stale-boundary"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_7e7cb6fed8bb4f8096454660",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_7e7cb6fed8bb4f8096454660",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_ee78c02d81714ade95a55f68",
+     "name": "edit",
+     "arguments": "{\"path\": \"insert-race.ts\", \"edits\": [{\"oldText\": \"bbb\", \"newText\": \"bbb\\nBB1\\nBB2\"}]}"
+    }
+   ],
+   "reasoning": "Insert BB1 and BB2 after the line containing 'bbb'. Use edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_ee78c02d81714ade95a55f68",
+   "content": "Successfully replaced 1 block(s) in insert-race.ts."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_495d6a773d2b4a408746f7eb",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "Let me verify the result by reading the file."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_495d6a773d2b4a408746f7eb",
+   "content": "aaa\nbbb\nBB1\nBB2-x\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_6c6c931d502340378d4fe13a",
+     "name": "edit",
+     "arguments": "{\"edits\": [{\"oldText\": \"BB2-x\", \"newText\": \"BB2\"}], \"path\": \"insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "Interesting — the result shows \"BB2-x\" instead of \"BB2\". Wait, my edit said \"bbb\\nBB1\\nBB2\" but the file shows \"BB2-x\". Hmm, maybe the file was modified concurrently (this is a \"race\" test — insert-race, stale boundary). Let me re-read... The output shows \"BB2-x\". That's odd. Perhaps another process modified the file concurrently, appending \"-x\" to BB2? Or the tool applied something strange.\n\nRegardless, the task requires the lines to be exactly 'BB1' and 'BB2'. Currently it's \"BB1\" and \"BB2-x\". I need to fix \"BB2-x\" to \"BB2\". Let me edit.\n\nBut careful with the edit tool: oldText \"BB2-x\" → \"BB2\". But there's also \"BB2\" as substring... \"BB2-x\" is unique. Edit it.\n\nAlso check the line \"bbb\" stays — yes.\n\nLet me do the edit and re-verify. Also note the race may happen again; I should verify after editing."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_6c6c931d502340378d4fe13a",
+   "content": "Successfully replaced 1 block(s) in insert-race.ts."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_9ae61c44ebc94e599ff19821",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ],
+   "reasoning": "Verify again."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_9ae61c44ebc94e599ff19821",
+   "content": "aaa\nbbb\nBB1\nBB2\nccc\n"
+  }
+ ]
+}

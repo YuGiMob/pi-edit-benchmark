@@ -1,0 +1,112 @@
+{
+ "modelId": "mimo-v2.6-flash",
+ "contenderId": "pi-hashline-edit-pro-nodedup",
+ "contenderVersion": "4.3.8",
+ "scenarioId": "stale-line",
+ "task": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:44:52.192Z",
+ "durationMs": 23074,
+ "tokensIn": 11759,
+ "tokensOut": 325,
+ "costUsd": 0.0017372600000000002,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-s20OcS/pi-hashline-edit-pro-nodedup-stale-line"
+  },
+  {
+   "role": "user",
+   "content": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_c1fe85298c45498c8fa96956",
+     "name": "read",
+     "arguments": "{\"path\": \"stale-line.ts\"}"
+    }
+   ],
+   "reasoning": "Simple: read file, then replace line containing bbb."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_c1fe85298c45498c8fa96956",
+   "content": "zfpm│aaa\ndxYA│bbb\nItFC│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_67b0046e9fe940ffae53a51b",
+     "name": "replace",
+     "arguments": "{\"path\": \"stale-line.ts\", \"remove_from\": \"dxYA\", \"remove_to\": \"dxYA\", \"replacement_lines\": [\"BBB\"]}"
+    }
+   ],
+   "reasoning": "Replace line dxYA with BBB."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_67b0046e9fe940ffae53a51b",
+   "content": "Error: [E_BAD_SHAPE] Edit request contains unknown or unsupported fields: path. Path resolution is anchor-only; retry without `path`."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_7be89714e9504cd29af3fbcb",
+     "name": "replace",
+     "arguments": "{\"remove_from\": \"dxYA\", \"remove_to\": \"dxYA\", \"replacement_lines\": [\"BBB\"]}"
+    }
+   ],
+   "reasoning": "Just drop path — but replace needs path resolution? It says path resolution is anchor-only; don't pass path. So omit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_7be89714e9504cd29af3fbcb",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in stale-line.ts: \"dxYA\", \"dxYA\". The file changed since read. Call read() on stale-line.ts for fresh anchors."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_e946113d58784150a839594b",
+     "name": "read",
+     "arguments": "{\"path\": \"stale-line.ts\"}"
+    }
+   ],
+   "reasoning": "The file changed since read — re-read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_e946113d58784150a839594b",
+   "content": "zfpm│aaa\nllhy│bbb-external\nItFC│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_5e01136e438042eba2a2f7ed",
+     "name": "replace",
+     "arguments": "{\"remove_from\": \"llhy\", \"remove_to\": \"llhy\", \"replacement_lines\": [\"BBB\"]}"
+    }
+   ],
+   "reasoning": "The file changed — now the line is \"bbb-external\". Replace it with BBB."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_5e01136e438042eba2a2f7ed",
+   "content": "Successfully replaced in stale-line.ts. Added 1 line(s), removed 1 line(s).\n zfpm│aaa\n-llhy│bbb-external\n+osSE│BBB\n ItFC│ccc"
+  }
+ ]
+}

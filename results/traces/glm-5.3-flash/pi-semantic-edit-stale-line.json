@@ -1,0 +1,110 @@
+{
+ "modelId": "glm-5.3-flash",
+ "contenderId": "pi-semantic-edit",
+ "contenderVersion": "0.4.0",
+ "scenarioId": "stale-line",
+ "task": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:49:58.402Z",
+ "durationMs": 19947,
+ "tokensIn": 6868,
+ "tokensOut": 594,
+ "costUsd": 0.0013272,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call — set replaceAll: true to replace every occurrence (e.g. renames)\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match the current file content, modulo tolerated drift).\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls.\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\nThe matcher tolerates minor whitespace, indentation, line-ending, escape, and Unicode drift — but copy the code as accurately as you can.\nIf the text matches multiple locations, the edit fails with the line positions — include more surrounding context, or set replaceAll: true to replace every occurrence. If nothing matches, the error shows the closest text actually in the file; correct against that and retry.\n\nCurrent working directory: /tmp/pi-llm-bench-tUOACX/pi-semantic-edit-stale-line"
+  },
+  {
+   "role": "user",
+   "content": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "chatcmpl-tool-98c11fc3c34ba38d",
+     "name": "read",
+     "arguments": "{\"path\": \"stale-line.ts\"}"
+    }
+   ],
+   "reasoning": "Let me read the file first."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "chatcmpl-tool-98c11fc3c34ba38d",
+   "content": "aaa\nbbb\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "chatcmpl-tool-96a93140b9351a7b",
+     "name": "edit",
+     "arguments": "{\"path\": \"stale-line.ts\", \"edits\": [{\"oldText\": \"bbb\", \"newText\": \"BBB\"}]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "chatcmpl-tool-96a93140b9351a7b",
+   "content": "Successfully replaced 1 replacement across 1 edit(s) in stale-line.ts.\n 1 aaa\n-2 bbb-external\n+2 BBB-external\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "chatcmpl-tool-99d9ba2bb672d599",
+     "name": "read",
+     "arguments": "{\"path\": \"stale-line.ts\"}"
+    }
+   ],
+   "reasoning": "Interesting - the output says \"bbb-external\" — there seems to be some odd suffix. Wait, the read showed \"bbb\" but the edit output shows \"-2 bbb-external\" → \"+2 BBB-external\". That's strange — perhaps the tool output is decorated with some suffix in the display. Let me re-read the file to verify."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "chatcmpl-tool-99d9ba2bb672d599",
+   "content": "aaa\nBBB-external\nccc\n"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "chatcmpl-tool-bfc6fdbe69b274ab",
+     "name": "edit",
+     "arguments": "{\"edits\": [{\"newText\": \"BBB\", \"oldText\": \"BBB-external\"}], \"path\": \"stale-line.ts\"}"
+    }
+   ],
+   "reasoning": "The file was modified externally between my read and my edit — the line was \"bbb\" when I read it, but by the time my edit ran, it had become \"bbb-external\", and the edit tool's fuzzy matcher matched \"bbb\" against \"bbb-external\" and replaced it, producing \"BBB-external\". \n\nThe user asked to replace the line containing 'bbb' with exactly one line: BBB. The current content shows \"BBB-external\" which is not exactly \"BBB\". The external modification changed things. Now the line contains \"BBB\" (as substring of \"BBB-external\"). Hmm, tricky.\n\nThe user wants the line containing 'bbb' to be replaced with exactly \"BBB\". Since the file now contains \"BBB-external\", and the original 'bbb' line was that line... The external modification added \"-external\" suffix. Should I now fix it to be exactly \"BBB\"?\n\nThe instruction: \"Replace the line containing 'bbb' with exactly one line: BBB.\" The file now has \"BBB-external\". There's no 'bbb' anymore. But the spirit of the task was to make the file contain BBB exactly on that line. The external edit happened after/during my edit.\n\nI think the right move is to make the final state exactly what the user asked: the line should be \"BBB\". So I should edit \"BBB-external\" to \"BBB\". But wait — is that overstepping? The external modification happened mid-flight. The user's intent is that after the edit, the file has BBB on that line. The current state has \"BBB-external\" which does not satisfy \"exactly one line: BBB\".\n\nLet me fix it to be exactly \"BBB\"."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "chatcmpl-tool-bfc6fdbe69b274ab",
+   "content": "Successfully replaced 1 replacement across 1 edit(s) in stale-line.ts.\n 1 aaa\n-2 BBB-external\n+2 BBB\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "chatcmpl-tool-84c5638542fd3336",
+     "name": "read",
+     "arguments": "{\"path\": \"stale-line.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "chatcmpl-tool-84c5638542fd3336",
+   "content": "aaa\nBBB\nccc\n"
+  }
+ ]
+}

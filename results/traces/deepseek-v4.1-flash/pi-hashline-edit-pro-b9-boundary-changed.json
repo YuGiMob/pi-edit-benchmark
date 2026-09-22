@@ -1,0 +1,95 @@
+{
+ "modelId": "deepseek-v4.1-flash",
+ "contenderId": "pi-hashline-edit-pro",
+ "contenderVersion": "4.3.8",
+ "scenarioId": "b9-boundary-changed",
+ "task": "Modify b9.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:27:17.314Z",
+ "durationMs": 6860,
+ "tokensIn": 10741,
+ "tokensOut": 381,
+ "costUsd": 0.00183975,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-l31wZE/pi-hashline-edit-pro-b9-boundary-changed"
+  },
+  {
+   "role": "user",
+   "content": "Modify b9.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_ET_BdgGmg15l2zVHO7eFuiI3962",
+     "name": "read",
+     "arguments": "{\"path\": \"b9.ts\"}"
+    }
+   ],
+   "reasoning": ""
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_ET_BdgGmg15l2zVHO7eFuiI3962",
+   "content": "giuc│aaa\nMFNV│bbb\ntnrm│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_bkfE4iRtjOY2qH6jgthW6243",
+     "name": "replace",
+     "arguments": "{\"remove_from\": \"MFNV\", \"remove_to\": \"MFNV\", \"replacement_lines\": [\"BBB\"]}"
+    }
+   ],
+   "reasoning": "Replace line containing bbb with BBB."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_bkfE4iRtjOY2qH6jgthW6243",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in b9.ts: \"MFNV\", \"MFNV\". The file changed since read. Call read() on b9.ts for fresh anchors."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_OsjyDhXkbfFToMMn8e1y6743",
+     "name": "read",
+     "arguments": "{\"path\": \"b9.ts\"}"
+    }
+   ],
+   "reasoning": "The file changed since read. Need to re-read."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_OsjyDhXkbfFToMMn8e1y6743",
+   "content": "giuc│aaa\niiTU│bbb-x\ntnrm│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_00_7Xp1jEwLMKeRPZuiq8ok1460",
+     "name": "replace",
+     "arguments": "{\"remove_from\": \"iiTU\", \"remove_to\": \"iiTU\", \"replacement_lines\": [\"BBB\"]}"
+    }
+   ],
+   "reasoning": "Now the line is \"bbb-x\" containing bbb. Replace it with BBB.\n\nWait, \"Replace the line containing 'bbb' with exactly one line: BBB.\" So the line bbb-x contains bbb, replace with BBB.\n\nCareful: this may be a boundary-changed test where line content changed. Let's replace."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_00_7Xp1jEwLMKeRPZuiq8ok1460",
+   "content": "Successfully replaced in b9.ts. Added 1 line(s), removed 1 line(s).\n giuc│aaa\n-iiTU│bbb-x\n+WIjl│BBB\n tnrm│ccc"
+  }
+ ]
+}

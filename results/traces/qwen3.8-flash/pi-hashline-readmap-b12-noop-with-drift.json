@@ -1,0 +1,96 @@
+{
+ "modelId": "qwen3.8-flash",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "b12-noop-with-drift",
+ "task": "Modify b12.ts in the current working directory. Replace the line containing 'bbb' with exactly the same line 'bbb' (the file should end up unchanged). Use the provided tools; always read the file before editing.",
+ "startedAt": "2026-09-22T17:45:47.031Z",
+ "durationMs": 26373,
+ "tokensIn": 8138,
+ "tokensOut": 1117,
+ "costUsd": 0.0017456899999999998,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa-x\nbbb\nccc\n",
+ "actualContent": "aaa-x\nbbb\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-mwhm2Z/pi-hashline-readmap-b12-noop-with-drift"
+  },
+  {
+   "role": "user",
+   "content": "Modify b12.ts in the current working directory. Replace the line containing 'bbb' with exactly the same line 'bbb' (the file should end up unchanged). Use the provided tools; always read the file before editing."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_12f01bc6d93e428b9e8c1a26",
+     "name": "read",
+     "arguments": "{\"path\": \"b12.ts\", \"map\": true}"
+    }
+   ],
+   "reasoning": "Let me read the file first, and map the file structure since it's small enough."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_12f01bc6d93e428b9e8c1a26",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_07928a80a73741619db9f1c2",
+     "name": "edit",
+     "arguments": "{\"path\": \"b12.ts\", \"edits\": \n[{\"set_line\": {\"anchor\": \"2:467\", \"new_text\": \"bbb\"}}]\n\n, \"postEditVerify\": true}"
+    }
+   ],
+   "reasoning": "The map is appended? The read returned lines with anchors. Now edit line 2 to 'bbb' using set_line with anchor 2:467.\n\nNote: the read may have had a drift. Let's do the edit."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_07928a80a73741619db9f1c2",
+   "content": "Error: No changes made to b12.ts. The edits produced identical content.\nEdit 0: replacement for 2:467 is identical to current content:\n  2:467| bbb\nRe-read the file to see the current state."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_fa67152c15504116a229ce42",
+     "name": "read",
+     "arguments": "{\"path\": \"b12.ts\"}"
+    }
+   ],
+   "reasoning": "The tool refuses no-op edits. The file is already unchanged, which is the desired end state. Let me re-read to confirm."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_fa67152c15504116a229ce42",
+   "content": "1:5b8|aaa-x\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_e63334291d6949298d7762d2",
+     "name": "read",
+     "arguments": "{\"path\": \"b12.ts\"}"
+    }
+   ],
+   "reasoning": "Interesting — drift: line 1 now reads 'aaa-x'. That's a change made externally (the scenario says \"with drift\"). My task: replace line 2 with same content, file unchanged. The tool refused because content identical. That's expected behavior — no edit needed.\n\nBut note the drift on line 1: I should not modify it. The instruction is to leave file unchanged. So report: no edit was necessary; also mention drift observed.\n\nShould I try another approach? The harness rejected as no-op. The correct outcome is the file remains unchanged, which it already is. I'll report that."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_e63334291d6949298d7762d2",
+   "content": "1:5b8|aaa-x\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  }
+ ]
+}
