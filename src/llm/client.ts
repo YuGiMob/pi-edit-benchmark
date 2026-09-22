@@ -53,7 +53,7 @@ export async function chat(
       if (!transient && !rateLimited) throw lastError;
       if (attempt === 2) throw lastError;
       await new Promise((r) =>
-        setTimeout(r, rateLimited ? 90_000 * (attempt + 1) : 1500 * (attempt + 1)),
+        setTimeout(r, rateLimited ? 10_000 * (attempt + 1) : 1500 * (attempt + 1)),
       );
     }
   }
@@ -123,7 +123,7 @@ async function chatCompletions(
   if (!message) throw new Error(`Empty completion: ${raw.slice(0, 300)}`);
   return {
     content: message.content ?? "",
-    reasoning: message.reasoning ?? undefined,
+    reasoning: message.reasoning ?? (message as { reasoning_content?: string | null }).reasoning_content ?? undefined,
     toolCalls: (message.tool_calls ?? []).map((tc) => ({
       id: tc.id ?? `call_${Math.random().toString(36).slice(2, 12)}`,
       name: tc.function?.name ?? "",

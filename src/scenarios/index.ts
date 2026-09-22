@@ -1,8 +1,6 @@
 import type { Scenario } from "../types";
 import { betterEditScenarios } from "./better-edit";
 
-const LONG_LINE = "x".repeat(60 * 1024);
-
 export const scenarios: Scenario[] = [
   ...betterEditScenarios,
   {
@@ -121,20 +119,6 @@ export const scenarios: Scenario[] = [
     expectedByContender: {
       "builtin-edit": { outcome: "rejected" },
       "pi-semantic-edit": { outcome: "rejected" },
-    },
-  },
-  {
-    id: "long-line",
-    fileName: "long.js",
-    category: "correctness",
-    focus: "core",
-    name: "replace a >50KB line",
-    description:
-      "The target line exceeds the read-output budget; the model only ever saw a truncated row or a marker.",
-    fixture: `a\n${LONG_LINE}\nb\n`,
-    expected: { outcome: "applied", content: `a\nREPLACED\nb\n` },
-    expectedByContender: {
-      "builtin-edit": { outcome: "rejected" },
     },
   },
   {

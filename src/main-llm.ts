@@ -1,7 +1,7 @@
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { appendFile, mkdir, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { mkdtemp, rm } from "fs/promises";
 import { tmpdir } from "os";
 import { allContenders } from "./contenders";
@@ -23,6 +23,7 @@ interface CliArgs {
   out: string;
   delayMs: number;
   noReadMandate: boolean;
+  resume: boolean;
   timeoutMs?: number;
 }
 
@@ -40,6 +41,7 @@ function parseArgs(argv: string[]): CliArgs {
     out: "results/llm-report.md",
     delayMs: 0,
     noReadMandate: false,
+    resume: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
@@ -47,6 +49,9 @@ function parseArgs(argv: string[]): CliArgs {
     switch (a) {
       case "--no-read-mandate":
         args.noReadMandate = true;
+        break;
+      case "--resume":
+        args.resume = true;
         break;
       case "--models":
         args.models = next().split(",");
@@ -103,6 +108,8 @@ Options:
 
   --no-read-mandate   Drop the 'always read the file before editing' task suffix
                       (secondary comparison: lets text tools attempt blind edits)
+
+  --resume            Skip runs already recorded in <out>.runs.jsonl; new runs append there
 
   --dry-run            Print the run matrix without calling the API
   --out <path>         Report output path (default: results/llm-report.md)
@@ -178,7 +185,7 @@ function logRun(run: LlmRun): void {
   const mark = run.pass ? "PASS" : "FAIL";
   const calls = run.toolCalls.map((t) => (t.ok ? t.name : `${t.name}x`)).join(" ");
   console.log(
-    `[${mark}] ${run.modelId.padEnd(20)} ${run.contenderId.padEnd(26)} ${run.scenarioId.padEnd(30)} ${run.outcome.padEnd(12)} steps=${run.steps} tok=${run.tokensIn + run.tokensOut} ${run.failureKind ?? ""} | ${calls}`,
+    `[${mark}] ${run.modelId.padEnd(20)} ${run.contenderId.padEnd(26)} ${run.scenarioId.padEnd(30)} ${run.outcome.padEnd(12)} steps=${run.steps} tok=${run.tokensIn + run.tokensOut} ${run.failureKind ?? ""} | ${calls}${run.errorMessage ? ` :: ${run.errorMessage.slice(0, 200)}` : ""}`,
   );
 }
 
@@ -213,9 +220,27 @@ async function main(): Promise<void> {
     return false;
   });
 
+  const outPath = args.out.startsWith("/") ? args.out : join(process.cwd(), args.out);
+  const runsFile = outPath.replace(/\.md$/, ".runs.jsonl");
+  const completed = new Map<string, LlmRun>();
+  if (args.resume && existsSync(runsFile)) {
+    for (const line of (await readFile(runsFile, "utf-8")).split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        const run = JSON.parse(line) as LlmRun;
+        completed.set(`${run.modelId}/${run.contenderId}/${run.scenarioId}`, run);
+      } catch {
+      }
+    }
+  }
+  let runsDone = completed.size;
+  await mkdir(join(process.cwd(), "results"), { recursive: true });
+  if (completed.size > 0) console.log(`resuming: ${completed.size} completed runs loaded from ${runsFile}`);
   for (const model of activeModels) {
     console.log(`\n=== Model: ${model.name} (${model.id}) ===`);
-    console.log(`  ${contenders.length * scenarioList.length} runs, lane concurrency ${laneConcurrencyOf(model, args)}`);
+    const remaining = contenders.length * scenarioList.length
+      - [...completed.values()].filter((r) => r.modelId === model.id).length;
+    console.log(`  ${remaining} runs, lane concurrency ${laneConcurrencyOf(model, args)}`);
     if (args.dryRun) {
       for (const contender of contenders) {
         for (const scenario of scenarioList) {
@@ -235,13 +260,14 @@ async function main(): Promise<void> {
       const apiKey = apiKeyFor(model)!;
       const cost = costs.get(providerOf(model))?.get(model.id) ?? { in: 0, out: 0 };
       const laneConcurrency = laneConcurrencyOf(model, args);
+      const laneRuns: LlmRun[] = [...completed.values()].filter((r) => r.modelId === model.id);
       const queue: Array<{ contenderId: string; scenarioId: string }> = [];
       for (const contender of contenders) {
         for (const scenario of scenarioList) {
+          if (completed.has(`${model.id}/${contender.info.id}/${scenario.id}`)) continue;
           queue.push({ contenderId: contender.info.id, scenarioId: scenario.id });
         }
       }
-      const laneRuns: LlmRun[] = [];
       let cursor = 0;
       if (args.delayMs > 0) await new Promise((r) => setTimeout(r, args.delayMs));
       const worker = async (): Promise<void> => {
@@ -266,6 +292,14 @@ async function main(): Promise<void> {
             });
             laneRuns.push(run);
             logRun(run);
+            runsDone += 1;
+            if (runsDone % 10 === 0) {
+              (globalThis as { Bun?: { gc?: (sync: boolean) => void } }).Bun?.gc?.(true);
+            }
+            try {
+              await appendFile(runsFile, JSON.stringify(run) + "\n");
+            } catch {
+            }
           } finally {
             await rm(dir, { recursive: true, force: true });
           }
@@ -286,7 +320,6 @@ async function main(): Promise<void> {
     runs,
     mandateRead: !args.noReadMandate,
   };
-  const outPath = args.out.startsWith("/") ? args.out : join(process.cwd(), args.out);
   await mkdir(join(process.cwd(), "results"), { recursive: true });
   await writeFile(outPath, renderLlmReport(report, totalCost, outPath));
   await writeFile(outPath.replace(/\.md$/, ".json"), JSON.stringify(report, null, 2));

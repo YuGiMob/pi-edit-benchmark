@@ -26,18 +26,18 @@ Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without
 
 ## LLM benchmark
 
-`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from two remote providers — opencode-go and ollama-cloud — each reached at its own endpoint with its own key (`OPENCODE_API_KEY`, `OLLAMA_API_KEY`), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, any `before_agent_start` system-prompt patches the contender registers, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
+`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from the opencode-go remote provider (`OPENCODE_API_KEY`), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, any `before_agent_start` system-prompt patches the contender registers, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
 The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
 
 ```
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
-bun run src/main-llm.ts                        # 10 models × 10 contenders × 39 scenarios (3,900 runs)
+bun run src/main-llm.ts                        # 9 models × 10 contenders × 38 scenarios (3,420 runs)
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
 ```
 
-**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`opencode-go: 16`, `ollama-cloud: 5`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). One invocation covers the whole matrix — no manual per-lane runs or report merging.
+**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`opencode-go: 16`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). One invocation covers the whole matrix — no manual per-lane runs or report merging.
 
 ### Run traces (validation)
 
@@ -54,15 +54,14 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 
 | Model | Id | Provider | API | Effort | Pricing (per M in/out) |
 | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | `deepseek-v4.1-flash` | ollama-cloud | chat completions | provider default | $0.30 / $1.20 |
+| DeepSeek V4.1 Flash | `deepseek-v4.1-flash` | opencode-go | chat completions | provider default | $0.15 / $0.60 |
 | Gemma 4 26B A4B | `gemma-4-26b-a4b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.075 / $0.25 |
 | Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
-| MiMo 2.6 Flash | `mimo-v2.6-flash` | opencode-go | chat completions | `max` | $0.14 / $0.28 |
-| Gemma 4 (31B) | `gemma4:31b` | ollama-cloud | chat completions | provider default | $0.14 / $0.40 |
-| Nemotron 3 Nano (30B) | `nemotron-3-nano:30b` | ollama-cloud | chat completions | provider default | $0.06 / $0.24 |
+| MiMo 2.6 Flash | `mimo-v2.6-flash` | opencode-go | chat completions | provider default | $0.14 / $0.28 |
+| MiMo-V2.6-Pro | `mimo-v2.6-pro` | opencode-go | chat completions | provider default | $0.435 / $0.87 |
 | Qwen3.5 9B (Q4_K_M, llama.cpp) | `qwen3.5-9b-q4km` | llamacpp | chat completions | provider default | local, $0.00 |
 
 Reported per run: pass/fail against the scenario expectations, outcome class (`applied`, `rejected`, `recovered` — the model re-read after a stale rejection and applied correctly), tool-call trace, tokens, and API cost (prices from `~/.pi/agent/models-store.json`).
@@ -83,11 +82,11 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | `pi-edit-guard` | same surface as built-in `edit` (`{ path, edits: [{ oldText, newText }] }`) plus `undo` | none (argument repair, 14-pass fuzzy match chain, mtime staleness check) | yes |
 
 
-## Scenarios (39)
+## Scenarios (38)
 
-Each scenario carries a `focus` that the report splits by: **core editing** (21), **staleness & concurrency** (11), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
+Each scenario carries a `focus` that the report splits by: **core editing** (20), **staleness & concurrency** (11), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
 
-### Core editing (21)
+### Core editing (20)
 - `single-line` — replace one line
 - `range` — replace an inclusive range
 - `delete-line` — delete one line cleanly
@@ -95,7 +94,6 @@ Each scenario carries a `focus` that the report splits by: **core editing** (21)
 - `whitespace-only` — target a line with trailing whitespace
 - `crlf` / `bom` — line endings and BOM survive
 - `empty-file` — seed an empty file
-- `long-line` — replace a >50KB line the model only ever saw truncated
 - `noop` — identical replacement leaves the file byte-identical
 - `insert-after` — insert lines below a target
 - `unicode` — CJK/emoji/accent content survives byte-level
@@ -141,7 +139,7 @@ The report splits every score by the three focus groups above.
 
 ## Results — latest full round (9 models × 11 contenders × 35 scenarios, `results/llm-report.md`, 3,465 runs, $4.54)
 
-> **Post-round cleanup:** `pi-hashline-edit` (repo deleted, frozen since July), `pi-hashline-context-edit` (one release ever, quiet for 3 months), `pi-semantic-edit` (worst scores and the highest silent-corruption rate), and `pi-agent-ide` (weakest remaining score at the heaviest token cost) were dropped. The `pi-hashline-edit-pro-diff0` variant lane was replaced by `pi-hashline-edit-pro-nodedup` (`boundaryDedupMode: off`), which isolates the boundary anti-duplication behavior instead of the diff context. Per-model totals below still reflect the final 11-contender round.
+> **Post-round cleanup:** `pi-hashline-edit` (repo deleted, frozen since July), `pi-hashline-context-edit` (one release ever, quiet for 3 months), and `pi-agent-ide` (weakest remaining score at the heaviest token cost) were dropped. The `pi-hashline-edit-pro-diff0` variant lane was replaced by `pi-hashline-edit-pro-nodedup` (`boundaryDedupMode: off`), which isolates the boundary anti-duplication behavior instead of the diff context. `long-line` was dropped from the battery after the cloud round: the runs took a disproportionate share of wall time, and the text-matching tools that attempted it exceeded 2.5GB before finishing. Per-model totals below still reflect the final 11-contender round.
 
 Per model (each /385; three models ran locally on llama.cpp):
 
@@ -201,7 +199,7 @@ Totals across the round: **30.2M prompt tokens in, 5.2M completion tokens out, 1
 | `@xynogen/pix-edit` | 2,599 | 62 |
 | `pi-hashline-readmap` | 2,293 | 104 |
 | `pi-hashline-edit` (removed from bench) | 1,942 | repo deleted |
-| `pi-semantic-edit` (removed from bench) | 1,537 | 4 |
+| `pi-semantic-edit` | 1,537 | 4 |
 | `pi-better-edit` (removed from bench) | 950 | 4 |
 | `pi-hledit` (removed from bench) | 228 | 2 |
 | `@jerryan/pi-hashline-edit` (removed from bench) | 173 | 7 |
@@ -217,7 +215,7 @@ src/
   main-llm.ts   benchmark entry point
   types.ts      shared types
   contenders/   per-tool adapters (expose the real pi tools to the LLM loop)
-  scenarios/    the scenario battery (35, tagged core/staleness/served-state)
+  scenarios/    the scenario battery (38, tagged core/staleness/served-state)
   llm/          multi-provider client + tool-calling runner + report rendering
 results/        generated reports + per-run traces (committed)
 ```

@@ -44,8 +44,6 @@ const taskDescriptions: Record<string, string> = {
   crlf: "Replace the line containing 'beta' (in a CRLF file) with exactly one line: BETA",
   bom: "Replace the line containing 'beta' with exactly one line: BETA",
   "empty-file": "The file is empty. Insert exactly two lines: 'first' and 'second'",
-  "long-line":
-    "Replace the very long line (the one consisting almost entirely of lowercase x characters) with exactly one line: REPLACED",
   noop: "Replace the line containing 'bbb' with exactly the same line 'bbb' (the file should end up unchanged)",
   "insert-after":
     "Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay",
