@@ -10,8 +10,6 @@ import { runLlmScenario } from "./llm/runner";
 import { LLM_MODELS, DEFAULT_LLM_SCENARIOS, LLM_TOOL_FILTERS } from "./llm/models";
 import type { LlmModelSpec, LlmReport, LlmRun } from "./types";
 
-const BASE_URL = "https://hyper.charm.land/v1";
-const PROVIDER = "hyper";
 interface CliArgs {
   models: string[];
   contenders: string[];
@@ -24,6 +22,7 @@ interface CliArgs {
   laneConcurrency: Record<string, number>;
   out: string;
   delayMs: number;
+  noReadMandate: boolean;
   timeoutMs?: number;
 }
 
@@ -40,11 +39,15 @@ function parseArgs(argv: string[]): CliArgs {
     laneConcurrency: {},
     out: "results/llm-report.md",
     delayMs: 0,
+    noReadMandate: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
     const next = () => argv[++i]!;
     switch (a) {
+      case "--no-read-mandate":
+        args.noReadMandate = true;
+        break;
       case "--models":
         args.models = next().split(",");
         break;
@@ -98,6 +101,9 @@ Options:
   --delay-ms <n>       Pause before starting each provider lane (pacing for tight rate limits)
   --timeout-ms <n>     Per-API-call timeout (default: 180000)
 
+  --no-read-mandate   Drop the 'always read the file before editing' task suffix
+                      (secondary comparison: lets text tools attempt blind edits)
+
   --dry-run            Print the run matrix without calling the API
   --out <path>         Report output path (default: results/llm-report.md)
 `);
@@ -131,11 +137,10 @@ async function loadCosts(): Promise<Map<string, Map<string, { in: number; out: n
 }
 
 function providerOf(model: LlmModelSpec): string {
-  return model.provider ?? PROVIDER;
+  return model.provider;
 }
 
 const PROVIDER_ENV: Record<string, string> = {
-  hyper: "HYPER_API_KEY",
   "opencode-go": "OPENCODE_API_KEY",
   "ollama-cloud": "OLLAMA_API_KEY",
 };
@@ -157,7 +162,6 @@ function apiKeyFor(model: LlmModelSpec): string | undefined {
 }
 
 const PROVIDER_CONCURRENCY: Record<string, number> = {
-  hyper: 16,
   "opencode-go": 16,
   "ollama-cloud": 5,
   llamacpp: 6,
@@ -179,7 +183,7 @@ function logRun(run: LlmRun): void {
 }
 
 function baseUrlOf(model: LlmModelSpec): string {
-  return model.baseUrl ?? BASE_URL;
+  return model.baseUrl;
 }
 
 async function main(): Promise<void> {
@@ -255,6 +259,7 @@ async function main(): Promise<void> {
               toolFilter: LLM_TOOL_FILTERS[q.contenderId] ?? [],
               maxSteps: args.maxSteps,
               timeoutMs: args.timeoutMs ?? 180_000,
+              mandateRead: !args.noReadMandate,
               costPerMIn: cost.in,
               costPerMOut: cost.out,
               traceDir: join(process.cwd(), "results", "traces"),
@@ -279,6 +284,7 @@ async function main(): Promise<void> {
     generatedAt: new Date().toISOString(),
     models,
     runs,
+    mandateRead: !args.noReadMandate,
   };
   const outPath = args.out.startsWith("/") ? args.out : join(process.cwd(), args.out);
   await mkdir(join(process.cwd(), "results"), { recursive: true });
@@ -294,7 +300,7 @@ export function renderLlmReport(report: LlmReport, totalCost: number, outPath?: 
   out.push("# pi edit-tool benchmark — LLM runs");
   out.push("");
   const providers = [...new Set(report.models.map(providerOf))].join(" + ");
-  out.push(`Generated ${report.generatedAt}. Real-model runs against ${providers}; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $${totalCost.toFixed(4)}.`);
+  out.push(`Generated ${report.generatedAt}. Real-model runs against ${providers}; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $${totalCost.toFixed(4)}.${report.mandateRead === false ? " Read mandate off (--no-read-mandate)." : ""}`);
   out.push("");
   out.push("## Models");
   out.push("");

@@ -1,6 +1,6 @@
 # pi-edit-benchmark
 
-LLM tool-calling benchmark comparing file-editing extensions for [pi-coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent): the built-in `edit` tool, the hashline family (`pi-hashline-edit`, `pi-hashline-edit-pro`, `pi-hashline-context-edit`, `pi-hashline-readmap`), tolerant/semantic matchers (`@cortexkit/aft-pi`, `@xynogen/pix-edit`, `pi-semantic-edit`), snapshot-bound hashline editing (`@agimon-ai/doompi-edit`), and guarded IDE editing (`pi-agent-ide`).
+LLM tool-calling benchmark comparing file-editing extensions for [pi-coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent): the built-in `edit` tool, a shell-only `bash` baseline (`builtin-bash`), the hashline family (`pi-hashline-edit-pro`, `pi-hashline-readmap`), tolerant matchers (`@cortexkit/aft-pi`, `@xynogen/pix-edit`, `pi-semantic-edit`), snapshot-bound hashline editing (`@agimon-ai/doompi-edit`), and a repairing `edit` override (`pi-edit-guard`).
 
 ## Why
 
@@ -26,18 +26,18 @@ Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without
 
 ## LLM benchmark
 
-`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from two remote providers — opencode-go and ollama-cloud — each reached at its own endpoint with its own key (`OPENCODE_API_KEY`, `OLLAMA_API_KEY`; the hyper provider is retired from the default matrix), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, any `before_agent_start` system-prompt patches the contender registers, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
+`src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from two remote providers — opencode-go and ollama-cloud — each reached at its own endpoint with its own key (`OPENCODE_API_KEY`, `OLLAMA_API_KEY`), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, any `before_agent_start` system-prompt patches the contender registers, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
 The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
 
 ```
-bun run src/main-llm.ts                        # 9 models × 11 contenders × 35 scenarios (3,465 runs)
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
+bun run src/main-llm.ts                        # 9 models × 10 contenders × 39 scenarios (3,510 runs)
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
 ```
 
-**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`hyper: 16`, `opencode-go: 16`, `ollama-cloud: 5`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). One invocation covers the whole matrix — no manual per-lane runs or report merging.
+**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`opencode-go: 16`, `ollama-cloud: 5`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). One invocation covers the whole matrix — no manual per-lane runs or report merging.
 
 ### Run traces (validation)
 
@@ -71,23 +71,22 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | Contender | Edit format | Anchors | Undo |
 | --- | --- | --- | --- |
 | `builtin-edit` | `{ path, edits: [{ oldText, newText }] }` | none (text matching) | no |
-| `pi-hashline-edit` | `{ path, edits: [{ op, pos, end, lines }] }` | `LINE#HASH:` 2-char contextual | no |
-| `pi-hashline-context-edit` | same + `replace_text` | `LINE#HASH:` 2-char contextual | no |
-| `pi-hashline-edit-pro` (4.2.6) | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
-| `pi-hashline-edit-pro-diff0` | same, with `diffContextLines: 0` (post-edit diffs carry no context lines) | `HASH│` 4-char, served-range verification | yes |
+| `pi-hashline-edit-pro` | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
+| `pi-hashline-edit-pro-nodedup` | same, with `boundaryDedupMode: off` (boundary re-inclusions apply literally) | `HASH│` 4-char, served-range verification | yes |
 | `pi-hashline-readmap` | `{ path, edits: [{ set_line / replace_lines / insert_after }] }` | `LINE:HASH|` 3-char | no |
 | `@cortexkit/aft-pi` | `{ path, edits: [{ oldString, newString, occurrence }] }` | none (fuzzy find/replace, Rust backend) | no |
 | `@xynogen/pix-edit` | `{ path, edits: [{ oldText, newText }] }` | none (unique-text replace + diff) | no |
 | `pi-semantic-edit` | `{ path, edits: [{ oldText, newText, replaceAll? }] }` | none (10-pass semantic fuzzy chain, uniqueness guard) | no |
 | `@agimon-ai/doompi-edit` | `{ path, hash, edits: [{ from, to, content }] }` | 8-char exact-byte file tag + 3-letter line anchors from a snapshot-bound read/grep | no |
-| `pi-agent-ide` | guarded editing: `replace` (text/line-range/search-match selectors), `insert`, `delete`, `write`, `apply` | line-hash and exact-text selectors with stale-selection recovery | no |
+| `builtin-bash` | pi's standard `bash` tool only — no read/edit/write tools | none (shell: `cat`, `sed`, `printf`, …) | no |
+| `pi-edit-guard` | same surface as built-in `edit` (`{ path, edits: [{ oldText, newText }] }`) plus `undo` | none (argument repair, 14-pass fuzzy match chain, mtime staleness check) | yes |
 
 
-## Scenarios (35)
+## Scenarios (39)
 
-Each scenario carries a `focus` that the report splits by: **core editing** (18), **staleness & concurrency** (10), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
+Each scenario carries a `focus` that the report splits by: **core editing** (21), **staleness & concurrency** (11), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
 
-### Core editing (18)
+### Core editing (21)
 - `single-line` — replace one line
 - `range` — replace an inclusive range
 - `delete-line` — delete one line cleanly
@@ -104,8 +103,11 @@ Each scenario carries a `focus` that the report splits by: **core editing** (18)
 - `delete-range` — delete an inclusive range cleanly
 - `insert-eof` — insert after the last line
 - `crlf-bom` — BOM and CRLF survive together
+- `sub-line-token` — replace a small token inside a longer line; the rest of the line stays byte-identical (search/replace targets the token, line-anchored tools rewrite the line — the outcome is the same for both)
+- `replace-all` — every occurrence of a repeated token replaced (one `replaceAll`-style edit vs per-occurrence entries or ranges)
+- `batch-edits` — five disjoint small values changed in one file; tests batching economy
 
-### Staleness & concurrency (10)
+### Staleness & concurrency (11)
 - `stale-line` — the target line changed on disk; the edit must be refused
 - `stale-range` — a line *inside* the replaced range changed; the edit must be refused
 - `external-far` — an unrelated distant change must not block the edit
@@ -116,6 +118,7 @@ Each scenario carries a `focus` that the report splits by: **core editing** (18)
 - `b15-large-range-drift` — 200-line range with drifted interior; must reject
 - `error-guidance` — a refused edit explains how to recover
 - `insert-race-stale-boundary` — insert after a line changed on disk; must be refused
+- `formatter-drift` — a formatter reindents the whole file between read and edit; the target token survives, so tolerant apply or refuse-and-recover both end at the same formatted result — writing back a stale cached view fails
 
 ### Served-state & undo (7)
 - `anchor-stability` — anchors of untouched lines survive an edit (no re-read needed)
@@ -137,6 +140,8 @@ The report splits every score by the three focus groups above.
 
 ## Results — latest full round (9 models × 11 contenders × 35 scenarios, `results/llm-report.md`, 3,465 runs, $4.54)
 
+> **Post-round cleanup:** `pi-hashline-edit` (repo deleted, frozen since July), `pi-hashline-context-edit` (one release ever, quiet for 3 months), `pi-semantic-edit` (worst scores and the highest silent-corruption rate), and `pi-agent-ide` (weakest remaining score at the heaviest token cost) were dropped. The `pi-hashline-edit-pro-diff0` variant lane was replaced by `pi-hashline-edit-pro-nodedup` (`boundaryDedupMode: off`), which isolates the boundary anti-duplication behavior instead of the diff context. Per-model totals below still reflect the final 11-contender round.
+
 Per model (each /385; three models ran locally on llama.cpp):
 
 | Model | Passed | Rate | Avg tokens/run | Cost |
@@ -156,32 +161,22 @@ Per tool with the focus split (each cell passed/total across all models):
 | Tool | Core (162) | Staleness (90) | Served-state (63) | Overall (315) |
 | --- | --- | --- | --- | --- |
 | **pi-hashline-edit-pro** | **161** | 89 | 58 | **308 (98%)** |
-| **pi-hashline-edit-pro-diff0** | 160 | 89 | 59 | **308 (98%)** |
 | @agimon-ai/doompi-edit | 149 | 86 | 62 | 297 (94%) |
 | pi-hashline-readmap | 151 | 85 | 57 | 293 (93%) |
-| pi-hashline-context-edit | 134 | 87 | 63 | 284 (90%) |
-| pi-hashline-edit | 133 | 87 | 63 | 283 (90%) |
 | @cortexkit/aft-pi | 140 | 76 | 62 | 278 (88%) |
 | @xynogen/pix-edit | 142 | 76 | 60 | 278 (88%) |
-| pi-agent-ide | 124 | 77 | 62 | 263 (83%) |
 | builtin-edit | 124 | 66 | 60 | 250 (79%) |
-| pi-semantic-edit | 125 | 59 | 59 | 243 (77%) |
 
 Per-tool process (all models):
 
 | Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |
 | --- | --- | --- | --- | --- | --- |
 | builtin-edit | 0.85.1 | 3.4 | 7,301 | $0.0011 | 10 |
-| pi-hashline-edit | 0.8.3 | 2.9 | 10,760 | $0.0011 | 10 |
-| pi-hashline-context-edit | 0.11.0 | 2.6 | 8,878 | $0.0010 | 10 |
 | pi-hashline-edit-pro | 4.3.5 | 2.8 | 9,079 | $0.0010 | 10 |
-| pi-hashline-edit-pro-diff0 | 4.3.5 | 2.9 | 9,500 | $0.0011 | 10 |
 | pi-hashline-readmap | 0.14.0 | 3.2 | 9,534 | $0.0012 | 10 |
 | @cortexkit/aft-pi | 0.56.2 | 3.0 | 10,881 | $0.0012 | 10 |
 | @xynogen/pix-edit | 0.2.5 | 3.3 | 7,307 | $0.0011 | 10 |
-| pi-semantic-edit | 0.4.0 | 2.9 | 12,239 | $0.0021 | 11 |
 | @agimon-ai/doompi-edit | 0.0.1-alpha.49 | 3.5 | 8,874 | $0.0011 | 10 |
-| pi-agent-ide | 0.6.2 | 4.6 | 17,890 | $0.0022 | 12 |
 
 Totals across the round: **30.2M prompt tokens in, 5.2M completion tokens out, 11,179 tool calls** (856 failed), 38.3h of summed run time.
 
@@ -204,13 +199,13 @@ Totals across the round: **30.2M prompt tokens in, 5.2M completion tokens out, 1
 | `@cortexkit/aft-pi` | 4,362 | 275 |
 | `@xynogen/pix-edit` | 2,599 | 62 |
 | `pi-hashline-readmap` | 2,293 | 104 |
-| `pi-hashline-edit` (abandoned upstream) | 1,942 | repo deleted |
-| `pi-semantic-edit` | 1,537 | 4 |
+| `pi-hashline-edit` (removed from bench) | 1,942 | repo deleted |
+| `pi-semantic-edit` (removed from bench) | 1,537 | 4 |
 | `pi-better-edit` (removed from bench) | 950 | 4 |
 | `pi-hledit` (removed from bench) | 228 | 2 |
 | `@jerryan/pi-hashline-edit` (removed from bench) | 173 | 7 |
 | `@the-agency/pi-hashline-edit` (removed from bench) | 61 | 25 |
-| `pi-hashline-context-edit` | 47 | 0 |
+| `pi-hashline-context-edit` (removed from bench) | 47 | 0 |
 
 `pi-hashline-edit-pro` is the most-downloaded dedicated editing extension in the pi ecosystem (~4.7× the runner-up) and the only edit tool in the [pi.dev top-50 catalog](https://pi.dev/packages).
 

@@ -5,7 +5,7 @@ import {
   createReadToolDefinition,
 } from "@earendil-works/pi-coding-agent";
 import type { Contender, ToolSpec } from "../types";
-import { extractResultText, isErrorResult, pkgVersion } from "./shared";
+import { pkgVersion, runBuiltinTool } from "./shared";
 
 export function builtinContender(): Contender {
   return {
@@ -42,28 +42,4 @@ export function builtinContender(): Contender {
       ];
     },
   };
-}
-
-async function runBuiltinTool(
-  tool: any,
-  params: unknown,
-  cwd: string,
-): Promise<{ ok: boolean; error?: string; resultText?: string }> {
-  try {
-    const result = await tool.execute(
-      "t1",
-      params,
-      undefined,
-      undefined,
-      { cwd } as never,
-    );
-    const text = extractResultText(result);
-    return {
-      ok: !isErrorResult(result),
-      resultText: text,
-      error: isErrorResult(result) ? text : undefined,
-    };
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : String(error) };
-  }
 }

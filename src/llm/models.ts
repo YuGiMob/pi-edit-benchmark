@@ -83,14 +83,13 @@ export const DEFAULT_LLM_SCENARIOS: string[] = [];
 
 export const LLM_TOOL_FILTERS: Record<string, string[]> = {
   "builtin-edit": ["read", "edit"],
-  "pi-hashline-edit": ["read", "edit"],
-  "pi-hashline-context-edit": ["read", "edit"],
   "pi-hashline-edit-pro": ["read", "replace", "insert", "undo_last_change"],
-  "pi-hashline-edit-pro-diff0": ["read", "replace", "insert", "undo_last_change"],
+  "pi-hashline-edit-pro-nodedup": ["read", "replace", "insert", "undo_last_change"],
   "pi-hashline-readmap": ["read", "edit"],
   "@cortexkit/aft-pi": ["read", "edit"],
   "@xynogen/pix-edit": ["read", "edit"],
-  "pi-semantic-edit": ["read", "edit"],
   "@agimon-ai/doompi-edit": ["read", "grep", "edit"],
-  "pi-agent-ide": ["read", "apply", "replace", "insert", "delete", "write"],
+  "builtin-bash": ["bash"],
+  "pi-semantic-edit": ["read", "edit"],
+  "pi-edit-guard": ["read", "edit", "undo"],
 };

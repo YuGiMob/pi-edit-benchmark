@@ -21,12 +21,18 @@ describe("contender registry", () => {
     const contenders = allContenders();
     const ids = contenders.map((c) => c.info.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(contenders.length).toBeGreaterThanOrEqual(8);
+    expect(contenders.length).toBeGreaterThanOrEqual(9);
   });
 
-  it("registers both pro diff-context variants", () => {
+  it("registers the pro family and drops removed contenders", () => {
     const ids = allContenders().map((c) => c.info.id);
     expect(ids).toContain("pi-hashline-edit-pro");
-    expect(ids).toContain("pi-hashline-edit-pro-diff0");
+    expect(ids).toContain("builtin-bash");
+    expect(ids).toContain("pi-hashline-edit-pro-nodedup");
+    expect(ids).toContain("pi-edit-guard");
+    expect(ids).not.toContain("pi-hashline-edit-pro-diff0");
+    expect(ids).not.toContain("pi-hashline-edit");
+    expect(ids).not.toContain("pi-hashline-context-edit");
+    expect(ids).not.toContain("pi-agent-ide");
   });
 });

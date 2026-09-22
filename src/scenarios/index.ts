@@ -135,8 +135,6 @@ export const scenarios: Scenario[] = [
     expected: { outcome: "applied", content: `a\nREPLACED\nb\n` },
     expectedByContender: {
       "builtin-edit": { outcome: "rejected" },
-      "pi-hashline-edit": { outcome: "rejected" },
-      "pi-hashline-context-edit": { outcome: "rejected" },
     },
   },
   {
@@ -148,6 +146,84 @@ export const scenarios: Scenario[] = [
     description: "Replace a line with its exact current content; nothing may change.",
     fixture: "aaa\nbbb\nccc\n",
     expected: { outcome: "either", content: "aaa\nbbb\nccc\n" },
+  },
+  {
+    id: "sub-line-token",
+    fileName: "sub-line.ts",
+    category: "correctness",
+    focus: "core",
+    name: "replace a token inside a longer line",
+    description:
+      "Only a small token inside a longer line changes. Search/replace tools can target the token alone; line-anchored tools rewrite the line. The outcome (the rest of the line byte-identical) is the same for both.",
+    fixture: [
+      "function loadConfig() {",
+      '  const endpoint = "https://api.example.com/v1/resources?limit=100&sort=asc";',
+      '  const fallback = "https://api.example.com/v1/resources?limit=25&sort=desc";',
+      "  return { endpoint, fallback };",
+    ].join("\n") + "\n",
+    expected: {
+      outcome: "applied",
+      content: [
+        "function loadConfig() {",
+        '  const endpoint = "https://api.example.com/v1/resources?limit=250&sort=asc";',
+        '  const fallback = "https://api.example.com/v1/resources?limit=25&sort=desc";',
+        "  return { endpoint, fallback };",
+      ].join("\n") + "\n",
+    },
+  },
+  {
+    id: "replace-all",
+    fileName: "replace-all.yaml",
+    category: "correctness",
+    focus: "core",
+    name: "replace every occurrence of a repeated token",
+    description:
+      "A token appears on four lines. Tools with replaceAll get it in one small edit; others need per-occurrence entries or ranges. All must end with every occurrence replaced.",
+    fixture: [
+      "script:",
+      "  stage: deploy --env stage",
+      "  canary: deploy --env canary",
+      "  prod: deploy --env prod",
+      "  smoke: deploy --env smoke",
+    ].join("\n") + "\n",
+    expected: {
+      outcome: "applied",
+      content: [
+        "script:",
+        "  stage: ship --env stage",
+        "  canary: ship --env canary",
+        "  prod: ship --env prod",
+        "  smoke: ship --env smoke",
+      ].join("\n") + "\n",
+    },
+  },
+  {
+    id: "batch-edits",
+    fileName: "batch.ts",
+    category: "correctness",
+    focus: "core",
+    name: "five disjoint small edits across a file",
+    description:
+      "Five separate values change in one file. Tests batching economy: multi-edit calls vs one call per change. Every edit must land; unmodified lines stay byte-identical.",
+    fixture: [
+      "server:",
+      "  host: localhost",
+      "  port: 8080",
+      "  timeout: 30",
+      "  workers: 4",
+      "  loglevel: info",
+    ].join("\n") + "\n",
+    expected: {
+      outcome: "applied",
+      content: [
+        "server:",
+        "  host: 127.0.0.1",
+        "  port: 9090",
+        "  timeout: 60",
+        "  workers: 8",
+        "  loglevel: debug",
+      ].join("\n") + "\n",
+    },
   },
   {
     id: "insert-after",
@@ -222,6 +298,35 @@ export const scenarios: Scenario[] = [
     fixture: "aaa\nbbb\nccc\nddd\neee\n",
     mutateAfterRead: (content) => content.replace("aaa", "aaa-external"),
     expected: { outcome: "applied", content: "aaa-external\nbbb\nCCC\nddd\neee\n" },
+  },
+  {
+    id: "formatter-drift",
+    fileName: "formatter-drift.ts",
+    category: "safety",
+    focus: "staleness",
+    name: "whole-file reformat between read and edit; the target token survives",
+    description:
+      "A formatter reindents the entire file after the model reads it. The target token is unchanged by the reformat. Tolerant tools apply onto the current bytes, strict tools refuse and re-read; both end at the same formatted result. Writing back a stale cached view fails.",
+    fixture: [
+      "function connect(opts) {",
+      "  const host = opts.host;",
+      "  const port = opts.port ?? 8080;",
+      "  return { host, port };",
+    ].join("\n") + "\n",
+    mutateAfterRead: (content) =>
+      content
+        .split("\n")
+        .map((line) => (line.startsWith("  ") ? "  " + line : line))
+        .join("\n"),
+    expected: {
+      outcome: "applied",
+      content: [
+        "function connect(opts) {",
+        "    const host = opts.host;",
+        "    const port = opts.port ?? 9090;",
+        "    return { host, port };",
+      ].join("\n") + "\n",
+    },
   },
   {
     id: "anchor-stability",

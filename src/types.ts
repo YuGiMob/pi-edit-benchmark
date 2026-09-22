@@ -54,8 +54,8 @@ export interface LlmModelSpec {
   name: string;
   reasoning: boolean;
   maxTokens: number;
-  provider?: string;
-  baseUrl?: string;
+  provider: string;
+  baseUrl: string;
   api?: "openai-completions" | "openai-responses";
   reasoningEffort?: string;
 }
@@ -114,4 +114,5 @@ export interface LlmReport {
   generatedAt: string;
   models: LlmModelSpec[];
   runs: LlmRun[];
+  mandateRead?: boolean;
 }

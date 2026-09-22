@@ -9,6 +9,7 @@ export interface ProContenderOptions {
   name?: string;
   description?: string;
   diffContextLines?: number;
+  boundaryDedupMode?: "on" | "strict" | "off";
 }
 
 const DEFAULT_ID = "pi-hashline-edit-pro";
@@ -30,7 +31,11 @@ function serialize<T>(work: () => Promise<T>): Promise<T> {
   return run;
 }
 
-async function configDirFor(id: string, diffContextLines: number): Promise<string> {
+async function configDirFor(
+  id: string,
+  diffContextLines: number,
+  boundaryDedupMode: "on" | "strict" | "off",
+): Promise<string> {
   const dir = join(CONFIG_ROOT, id.replace(/[^A-Za-z0-9._-]/g, "_"));
   const appDir = join(dir, "pi-hashline-edit-pro");
   await mkdir(appDir, { recursive: true });
@@ -42,7 +47,7 @@ async function configDirFor(id: string, diffContextLines: number): Promise<strin
         anchorGrepEnabled: true,
         requirePath: false,
         strictInput: false,
-        boundaryDedupMode: "on",
+        boundaryDedupMode,
         diffContextLines,
       },
       null,
@@ -66,16 +71,16 @@ function withStandardConfig<T>(dir: string, work: () => Promise<T>): Promise<T> 
   });
 }
 
-const PRO_VERSION = pkgVersion("pi-hashline-edit-pro", "4.2.6");
-
+const PRO_VERSION = pkgVersion("pi-hashline-edit-pro", "4.3.7");
 export function proContender(options: ProContenderOptions = {}): Contender {
   const id = options.id ?? DEFAULT_ID;
   const diffContextLines = options.diffContextLines ?? DEFAULT_DIFF_CONTEXT_LINES;
+  const boundaryDedupMode = options.boundaryDedupMode ?? "on";
   const registryRef: { registry?: ReturnType<typeof makeRegistry> } = {};
   const configDirRef: { dir?: Promise<string> } = {};
 
   const getConfigDir = () => {
-    configDirRef.dir ??= configDirFor(id, diffContextLines);
+    configDirRef.dir ??= configDirFor(id, diffContextLines, boundaryDedupMode);
     return configDirRef.dir;
   };
 

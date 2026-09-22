@@ -18,6 +18,7 @@ function makeEvents() {
 import { Compile } from "typebox/compile";
 import type { ToolSpec } from "../types";
 import { readFileSync } from "fs";
+import { createReadTool, createReadToolDefinition } from "@earendil-works/pi-coding-agent";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
@@ -154,4 +155,41 @@ export function extractResultText(result: unknown): string {
 
 export function isErrorResult(result: unknown): boolean {
   return (result as { isError?: boolean })?.isError === true;
+}
+
+export async function runBuiltinTool(
+  tool: any,
+  params: unknown,
+  cwd: string,
+): Promise<{ ok: boolean; error?: string; resultText?: string }> {
+  try {
+    const result = await tool.execute(
+      "t1",
+      params,
+      undefined,
+      undefined,
+      { cwd } as never,
+    );
+    const text = extractResultText(result);
+    return {
+      ok: !isErrorResult(result),
+      resultText: text,
+      error: isErrorResult(result) ? text : undefined,
+    };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+export function builtinReadTool(): ToolSpec {
+  const readDef = createReadToolDefinition(".") as unknown as any;
+  return {
+    name: "read",
+    description: readDef.description,
+    promptSnippet: readDef.promptSnippet,
+    promptGuidelines: readDef.promptGuidelines,
+    parameters: readDef.parameters ?? {},
+    execute: (params: unknown, runCwd: string) =>
+      runBuiltinTool(createReadTool(runCwd) as unknown as any, params, runCwd),
+  };
 }

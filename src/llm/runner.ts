@@ -15,6 +15,7 @@ export interface LlmRunnerOptions {
   costPerMIn: number;
   costPerMOut: number;
   traceDir?: string;
+  mandateRead?: boolean;
   log?: (line: string) => void;
 }
 
@@ -24,8 +25,11 @@ export interface EvaluatedOutcome {
   failureKind?: string;
 }
 
-export function taskPrompt(scenario: Scenario): string {
-  return `Modify ${scenario.fileName} in the current working directory. ${taskDescriptions[scenario.id] ?? scenario.name}. Use the provided tools; always read the file before editing.`;
+export function taskPrompt(scenario: Scenario, opts?: { mandateRead?: boolean }): string {
+  const suffix = opts?.mandateRead === false
+    ? "Use the provided tools."
+    : "Use the provided tools; always read the file before editing.";
+  return `Modify ${scenario.fileName} in the current working directory. ${taskDescriptions[scenario.id] ?? scenario.name}. ${suffix}`;
 }
 
 const taskDescriptions: Record<string, string> = {
@@ -78,6 +82,10 @@ const taskDescriptions: Record<string, string> = {
   "insert-eof": "Insert exactly one line 'CCC' after the last line of the file; the existing lines must stay",
   "crlf-bom": "Replace the line containing 'beta' (in a BOM-prefixed CRLF file) with exactly one line: BETA",
   "insert-race-stale-boundary": "Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay",
+  "sub-line-token": "In the line containing 'sort=asc', change 'limit=100' to 'limit=250'. Keep the rest of the line exactly as it is",
+  "replace-all": "Replace every occurrence of the word 'deploy' with 'ship' (there are four)",
+  "batch-edits": "Update the server config: host to 127.0.0.1, port to 9090, timeout to 60, workers to 8, and loglevel to debug. Keep the keys and structure unchanged",
+  "formatter-drift": "In the line containing 'opts.port ?? 8080', change 8080 to 9090"
 };
 
 const RECOVERY_CONTENT: Record<string, string> = {
@@ -159,6 +167,7 @@ export async function runLlmScenario(
     const tools = (await contender.listTools()).filter((t) =>
       opts.toolFilter.includes(t.name),
     );
+    const hasReadTool = tools.some((t) => t.name === "read");
     if (tools.length === 0) {
       base.outcome = "no tools";
       base.failureKind = "skipped";
@@ -172,7 +181,7 @@ export async function runLlmScenario(
           ? contender.systemPromptPatch(buildSystemPrompt(tools, dir))
           : buildSystemPrompt(tools, dir),
       },
-      { role: "user", content: taskPrompt(scenario) },
+      { role: "user", content: taskPrompt(scenario, { mandateRead: opts.mandateRead !== false }) },
     ];
     const traceMessages: LlmTrace["messages"] = messages.map((m) => ({ ...m }));
 
@@ -238,11 +247,12 @@ export async function runLlmScenario(
         if (!base.readFirst && isReadCall(call.name, params)) {
           base.readFirst = true;
         }
+        const readLike = isReadCall(call.name, params) || (!hasReadTool && !seenRead.value);
         if (isEditCall(call.name) && !seenRead.value) {
           base.editedBlind = true;
         }
         const toolResult = await tool.execute(params, dir);
-        if (!seenRead.value && isReadCall(call.name, params)) {
+        if (!seenRead.value && readLike) {
           seenRead.value = true;
           if (scenario.mutateAfterRead && !mutationApplied) {
             const current = await readFile(filePath, "utf-8");
@@ -284,7 +294,7 @@ export async function runLlmScenario(
         contenderId: contender.info.id,
         contenderVersion: contender.info.version,
         scenarioId: scenario.id,
-        task: taskPrompt(scenario),
+        task: taskPrompt(scenario, { mandateRead: opts.mandateRead !== false }),
         startedAt: new Date(startedAt).toISOString(),
         durationMs: base.durationMs,
         tokensIn: base.tokensIn,
@@ -371,6 +381,16 @@ export function evaluateLlmOutcome(
       outcome: "applied",
       failureKind: "silent-wrong-line",
     };
+  }
+
+  if (scenario.id === "formatter-drift") {
+    if (postMutation !== null && actual === postMutation) {
+      return {
+        pass: false,
+        outcome: "rejected",
+        failureKind: "no-recovery",
+      };
+    }
   }
 
   if (expected.outcome === "rejected") {
