@@ -1,13 +1,13 @@
 {
  "modelId": "k2-horizon-3.7b-q4",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "b18-boundary-dup",
  "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools.",
- "startedAt": "2026-09-23T11:31:02.331Z",
- "durationMs": 4872,
- "tokensIn": 5143,
- "tokensOut": 175,
+ "startedAt": "2026-09-23T20:55:30.106Z",
+ "durationMs": 3846,
+ "tokensIn": 5533,
+ "tokensOut": 109,
  "costUsd": 0,
  "pass": true,
  "outcome": "applied",
@@ -18,7 +18,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-Jj4FGo/pi-hashline-edit-pro-b18-boundary-dup"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-ASukrX/pi-hashline-edit-pro-b18-boundary-dup"
   },
   {
    "role": "user",
@@ -27,10 +27,10 @@
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "I need to read b18.ts first to see its content and anchors.",
+   "reasoning": "Let me read the file first to find the line with 'bbb'.",
    "toolCalls": [
     {
-     "id": "yDcKugk1RVOWcr2QP1O6bGPpXkEltJbU",
+     "id": "ioRVJoqnPDX9D7Bmzf8Ks5hFhHoblgbA",
      "name": "read",
      "arguments": "{\"path\":\"b18.ts\"}"
     }
@@ -38,25 +38,24 @@
   },
   {
    "role": "tool",
-   "toolCallId": "yDcKugk1RVOWcr2QP1O6bGPpXkEltJbU",
-   "content": "ywWe│aaa\ndpEm│bbb\nIfOh│ccc"
+   "toolCallId": "ioRVJoqnPDX9D7Bmzf8Ks5hFhHoblgbA",
+   "content": "lpov│aaa\nPoEk│bbb\nyzDY│ccc"
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The file has three lines: \"aaa\", \"bbb\", \"ccc\". I need to replace the line containing 'bbb' with exactly two lines: 'aaa' and 'BBB'. So the result should be:\n\naaa\naaa\nBBB\nccc\n\nLet me use replace to replace the 'bbb' line with two lines.",
    "toolCalls": [
     {
-     "id": "MzXXzCTAHYWdTJ7KasiD69FfdlVuxA5j",
+     "id": "IZ5Pl4oSj9GDd6V2Ulbc9Tdt3Xk8uO3v",
      "name": "replace",
-     "arguments": "{\"remove_from\":\"dpEm\",\"remove_to\":\"dpEm\",\"replacement_lines\":[\"aaa\", \"BBB\"]}"
+     "arguments": "{\"remove_from\":\"lpov\",\"remove_to\":\"PoEk\",\"replacement_lines\":[\"aaa\", \"BBB\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "MzXXzCTAHYWdTJ7KasiD69FfdlVuxA5j",
-   "content": "Successfully replaced in b18.ts. Added 1 line(s), removed 1 line(s).\n\nWarnings:\nBoundary dedup: 1 line not added again (see dedup│ row).\n ywWe│aaa\ndedup│aaa\n-dpEm│bbb\n+Opzk│BBB\n IfOh│ccc"
+   "toolCallId": "IZ5Pl4oSj9GDd6V2Ulbc9Tdt3Xk8uO3v",
+   "content": "Successfully replaced in b18.ts. Added 2 line(s), removed 2 line(s).\n lpov│aaa\n-PoEk│bbb\n+ikXL│BBB\n yzDY│ccc"
   }
  ]
 }

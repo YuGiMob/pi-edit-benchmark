@@ -1,0 +1,109 @@
+{
+ "modelId": "k2-horizon-7b-q4",
+ "contenderId": "pi-hashline-edit-pro",
+ "contenderVersion": "4.4.1",
+ "scenarioId": "insert-race-stale-boundary",
+ "task": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools.",
+ "startedAt": "2026-09-23T20:58:22.093Z",
+ "durationMs": 10847,
+ "tokensIn": 11974,
+ "tokensOut": 261,
+ "costUsd": 0,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nbbb-x\nBB1\nBB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-m9Wirs/pi-hashline-edit-pro-insert-race-stale-boundary"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "Let me start by reading the file to find the line containing 'bbb'.",
+   "toolCalls": [
+    {
+     "id": "v2tGBogkdwLjgLGWfAF9RulpMsicpTXR",
+     "name": "read",
+     "arguments": "{\"path\":\"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "v2tGBogkdwLjgLGWfAF9RulpMsicpTXR",
+   "content": "yxPP│aaa\ndpns│bbb\nIkAD│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "7pTkh1AwJUyCpQX524ZY5IEgO16sDSa7",
+     "name": "insert",
+     "arguments": "{\"anchor\":\"dpns\",\"direction\":\"after\",\"lines\":[\"BB1\", \"BB2\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "7pTkh1AwJUyCpQX524ZY5IEgO16sDSa7",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in /tmp/pi-llm-bench-m9Wirs/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts: \"dpns\", \"dpns\". The file changed since read. Call read() on /tmp/pi-llm-bench-m9Wirs/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts for fresh anchors."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "WnZ3lDLVZmNb8SPI8VH0t5Y0Pee2Umme",
+     "name": "read",
+     "arguments": "{\"path\":\"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "WnZ3lDLVZmNb8SPI8VH0t5Y0Pee2Umme",
+   "content": "yxPP│aaa\nUEbj│bbb-x\nIkAD│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The 'bbb' line has changed. Now I need to insert after the line containing 'bbb'. The current line is `UEbj│bbb-x`. Let me insert after that line.",
+   "toolCalls": [
+    {
+     "id": "h0KJqvBTdOGQsJnlivqF54VPu9nr0KHH",
+     "name": "insert",
+     "arguments": "{\"anchor\":\"UEbj\",\"direction\":\"after\",\"lines\":[\"BB1\", \"BB2\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "h0KJqvBTdOGQsJnlivqF54VPu9nr0KHH",
+   "content": "Successfully inserted in insert-race.ts. Added 2 line(s), removed 1 line(s).\n ...\n UEbj│bbb-x\n+CTFG│BB1\n+ijCC│BB2\n IkAD│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "4JUifZEW6Q8Q9c47s110HYVbvtUHjTpk",
+     "name": "read",
+     "arguments": "{\"path\":\"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "4JUifZEW6Q8Q9c47s110HYVbvtUHjTpk",
+   "content": "yxPP│aaa\nUEbj│bbb-x\nCTFG│BB1\nijCC│BB2\nIkAD│ccc"
+  }
+ ]
+}

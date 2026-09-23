@@ -1,13 +1,13 @@
 {
  "modelId": "gemma-4-26b-a4b-q4",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "batch-edits",
  "task": "Modify batch.ts in the current working directory. Update the server config: host to 127.0.0.1, port to 9090, timeout to 60, workers to 8, and loglevel to debug. Keep the keys and structure unchanged. Use the provided tools.",
- "startedAt": "2026-09-23T08:28:14.538Z",
- "durationMs": 7580,
- "tokensIn": 5481,
- "tokensOut": 187,
+ "startedAt": "2026-09-23T20:54:30.806Z",
+ "durationMs": 17059,
+ "tokensIn": 5952,
+ "tokensOut": 313,
  "costUsd": 0,
  "pass": true,
  "outcome": "applied",
@@ -18,7 +18,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-3A5xWQ/pi-hashline-edit-pro-batch-edits"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-t2NRz3/pi-hashline-edit-pro-batch-edits"
   },
   {
    "role": "user",
@@ -27,10 +27,10 @@
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "Okay, I need to modify `batch.ts` to update the server configuration.\nFirst, I'll read the `batch.ts` file to see the current configuration.",
+   "reasoning": "Okay, I understand the task. I need to modify `batch.ts` to update the server configuration with specific values:\n- `host`: `127.0.0.1`\n- `port`: `9090`\n- `timeout`: `60`\n- `workers`: `8`\n- `loglevel`: `debug`\n\nFirst, I need to read the content of `batch.ts` to identify the current configuration structure and find the appropriate lines to change.",
    "toolCalls": [
     {
-     "id": "QHfUVXIBu6MHywsJiF7jQhPE46SIPltd",
+     "id": "4cisjHwZKOkeUeTpRvXdq4nJF6ItoxiZ",
      "name": "read",
      "arguments": "{\"path\":\"batch.ts\"}"
     }
@@ -38,24 +38,24 @@
   },
   {
    "role": "tool",
-   "toolCallId": "QHfUVXIBu6MHywsJiF7jQhPE46SIPltd",
-   "content": "CUao│server:\nikDK│  host: localhost\nNXgb│  port: 8080\nvgaw│  timeout: 30\nawEc│  workers: 4\nGLup│  loglevel: info"
+   "toolCallId": "4cisjHwZKOkeUeTpRvXdq4nJF6ItoxiZ",
+   "content": "CLtg│server:\nidcr│  host: localhost\nNOXL│  port: 8080\nuzQM│  timeout: 30\napgn│  workers: 4\nGBIk│  loglevel: info"
   },
   {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "47uljXMBmpDrujjJqXzTce1DD7W5YcCI",
+     "id": "LNOV3Boz26z6W4U0kMbezAe7vGUSurRP",
      "name": "replace",
-     "arguments": "{\"remove_from\":\"ikDK\",\"remove_to\":\"GLup\",\"replacement_lines\":[\"  host: 127.0.0.1\",\"  port: 9090\",\"  timeout: 60\",\"  workers: 8\",\"  loglevel: debug\"]}"
+     "arguments": "{\"remove_from\":\"idcr\",\"remove_to\":\"GBIk\",\"replacement_lines\":[\"  host: 127.0.0.1\",\"  port: 9090\",\"  timeout: 60\",\"  workers: 8\",\"  loglevel: debug\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "47uljXMBmpDrujjJqXzTce1DD7W5YcCI",
-   "content": "Successfully replaced in batch.ts. Added 5 line(s), removed 5 line(s).\n CUao│server:\n-ikDK│  host: localhost\n-NXgb│  port: 8080\n-vgaw│  timeout: 30\n-awEc│  workers: 4\n-GLup│  loglevel: info\n+ffzw│  host: 127.0.0.1\n+LBED│  port: 9090\n+snMA│  timeout: 60\n+WHUA│  workers: 8\n+DuFT│  loglevel: debug"
+   "toolCallId": "LNOV3Boz26z6W4U0kMbezAe7vGUSurRP",
+   "content": "Successfully replaced in batch.ts. Added 5 line(s), removed 5 line(s).\n CLtg│server:\n-idcr│  host: localhost\n-NOXL│  port: 8080\n-uzQM│  timeout: 30\n-apgn│  workers: 4\n-GBIk│  loglevel: info\n+DaFu│  host: 127.0.0.1\n+kdBE│  port: 9090\n+Ohzi│  timeout: 60\n+xbHo│  workers: 8\n+chdi│  loglevel: debug"
   }
  ]
 }

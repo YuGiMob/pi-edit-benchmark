@@ -78,6 +78,14 @@ export const LLM_MODELS: LlmModelSpec[] = [
     provider: "llamacpp",
     baseUrl: "http://192.168.0.21:8080/v1",
   },
+  {
+    id: "k2-horizon-7b-q4",
+    name: "K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp)",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "llamacpp",
+    baseUrl: "http://192.168.0.21:8080/v1",
+  },
 ];
 
 export const DEFAULT_LLM_SCENARIOS: string[] = [];
@@ -85,7 +93,6 @@ export const DEFAULT_LLM_SCENARIOS: string[] = [];
 export const LLM_TOOL_FILTERS: Record<string, string[]> = {
   "builtin-edit": ["read", "edit"],
   "pi-hashline-edit-pro": ["read", "replace", "insert", "undo_last_change"],
-  "pi-hashline-edit-pro-nodedup": ["read", "replace", "insert", "undo_last_change"],
   "pi-hashline-readmap": ["read", "edit"],
   "@cortexkit/aft-pi": ["read", "edit"],
   "@xynogen/pix-edit": ["read", "edit"],

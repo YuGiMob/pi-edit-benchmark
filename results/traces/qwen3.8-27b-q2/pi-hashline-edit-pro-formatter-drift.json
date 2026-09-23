@@ -1,13 +1,13 @@
 {
  "modelId": "qwen3.8-27b-q2",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "formatter-drift",
  "task": "Modify formatter-drift.ts in the current working directory. In the line containing 'opts.port ?? 8080', change 8080 to 9090. Use the provided tools.",
- "startedAt": "2026-09-23T09:25:59.589Z",
- "durationMs": 53862,
- "tokensIn": 10978,
- "tokensOut": 580,
+ "startedAt": "2026-09-23T20:49:20.962Z",
+ "durationMs": 33696,
+ "tokensIn": 11718,
+ "tokensOut": 428,
  "costUsd": 0,
  "pass": true,
  "outcome": "applied",
@@ -18,7 +18,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-gpdel5/pi-hashline-edit-pro-formatter-drift"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-UvbwGx/pi-hashline-edit-pro-formatter-drift"
   },
   {
    "role": "user",
@@ -27,10 +27,10 @@
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The user is asking to modify `formatter-drift.ts` in the current working directory. I need to find the line containing 'opts.port ?? 8080' and change 8080 to 9090.\n\nFirst, I need to read the file and find the anchor for that line.\n",
+   "reasoning": "The user is asking to modify a file called formatter-drift.ts in the current working directory. The content is on the line containing 'opts.port ?? 8080', changing 8080 to 9090.\n\nLet me read the file to find that line.\n",
    "toolCalls": [
     {
-     "id": "pvah0xY3r6YHzdw8WnIGutndv9Yal6pa",
+     "id": "fteTGDY10eF4Nl6FM13PoaZgw7UuhAaj",
      "name": "read",
      "arguments": "{\"path\":\"formatter-drift.ts\"}"
     }
@@ -38,33 +38,33 @@
   },
   {
    "role": "tool",
-   "toolCallId": "pvah0xY3r6YHzdw8WnIGutndv9Yal6pa",
-   "content": "ngfi│function connect(opts) {\nRhbi│  const host = opts.host;\nASac│  const port = opts.port ?? 8080;\nfaac│  return { host, port };"
+   "toolCallId": "fteTGDY10eF4Nl6FM13PoaZgw7UuhAaj",
+   "content": "fxDH│function connect(opts) {\nLYbd│  const host = opts.host;\ntcSm│  const port = opts.port ?? 8080;\nXBfk│  return { host, port };"
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The file is as follows:\n```\nngfi│function connect(opts) {\nRhbi│  const host = opts.host;\nASac│  const port = opts.port ?? 8080;\nfaac│  return { host, port };\n```\n\nI need to change line 3 (ASac) from `  const port = opts.port ?? 8080;` to `  const port = opts.port ?? 9090;`.\n\nUsing replace, I'll set remove_from = \"ASac\", remove_to = \"ASac\", replacement_lines = [\"  const port = opts.port ?? 9090;\"].\n",
+   "reasoning": "Simple task. Find the line containing \"opts.port ?? 8080\" and change 8080 to 9090.\n\nThe anchor of the target line is `tcSm`. Use `replace` to replace that line.\n",
    "toolCalls": [
     {
-     "id": "Mk4SPbT61HoEH9m7jCjNuNi1VlvMko4I",
+     "id": "1QV1Ulh5sIwxzIwCHSOuoSMXBCbnYxrS",
      "name": "replace",
-     "arguments": "{\"remove_from\":\"ASac\",\"remove_to\":\"ASac\",\"replacement_lines\":[\"  const port = opts.port ?? 9090;\"]}"
+     "arguments": "{\"remove_from\":\"tcSm\",\"remove_to\":\"tcSm\",\"replacement_lines\":[\"  const port = opts.port ?? 9090;\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "Mk4SPbT61HoEH9m7jCjNuNi1VlvMko4I",
-   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in formatter-drift.ts: \"ASac\", \"ASac\". The file changed since read. Call read() on formatter-drift.ts for fresh anchors."
+   "toolCallId": "1QV1Ulh5sIwxzIwCHSOuoSMXBCbnYxrS",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in formatter-drift.ts: \"tcSm\", \"tcSm\". The file changed since read. Call read() on formatter-drift.ts for fresh anchors."
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The file has been modified since it was read. I'll read it again to get the new anchor.\n",
+   "reasoning": "I need to look into this further. Let me check the details.\n",
    "toolCalls": [
     {
-     "id": "SCx0Xp8vmUL6Zven3w4wvhew2vCosuSV",
+     "id": "oFvePtWyNoJzzezGzWro9tfhTv4JtTZT",
      "name": "read",
      "arguments": "{\"path\":\"formatter-drift.ts\"}"
     }
@@ -72,25 +72,25 @@
   },
   {
    "role": "tool",
-   "toolCallId": "SCx0Xp8vmUL6Zven3w4wvhew2vCosuSV",
-   "content": "ngfi│function connect(opts) {\nBSJP│    const host = opts.host;\nhbJA│    const port = opts.port ?? 8080;\nMTnx│    return { host, port };"
+   "toolCallId": "oFvePtWyNoJzzezGzWro9tfhTv4JtTZT",
+   "content": "fxDH│function connect(opts) {\nIRCE│    const host = opts.host;\npuHW│    const port = opts.port ?? 8080;\nThxs│    return { host, port };"
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "I need to look into this further. Let me confirm the details.\n\nThe file has been modified (the indentation has changed). I'll update the port line now.\n",
+   "reasoning": "The file has been reformatted (the indentation has changed). I'll replace it with the new anchor.\n",
    "toolCalls": [
     {
-     "id": "WX5Fq9wTBLKyIwLvhU81yK3Av3l34bL9",
+     "id": "2ZSUfPmH7UwAuI1tcaLGHyV0jckvzX5c",
      "name": "replace",
-     "arguments": "{\"remove_from\":\"hbJA\",\"remove_to\":\"hbJA\",\"replacement_lines\":[\"    const port = opts.port ?? 9090;\"]}"
+     "arguments": "{\"remove_from\":\"puHW\",\"remove_to\":\"puHW\",\"replacement_lines\":[\"    const port = opts.port ?? 9090;\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "WX5Fq9wTBLKyIwLvhU81yK3Av3l34bL9",
-   "content": "Successfully replaced in formatter-drift.ts. Added 1 line(s), removed 1 line(s).\n ...\n BSJP│    const host = opts.host;\n-hbJA│    const port = opts.port ?? 8080;\n+ZEUP│    const port = opts.port ?? 9090;\n MTnx│    return { host, port };"
+   "toolCallId": "2ZSUfPmH7UwAuI1tcaLGHyV0jckvzX5c",
+   "content": "Successfully replaced in formatter-drift.ts. Added 1 line(s), removed 1 line(s).\n ...\n IRCE│    const host = opts.host;\n-puHW│    const port = opts.port ?? 8080;\n+euUK│    const port = opts.port ?? 9090;\n Thxs│    return { host, port };"
   }
  ]
 }

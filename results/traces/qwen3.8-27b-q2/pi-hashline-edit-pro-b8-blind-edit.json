@@ -1,13 +1,13 @@
 {
  "modelId": "qwen3.8-27b-q2",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "b8-blind-edit",
  "task": "Modify b8.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools.",
- "startedAt": "2026-09-23T09:20:02.120Z",
- "durationMs": 28928,
- "tokensIn": 6161,
- "tokensOut": 304,
+ "startedAt": "2026-09-23T20:45:59.531Z",
+ "durationMs": 31398,
+ "tokensIn": 6554,
+ "tokensOut": 225,
  "costUsd": 0,
  "pass": true,
  "outcome": "applied",
@@ -18,7 +18,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-BR0BqN/pi-hashline-edit-pro-b8-blind-edit"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-VlEC7y/pi-hashline-edit-pro-b8-blind-edit"
   },
   {
    "role": "user",
@@ -27,36 +27,36 @@
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The user wants to modify b8.ts in the current working directory. First, I need to read the file to find the line containing \"bbb\", and then replace it with \"BBB\".\n\nLet me read the file first.\n",
+   "reasoning": "The user is asking me to modify b8.ts in the current working directory. I need to find the line containing \"bbb\" and replace it with exactly one line, \"BBB\". First, let me read the file to find the anchor.\n",
    "toolCalls": [
     {
-     "id": "t0LrH79hb20oeLwYxsCIzdyReFoQMAZh",
+     "id": "tpS1TG8F6PO0tzsKimwpmGHwKFpUbMD8",
      "name": "read",
-     "arguments": "{\"path\":\"/tmp/pi-llm-bench-BR0BqN/pi-hashline-edit-pro-b8-blind-edit/b8.ts\"}"
+     "arguments": "{\"path\":\"b8.ts\"}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "t0LrH79hb20oeLwYxsCIzdyReFoQMAZh",
-   "content": "ocCG│aaa\nSRcm│bbb\nAmqv│ccc"
+   "toolCallId": "tpS1TG8F6PO0tzsKimwpmGHwKFpUbMD8",
+   "content": "wwTV│aaa\nceKy│bbb\nHVnv│ccc"
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The user wants to replace the line containing 'bbb' with exactly one line: BBB.\n\nThe line containing 'bbb' is at anchor SRcm. I need to replace this line with BBB.\n\nLet me use the replace tool to replace the line at anchor SRcm with BBB.\n\nThe remove_from and remove_to should both be SRcm (the single line to replace). The replacement_lines should be [\"BBB\"].\n",
+   "reasoning": "I need to replace the 'bbb' line with BBB. The line is at anchor `ceKy`. Let me replace that single line.\n",
    "toolCalls": [
     {
-     "id": "bX4P9phVE8vhlbAKHrEKzAckfuPBCqfd",
+     "id": "dsvJKlzzRc96c9w6YtcU9zRatujURXhk",
      "name": "replace",
-     "arguments": "{\"remove_from\":\"SRcm\",\"remove_to\":\"SRcm\",\"replacement_lines\":[\"BBB\"]}"
+     "arguments": "{\"remove_from\":\"ceKy\",\"remove_to\":\"ceKy\",\"replacement_lines\":[\"BBB\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "bX4P9phVE8vhlbAKHrEKzAckfuPBCqfd",
-   "content": "Successfully replaced in b8.ts. Added 1 line(s), removed 1 line(s).\n ocCG│aaa\n-SRcm│bbb\n+IPPG│BBB\n Amqv│ccc"
+   "toolCallId": "dsvJKlzzRc96c9w6YtcU9zRatujURXhk",
+   "content": "Successfully replaced in b8.ts. Added 1 line(s), removed 1 line(s).\n wwTV│aaa\n-ceKy│bbb\n+ipam│BBB\n HVnv│ccc"
   }
  ]
 }

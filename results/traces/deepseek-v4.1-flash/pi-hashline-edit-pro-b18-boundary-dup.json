@@ -1,14 +1,14 @@
 {
  "modelId": "deepseek-v4.1-flash",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "b18-boundary-dup",
  "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools.",
- "startedAt": "2026-09-23T05:29:59.530Z",
- "durationMs": 14270,
- "tokensIn": 11977,
- "tokensOut": 894,
- "costUsd": 0.00233295,
+ "startedAt": "2026-09-23T20:44:31.433Z",
+ "durationMs": 6780,
+ "tokensIn": 6592,
+ "tokensOut": 249,
+ "costUsd": 0.0011382,
  "pass": false,
  "outcome": "applied",
  "failureKind": "applied-wrong",
@@ -19,7 +19,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-T77GSr/pi-hashline-edit-pro-b18-boundary-dup"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-GPj945/pi-hashline-edit-pro-b18-boundary-dup"
   },
   {
    "role": "user",
@@ -31,7 +31,7 @@
    "reasoning": "Let me read the file first.",
    "toolCalls": [
     {
-     "id": "call_00_inwmota3ai2jg49clk2wmv4x",
+     "id": "call_00_pdshuisnzgkinhnk9gskhjna",
      "name": "read",
      "arguments": "{\"path\": \"b18.ts\"}"
     }
@@ -39,59 +39,25 @@
   },
   {
    "role": "tool",
-   "toolCallId": "call_00_inwmota3ai2jg49clk2wmv4x",
-   "content": "CaFC│aaa\nioKV│bbb\nNeSY│ccc"
+   "toolCallId": "call_00_pdshuisnzgkinhnk9gskhjna",
+   "content": "ZeRo│aaa\nFNOn│bbb\nmmBL│ccc"
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "Replace line ioKV with two lines aaa and BBB. Note the replacement_lines re-include the boundary line adjacent? The line above is aaa, and replacement includes aaa, but that's not the boundary (remove_from is ioKV, remove_to ioKV). So it's fine, not dedup.\n\nWait, the dedup note: \"if replacement_lines re-include the boundary line adjacent to the range, it is deduplicated automatically\". The adjacent boundary lines are CaFC (aaa) and NeSY (ccc). Replacement_lines includes \"aaa\" which is content of CaFC, but dedup is by anchor line identity? Hmm, \"re-include the boundary line adjacent to the range\" - this likely refers to when remove_from/remove_to range is larger and replacement includes the line just before/after. Here range is single line ioKV, boundary adjacent lines are CaFC and NeSY. We're not re-including those lines as lines—we include text \"aaa\" which is a duplicate of CaFC's content but not the same line.\n\nActually the concern might be a trap: the task says replace line containing 'bbb' with exactly two lines aaa and BBB. So result:\naaa\naaa\nBBB\nccc\n\nLet me do it.",
+   "reasoning": "The line containing 'bbb' is FNOn. Replace it with two lines: aaa and BBB.",
    "toolCalls": [
     {
-     "id": "call_00_o6efecllqejet70z7uuwbq0y",
+     "id": "call_00_9azet9xg70kzz6w3pcyxdj1y",
      "name": "replace",
-     "arguments": "{\"remove_from\": \"ioKV\", \"remove_to\": \"ioKV\", \"replacement_lines\": [\"aaa\", \"BBB\"]}"
+     "arguments": "{\"remove_from\": \"FNOn\", \"remove_to\": \"FNOn\", \"replacement_lines\": [\"aaa\", \"BBB\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_00_o6efecllqejet70z7uuwbq0y",
-   "content": "Successfully replaced in b18.ts. Added 1 line(s), removed 1 line(s).\n\nWarnings:\nBoundary dedup: 1 line not added again (see dedup│ row).\n CaFC│aaa\ndedup│aaa\n-ioKV│bbb\n+RFzw│BBB\n NeSY│ccc"
-  },
-  {
-   "role": "assistant",
-   "content": "",
-   "reasoning": "As I suspected, the dedup kicked in: the replacement's first line \"aaa\" was deduplicated against the boundary line CaFC (adjacent to the range), so it wasn't added. Result is only aaa, BBB, ccc — not exactly two lines aaa and BBB.\n\nI need the result to be:\naaa\naaa\nBBB\nccc\n\nSo I need to add another aaa. The dedup prevented the first aaa. Now the file is:\nCaFC│aaa\nRFzw│BBB\nNeSY│ccc\n\nI need to insert aaa after CaFC. Let me read to confirm anchors. Actually the diff shows CaFC, RFzw, NeSY. Insert aaa after CaFC. But would dedup apply? Insert tool doesn't dedup, it says \"Lines are added literally, even when they duplicate neighbors.\" So insert aaa after CaFC.\n\nBut wait, insert after CaFC would put it between aaa and BBB, giving aaa, aaa, BBB, ccc. Correct.",
-   "toolCalls": [
-    {
-     "id": "call_00_p7ay203xg3yzrhnvl7pzkvtj",
-     "name": "insert",
-     "arguments": "{\"anchor\": \"CaFC\", \"direction\": \"after\", \"lines\": [\"aaa\"]}"
-    }
-   ]
-  },
-  {
-   "role": "tool",
-   "toolCallId": "call_00_p7ay203xg3yzrhnvl7pzkvtj",
-   "content": "Successfully inserted in b18.ts. Added 1 line(s), removed 1 line(s).\n CaFC│aaa\n+brwc│aaa\n RFzw│BBB\n ..."
-  },
-  {
-   "role": "assistant",
-   "content": "",
-   "reasoning": "Now the file should be aaa, aaa, BBB, ccc. Let me verify by reading.",
-   "toolCalls": [
-    {
-     "id": "call_00_wutz7rki8x4h38luetmw19p8",
-     "name": "read",
-     "arguments": "{\"path\": \"b18.ts\"}"
-    }
-   ]
-  },
-  {
-   "role": "tool",
-   "toolCallId": "call_00_wutz7rki8x4h38luetmw19p8",
-   "content": "CaFC│aaa\nbrwc│aaa\nRFzw│BBB\nNeSY│ccc"
+   "toolCallId": "call_00_9azet9xg70kzz6w3pcyxdj1y",
+   "content": "Successfully replaced in b18.ts. Added 2 line(s), removed 1 line(s).\n ZeRo│aaa\n-FNOn│bbb\n+NNyr│aaa\n+uzGF│BBB\n mmBL│ccc"
   }
  ]
 }

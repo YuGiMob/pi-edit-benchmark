@@ -31,13 +31,13 @@ The model must read the file and issue edits through the tools; the file state a
 
 ```
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
-bun run src/main-llm.ts                        # 9 models × 10 contenders × 38 scenarios (3,420 runs)
+bun run src/main-llm.ts                        # 10 models × 9 contenders × 38 scenarios (3,420 runs)
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
 ```
 
-**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`opencode-go: 16`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). One invocation covers the whole matrix — no manual per-lane runs or report merging.
+**Parallel lanes:** all selected models run in parallel, each as its own lane bounded by per-provider concurrency (`opencode-go: 16`, `llamacpp: 6` by default). `--lane-concurrency provider=n,...` overrides individual lanes, `--concurrency n` overrides every lane, and `--delay-ms` staggers lane starts (pacing for tight rate limits). Cloud lanes all run at once; the llamacpp lanes share one endpoint, so run one local model per invocation (or swap the served model between runs) and merge with `--resume`.
 
 ### Run traces (validation)
 
@@ -57,12 +57,15 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 | DeepSeek V4.1 Flash | `deepseek-v4.1-flash` | opencode-go | chat completions | provider default | $0.15 / $0.60 |
 | Gemma 4 26B A4B | `gemma-4-26b-a4b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | K2 Horizon 3.7B | `k2-horizon-3.7b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
+| K2 Horizon 7B | `k2-horizon-7b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.075 / $0.25 |
 | Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
 | MiMo 2.6 Flash | `mimo-v2.6-flash` | opencode-go | chat completions | provider default | $0.14 / $0.28 |
 | MiMo-V2.6-Pro | `mimo-v2.6-pro` | opencode-go | chat completions | provider default | $0.435 / $0.87 |
+
+The two K2 Horizon models run through IFM's llama.cpp fork (`model/K2Horizon` branch); mainline llama.cpp does not support the `k2_horizon` architecture yet. The local `llamacpp` endpoint serves a single model at a time, so local models are benchmarked in separate invocations with the served model swapped between them.
 
 Reported per run: pass/fail against the scenario expectations, outcome class (`applied`, `rejected`, `recovered` — the model re-read after a stale rejection and applied correctly), tool-call trace, tokens, and API cost (prices from `~/.pi/agent/models-store.json`).
 
@@ -72,7 +75,6 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | --- | --- | --- | --- |
 | `builtin-edit` | `{ path, edits: [{ oldText, newText }] }` | none (text matching) | no |
 | `pi-hashline-edit-pro` | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
-| `pi-hashline-edit-pro-nodedup` | same, with `boundaryDedupMode: off` (boundary re-inclusions apply literally) | `HASH│` 4-char, served-range verification | yes |
 | `pi-hashline-readmap` | `{ path, edits: [{ set_line / replace_lines / insert_after }] }` | `LINE:HASH|` 3-char | no |
 | `@cortexkit/aft-pi` | `{ path, edits: [{ oldString, newString, occurrence }] }` | none (fuzzy find/replace, Rust backend) | no |
 | `@xynogen/pix-edit` | `{ path, edits: [{ oldText, newText }] }` | none (unique-text replace + diff) | no |
@@ -137,60 +139,64 @@ Each scenario carries a `focus` that the report splits by: **core editing** (20)
 
 The report splits every score by the three focus groups above.
 
-## Results — opencode-go wave (6 models × 10 contenders × 38 scenarios, `results/llm-report.md`, 2,280 runs, $3.80)
+## Results — full wave (10 models × 9 contenders × 38 scenarios, 3,420 runs, $3.44)
 
-> **Local lanes pending:** the three llama.cpp models will be merged in with `--resume` once their server is available; the tables below cover the six opencode-go models only. This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, and lifecycle events live. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-diff0` was replaced by `pi-hashline-edit-pro-nodedup`, and `long-line` was dropped from the battery.
+Reports: `results/llm-report.md` (all models), `results/llm-report-cloud.md` (6 opencode-go models, 2,052 runs, $3.44), and `results/llm-report-local.md` (4 llama.cpp models, 1,368 runs, $0.00).
 
-Per model (each /380):
+> This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, `pi-hashline-edit-pro` 4.4.1, and lifecycle events live. The two K2 Horizon models run through IFM's llama.cpp fork (`model/K2Horizon` branch); mainline still does not support the `k2_horizon` architecture. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-nodedup` was dropped in favor of the standard config, and `long-line` was dropped from the battery.
+
+Per model (each /342):
 
 | Model | Passed | Rate | Avg tokens/run | Cost |
 | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | 360 | **95%** | 7,945 | $0.55 |
-| MiMo 2.6 Flash | 359 | 94% | 7,978 | $0.45 |
-| Qwen3.8-Flash | 357 | 94% | 8,200 | $0.55 |
-| MiMo-V2.6-Pro | 357 | 94% | 7,615 | $1.36 |
-| GLM 5.3 Flash | 353 | 93% | 6,068 | $0.39 |
-| Muse Spark 1.3 Contributor | 353 | 93% | 11,688 | $0.50 |
+| DeepSeek V4.1 Flash | 322 | **94%** | 7,954 | $0.50 |
+| MiMo 2.6 Flash | 321 | **94%** | 8,049 | $0.41 |
+| Qwen3.8-Flash | 319 | **93%** | 8,115 | $0.49 |
+| MiMo-V2.6-Pro | 319 | **93%** | 7,620 | $1.23 |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 319 | **93%** | 8,182 | $0.00 |
+| GLM 5.3 Flash | 315 | **92%** | 6,005 | $0.35 |
+| Muse Spark 1.3 Contributor | 315 | **92%** | 11,940 | $0.47 |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 288 | **84%** | 6,522 | $0.00 |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 272 | **80%** | 7,624 | $0.00 |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 260 | **76%** | 6,646 | $0.00 |
 
-Per tool with the focus split (each cell passed/total across all six models):
+Per tool with the focus split (each cell passed/total across all ten models):
 
 | Tool | Core (20) | Staleness (11) | Served-state (7) | Overall (38) |
 | --- | --- | --- | --- | --- |
-| **pi-hashline-edit-pro-nodedup** | **120** | **66** | **42** | **228 (100%)** |
-| pi-hashline-edit-pro | 120 | 66 | 36 | 222 (97%) |
-| @agimon-ai/doompi-edit | 115 | 65 | 41 | 221 (97%) |
-| @xynogen/pix-edit | 114 | 63 | 42 | 219 (96%) |
-| builtin-bash | 114 | 63 | 42 | 219 (96%) |
-| pi-hashline-readmap | 115 | 62 | 36 | 213 (93%) |
-| @cortexkit/aft-pi | 106 | 63 | 42 | 211 (93%) |
-| pi-edit-guard | 114 | 53 | 42 | 209 (92%) |
-| builtin-edit | 102 | 55 | 42 | 199 (87%) |
-| pi-semantic-edit | 102 | 54 | 42 | 198 (87%) |
+| pi-hashline-edit-pro | 199/200 | 110/110 | 61/70 | 370/380 (97%) |
+| builtin-bash | 186/200 | 100/110 | 70/70 | 356/380 (94%) |
+| @xynogen/pix-edit | 187/200 | 95/110 | 69/70 | 351/380 (92%) |
+| @cortexkit/aft-pi | 169/200 | 101/110 | 67/70 | 337/380 (89%) |
+| @agimon-ai/doompi-edit | 176/200 | 96/110 | 62/70 | 334/380 (88%) |
+| pi-edit-guard | 186/200 | 81/110 | 67/70 | 334/380 (88%) |
+| builtin-edit | 169/200 | 89/110 | 68/70 | 326/380 (86%) |
+| pi-hashline-readmap | 175/200 | 95/110 | 56/70 | 326/380 (86%) |
+| pi-semantic-edit | 170/200 | 77/110 | 69/70 | 316/380 (83%) |
 
-Per-tool process (all six models):
+Per-tool process (all ten models):
 
 | Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |
 | --- | --- | --- | --- | --- | --- |
-| builtin-edit | 0.87.0 | 3.8 | 7,114 | $0.0016 | 31 |
-| pi-hashline-edit-pro | 4.3.8 | 2.9 | 8,580 | $0.0017 | 7 |
-| pi-hashline-edit-pro-nodedup | 4.3.8 | 2.9 | 8,452 | $0.0016 | 7 |
-| pi-hashline-readmap | 0.14.0 | 3.2 | 7,621 | $0.0016 | 15 |
-| @cortexkit/aft-pi | 0.57.1 | 3.8 | 12,844 | $0.0026 | 10 |
-| @xynogen/pix-edit | 0.2.5 | 3.6 | 7,365 | $0.0017 | 27 |
-| pi-semantic-edit | 0.4.0 | 3.0 | 5,982 | $0.0012 | 7 |
-| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.0 | 8,196 | $0.0017 | 24 |
-| builtin-bash | 0.87.0 | 3.2 | 8,967 | $0.0015 | 16 |
-| pi-edit-guard | 0.1.5 | 3.1 | 7,369 | $0.0015 | 11 |
+| builtin-edit | 0.87.0 | 3.7 | 6,573 | $0.0009 | 31 |
+| pi-hashline-edit-pro | 4.4.1 | 3.0 | 8,871 | $0.0010 | 15 |
+| pi-hashline-readmap | 0.14.0 | 3.8 | 8,178 | $0.0009 | 15 |
+| @cortexkit/aft-pi | 0.57.1 | 3.9 | 12,726 | $0.0016 | 10 |
+| @xynogen/pix-edit | 0.2.5 | 3.5 | 6,616 | $0.0010 | 27 |
+| pi-semantic-edit | 0.4.0 | 3.0 | 5,772 | $0.0007 | 10 |
+| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.1 | 8,007 | $0.0010 | 24 |
+| builtin-bash | 0.87.0 | 3.4 | 6,855 | $0.0009 | 16 |
+| pi-edit-guard | 0.1.5 | 3.2 | 7,192 | $0.0009 | 15 |
 
-Totals across the wave: **17.2M prompt tokens in, 1.6M completion tokens out, 7,619 tool calls** (778 failed), 12.9h of summed run time.
+Totals across the wave: **24.5M prompt tokens in, 2.4M completion tokens out, 12,019 tool calls** (1,514 failed), 26.6h of summed run time.
 
 **Findings:**
-- **`pi-hashline-edit-pro-nodedup` sweeps the wave at 100% (228/228)**, ahead of `pi-hashline-edit-pro` 4.3.8 at 97% — the dedup-off variant takes all 42 served-state runs while pro loses 6 there.
-- **`@agimon-ai/doompi-edit` alpha.52 lands 3rd (97%)**, with `@xynogen/pix-edit` and `builtin-bash` at 96% — the shell baseline matches the best tolerant matchers on this battery.
-- **`pi-edit-guard` 0.1.5 sits at 92%**: lifecycle events now run (traces show stale blocks and `recovered` flows), but its `isVerbatimSafe` check allows edits whose `oldText` survives verbatim as a substring, so suffix-style drifts rarely trigger the block.
-- **Without the read mandate, the text tools lose staleness ground**: `builtin-edit` (87% overall, 55/66 staleness) and `pi-semantic-edit` (87%, last on core and served-state) now trail; the mandate previously prompted the read their matching depends on.
-- **DeepSeek V4.1 Flash leads the models at 95%** after the `reasoning_content` echo fix (its earlier 17 API-400 crashes are gone); all six models land between 93% and 95%.
-- **Cleanest wave so far**: 76 silent-wrong-line, 50 applied-wrong, 15 noop, and 0 crashes across 2,280 runs.
+- **`pi-hashline-edit-pro` 4.4.1 sweeps the wave at 97% (370/380)** — the only tool to take all 110 staleness runs, ahead of `builtin-bash` (94%) and `@xynogen/pix-edit` (92%).
+- **Qwen3.8-27B-Q2 runs with the cloud leaders at 93% (319/342)** — the best local model, matching Qwen3.8-Flash and MiMo-V2.6-Pro and trailing only DeepSeek (322) and MiMo 2.6 Flash (321).
+- **K2 Horizon scales with size**: 7B at 80% (272/342) beats 3.7B at 76% (260/342), but both trail Gemma 4 26B A4B (84%) and need IFM's fork to run at all.
+- **`builtin-bash` remains the strongest non-anchor baseline** at 94% overall — it and `pix-edit` take 69-70 of the 70 served-state runs, where tolerance pays off.
+- **The two K2 models drive the worst failure class**: 74 of the 152 applied-wrong results and 59 of the 176 silent-wrong-line results, on 20% of the matrix.
+- **`pi-semantic-edit` sits last at 83%**, with the weakest staleness score in the field (77/110); `builtin-edit` and `@cortexkit/aft-pi` tie for the weakest core (169/200).
 
 ## Ecosystem popularity (npm + GitHub, snapshot 2026-09)
 

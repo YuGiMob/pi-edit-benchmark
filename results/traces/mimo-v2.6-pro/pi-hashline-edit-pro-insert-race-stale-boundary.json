@@ -1,14 +1,14 @@
 {
  "modelId": "mimo-v2.6-pro",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "insert-race-stale-boundary",
  "task": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools.",
- "startedAt": "2026-09-23T05:00:03.242Z",
- "durationMs": 25211,
- "tokensIn": 9767,
- "tokensOut": 429,
- "costUsd": 0.004621874999999999,
+ "startedAt": "2026-09-23T20:45:07.105Z",
+ "durationMs": 21415,
+ "tokensIn": 13231,
+ "tokensOut": 650,
+ "costUsd": 0.0063209849999999995,
  "pass": true,
  "outcome": "recovered",
  "readFirst": true,
@@ -17,7 +17,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-nluQRf/pi-hashline-edit-pro-insert-race-stale-boundary"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-yszu70/pi-hashline-edit-pro-insert-race-stale-boundary"
   },
   {
    "role": "user",
@@ -26,70 +26,87 @@
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "Let me look at the file first.",
    "toolCalls": [
     {
-     "id": "call_148c8bcf052942bbb17cc24b",
+     "id": "call_65730d93803842ec800cb3c3",
      "name": "read",
      "arguments": "{\"path\": \"insert-race.ts\"}"
     }
-   ],
-   "reasoning": "Let me read the file first."
+   ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_148c8bcf052942bbb17cc24b",
-   "content": "ccBg│aaa\nHSkt│bbb\notBo│ccc"
+   "toolCallId": "call_65730d93803842ec800cb3c3",
+   "content": "kcDT│aaa\nOhIU│bbb\nxaHV│ccc"
   },
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "Insert after 'bbb' line (anchor OhIU).",
    "toolCalls": [
     {
-     "id": "call_94bd036ce796491994c4530c",
+     "id": "call_d45429e9702e4cc3b6ea3c4a",
      "name": "insert",
-     "arguments": "{\"anchor\": \"HSkt\", \"direction\": \"after\", \"lines\": [\"BB1\", \"BB2\"]}"
+     "arguments": "{\"anchor\": \"OhIU\", \"direction\": \"after\", \"lines\": [\"BB1\", \"BB2\"]}"
     }
-   ],
-   "reasoning": "Insert after 'bbb' (anchor HSkt): lines 'BB1', 'BB2'."
+   ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_94bd036ce796491994c4530c",
-   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in /tmp/pi-llm-bench-nluQRf/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts: \"HSkt\", \"HSkt\". The file changed since read. Call read() on /tmp/pi-llm-bench-nluQRf/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts for fresh anchors."
+   "toolCallId": "call_d45429e9702e4cc3b6ea3c4a",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in /tmp/pi-llm-bench-yszu70/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts: \"OhIU\", \"OhIU\". The file changed since read. Call read() on /tmp/pi-llm-bench-yszu70/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts for fresh anchors."
   },
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "The file changed since read. Re-read to get fresh anchors.",
    "toolCalls": [
     {
-     "id": "call_b6b8bded0a1246c6b49b9375",
+     "id": "call_52b2b14eed754dea9d51c0dd",
      "name": "read",
      "arguments": "{\"path\": \"insert-race.ts\"}"
     }
-   ],
-   "reasoning": "The file changed since read (race condition). Re-read to get fresh anchors."
+   ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_b6b8bded0a1246c6b49b9375",
-   "content": "ccBg│aaa\nNdID│bbb-x\notBo│ccc"
+   "toolCallId": "call_52b2b14eed754dea9d51c0dd",
+   "content": "kcDT│aaa\nSyUi│bbb-x\nxaHV│ccc"
   },
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "The file changed: 'bbb' became 'bbb-x'. Hmm, the task says insert after the line containing 'bbb'. 'SyUi│bbb-x' contains 'bbb' as a substring. But wait — the instruction: \"Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay.\"\n\nNow the line containing 'bbb' is 'bbb-x' (contains 'bbb'). Or should we be careful? The race: the file changed to 'bbb-x' which contains 'bbb' substring. The target line containing 'bbb' is SyUi. Insert after SyUi.\n\nBut is there ambiguity? The instruction says \"the line 'bbb' itself must stay\" — the line must remain unchanged. Inserting after SyUi keeps it. That seems right.\n\nAlternatively, maybe the trick is that no exact line 'bbb' exists anymore, and the safest interpretation is the line containing 'bbb' → 'bbb-x'. I'll go with SyUi.",
    "toolCalls": [
     {
-     "id": "call_eeb2f04080ad4236a07d1711",
+     "id": "call_f4228c9e783347b99d9f1c90",
      "name": "insert",
-     "arguments": "{\"anchor\": \"NdID\", \"direction\": \"after\", \"lines\": [\"BB1\", \"BB2\"]}"
+     "arguments": "{\"anchor\": \"SyUi\", \"direction\": \"after\", \"lines\": [\"BB1\", \"BB2\"]}"
     }
-   ],
-   "reasoning": "The file changed: 'bbb' line is now 'bbb-x' with anchor NdID. The line containing 'bbb' is 'bbb-x' (contains 'bbb'). Insert BB1 and BB2 after it."
+   ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_eeb2f04080ad4236a07d1711",
-   "content": "Successfully inserted in insert-race.ts. Added 2 line(s), removed 1 line(s).\n ...\n NdID│bbb-x\n+wiPW│BB1\n+btCR│BB2\n otBo│ccc"
+   "toolCallId": "call_f4228c9e783347b99d9f1c90",
+   "content": "Successfully inserted in insert-race.ts. Added 2 line(s), removed 1 line(s).\n ...\n SyUi│bbb-x\n+tyww│BB1\n+YeHB│BB2\n xaHV│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "Wait, \"Added 2 line(s), removed 1 line(s)\" — the diff shows SyUi preserved and two lines added. The \"removed 1\" is odd but the diff shows the anchor line kept. Let me verify by reading the file.",
+   "toolCalls": [
+    {
+     "id": "call_d6fa8a0b26f343118072a84b",
+     "name": "read",
+     "arguments": "{\"path\": \"insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_d6fa8a0b26f343118072a84b",
+   "content": "kcDT│aaa\nSyUi│bbb-x\ntyww│BB1\nYeHB│BB2\nxaHV│ccc"
   }
  ]
 }

@@ -1,14 +1,14 @@
 {
  "modelId": "mimo-v2.6-flash",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "duplicate-import",
  "task": "Modify dup-import.ts in the current working directory. Replace the SECOND occurrence of the line 'import { a } from 'x';' with exactly 'import { a2 } from 'x';'. Use the provided tools.",
- "startedAt": "2026-09-23T04:58:34.134Z",
- "durationMs": 11890,
- "tokensIn": 7561,
- "tokensOut": 212,
- "costUsd": 0.0011179000000000002,
+ "startedAt": "2026-09-23T20:44:31.434Z",
+ "durationMs": 11695,
+ "tokensIn": 5973,
+ "tokensOut": 157,
+ "costUsd": 0.00088018,
  "pass": true,
  "outcome": "applied",
  "readFirst": true,
@@ -18,7 +18,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-b1zBEF/pi-hashline-edit-pro-duplicate-import"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-P6g3mE/pi-hashline-edit-pro-duplicate-import"
   },
   {
    "role": "user",
@@ -27,53 +27,36 @@
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "Let me read the file first.",
    "toolCalls": [
     {
-     "id": "call_b45b3a943f0d4404b861ac9a",
+     "id": "call_5444aaac33824948953651ef",
      "name": "read",
      "arguments": "{\"path\": \"dup-import.ts\"}"
     }
-   ],
-   "reasoning": "Let me read the file first."
+   ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_b45b3a943f0d4404b861ac9a",
-   "content": "KCdu│import { a } from 'x';\nrsTr│import { b } from 'y';\nVCfc│import { a } from 'x';"
+   "toolCallId": "call_5444aaac33824948953651ef",
+   "content": "csLU│import { a } from 'x';\nIFUt│import { b } from 'y';\nphun│import { a } from 'x';"
   },
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "Second occurrence is at anchor phun. Replace it.",
    "toolCalls": [
     {
-     "id": "call_21031f2c77dc496a96bc5fc4",
+     "id": "call_3896a07244fe45618fcd6134",
      "name": "replace",
-     "arguments": "{\"path\": \"dup-import.ts\", \"remove_from\": \"VCfc\", \"remove_to\": \"VCfc\", \"replacement_lines\": [\"import { a2 } from 'x';\"]}"
+     "arguments": "{\"remove_from\": \"phun\", \"remove_to\": \"phun\", \"replacement_lines\": [\"import { a2 } from 'x';\"]}"
     }
-   ],
-   "reasoning": "Second occurrence is at anchor VCfc."
+   ]
   },
   {
    "role": "tool",
-   "toolCallId": "call_21031f2c77dc496a96bc5fc4",
-   "content": "Error: [E_BAD_SHAPE] Edit request contains unknown or unsupported fields: path. Path resolution is anchor-only; retry without `path`."
-  },
-  {
-   "role": "assistant",
-   "content": "",
-   "toolCalls": [
-    {
-     "id": "call_9cca20845e7a4b1dbbbdab7f",
-     "name": "replace",
-     "arguments": "{\"remove_from\": \"VCfc\", \"remove_to\": \"VCfc\", \"replacement_lines\": [\"import { a2 } from 'x';\"]}"
-    }
-   ],
-   "reasoning": "Remove path field."
-  },
-  {
-   "role": "tool",
-   "toolCallId": "call_9cca20845e7a4b1dbbbdab7f",
-   "content": "Successfully replaced in dup-import.ts. Added 1 line(s), removed 1 line(s).\n ...\n rsTr│import { b } from 'y';\n-VCfc│import { a } from 'x';\n+asYL│import { a2 } from 'x';"
+   "toolCallId": "call_3896a07244fe45618fcd6134",
+   "content": "Successfully replaced in dup-import.ts. Added 1 line(s), removed 1 line(s).\n ...\n IFUt│import { b } from 'y';\n-phun│import { a } from 'x';\n+WPps│import { a2 } from 'x';"
   }
  ]
 }

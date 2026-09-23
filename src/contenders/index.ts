@@ -13,13 +13,6 @@ export function allContenders(): Contender[] {
   return [
     builtinContender(),
     proContender(),
-    proContender({
-      id: "pi-hashline-edit-pro-nodedup",
-      name: "pi-hashline-edit-pro (dedup off)",
-      description:
-        "Same strict hashline fork with boundaryDedupMode: off — boundary re-inclusions apply literally instead of being stripped.",
-      boundaryDedupMode: "off",
-    }),
     readmapContender(),
     aftContender(),
     pixEditContender(),

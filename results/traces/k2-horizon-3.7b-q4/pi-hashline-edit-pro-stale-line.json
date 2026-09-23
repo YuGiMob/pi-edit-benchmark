@@ -1,13 +1,13 @@
 {
  "modelId": "k2-horizon-3.7b-q4",
  "contenderId": "pi-hashline-edit-pro",
- "contenderVersion": "4.3.8",
+ "contenderVersion": "4.4.1",
  "scenarioId": "stale-line",
  "task": "Modify stale-line.ts in the current working directory. Replace the line containing 'bbb' with exactly one line: BBB. Use the provided tools.",
- "startedAt": "2026-09-23T11:31:19.084Z",
- "durationMs": 6383,
- "tokensIn": 8847,
- "tokensOut": 234,
+ "startedAt": "2026-09-23T20:55:50.566Z",
+ "durationMs": 7882,
+ "tokensIn": 15860,
+ "tokensOut": 264,
  "costUsd": 0,
  "pass": true,
  "outcome": "recovered",
@@ -17,7 +17,7 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-JpaUpQ/pi-hashline-edit-pro-stale-line"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-RKPSbC/pi-hashline-edit-pro-stale-line"
   },
   {
    "role": "user",
@@ -26,10 +26,10 @@
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "Let me read the file first to find the line containing 'bbb'.",
+   "reasoning": "Let me find the file and read it first.",
    "toolCalls": [
     {
-     "id": "TsCuZCvGMq3XHM2X71Yt8sjBF7jnOaP8",
+     "id": "cbXNHZppL2cj9V0YOcU3Y7zjjgPNPhDV",
      "name": "read",
      "arguments": "{\"path\":\"stale-line.ts\"}"
     }
@@ -37,32 +37,32 @@
   },
   {
    "role": "tool",
-   "toolCallId": "TsCuZCvGMq3XHM2X71Yt8sjBF7jnOaP8",
-   "content": "tuoo│aaa\nYTjs│bbb\nEsPB│ccc"
+   "toolCallId": "cbXNHZppL2cj9V0YOcU3Y7zjjgPNPhDV",
+   "content": "txJI│aaa\nYZHB│bbb\nEvLD│ccc"
   },
   {
    "role": "assistant",
    "content": "",
-   "reasoning": "The line with 'bbb' is at anchor `YTjs│bbb`. Replace that line with exactly one line: `BBB`.",
    "toolCalls": [
     {
-     "id": "Pom7B1HN7tPLmlJftl7Kul4ZeWJXpPQg",
+     "id": "0PcORBu3bmWKrEKDDakCnEP5ekDpn3pu",
      "name": "replace",
-     "arguments": "{\"remove_from\":\"YTjs\",\"remove_to\":\"YTjs\",\"replacement_lines\":[\"BBB\"]}"
+     "arguments": "{\"remove_from\":\"YZHB\",\"remove_to\":\"YZHB\",\"replacement_lines\":[\"BBB\"]}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "Pom7B1HN7tPLmlJftl7Kul4ZeWJXpPQg",
-   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in stale-line.ts: \"YTjs\", \"YTjs\". The file changed since read. Call read() on stale-line.ts for fresh anchors."
+   "toolCallId": "0PcORBu3bmWKrEKDDakCnEP5ekDpn3pu",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in stale-line.ts: \"YZHB\", \"YZHB\". The file changed since read. Call read() on stale-line.ts for fresh anchors."
   },
   {
    "role": "assistant",
    "content": "",
+   "reasoning": "The file changed — probably another agent/process modified it concurrently. Let me read it fresh.",
    "toolCalls": [
     {
-     "id": "2R3fE1ryPK8U3BFrCtbsoXO0DgLLmECv",
+     "id": "EixRWVL9NuIdnc7umT4sYZNNq43Dxnqq",
      "name": "read",
      "arguments": "{\"path\":\"stale-line.ts\"}"
     }
@@ -70,24 +70,73 @@
   },
   {
    "role": "tool",
-   "toolCallId": "2R3fE1ryPK8U3BFrCtbsoXO0DgLLmECv",
-   "content": "tuoo│aaa\nIpWB│bbb-external\nEsPB│ccc"
+   "toolCallId": "EixRWVL9NuIdnc7umT4sYZNNq43Dxnqq",
+   "content": "txJI│aaa\nnuAF│bbb-external\nEvLD│ccc"
   },
   {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "z3LRkBJoy9aeXh70pVV83Na9zPnH9gd0",
-     "name": "replace",
-     "arguments": "{\"remove_from\":\"IpWB\",\"remove_to\":\"IpWB\",\"replacement_lines\":[\"BBB\"]}"
+     "id": "UJyyUvEAnYfE3B3Di26viiKLMyQ604B5",
+     "name": "read",
+     "arguments": "{\"path\":\"stale-line.ts\"}"
     }
    ]
   },
   {
    "role": "tool",
-   "toolCallId": "z3LRkBJoy9aeXh70pVV83Na9zPnH9gd0",
-   "content": "Successfully replaced in stale-line.ts. Added 1 line(s), removed 1 line(s).\n tuoo│aaa\n-IpWB│bbb-external\n+hmKY│BBB\n EsPB│ccc"
+   "toolCallId": "UJyyUvEAnYfE3B3Di26viiKLMyQ604B5",
+   "content": "txJI│aaa\nnuAF│bbb-external\nEvLD│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "KCuABx7KJYs4NgX1fcgAU93T0COIWnO5",
+     "name": "read",
+     "arguments": "{\"path\":\"stale-line.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "KCuABx7KJYs4NgX1fcgAU93T0COIWnO5",
+   "content": "txJI│aaa\nnuAF│bbb-external\nEvLD│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "4CoD6w7u2Ton0A8lfEj6VqwTGSGYea8k",
+     "name": "read",
+     "arguments": "{\"path\":\"stale-line.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "4CoD6w7u2Ton0A8lfEj6VqwTGSGYea8k",
+   "content": "txJI│aaa\nnuAF│bbb-external\nEvLD│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The anchor for line 2 has changed from YZHB to nuAF. Let me use the new anchor.",
+   "toolCalls": [
+    {
+     "id": "mKA1ESBBRKmfXwS1AoVLyLoFFFrtFym6",
+     "name": "replace",
+     "arguments": "{\"remove_from\":\"nuAF\",\"remove_to\":\"nuAF\",\"replacement_lines\":[\"BBB\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "mKA1ESBBRKmfXwS1AoVLyLoFFFrtFym6",
+   "content": "Successfully replaced in stale-line.ts. Added 1 line(s), removed 1 line(s).\n txJI│aaa\n-nuAF│bbb-external\n+ADSk│BBB\n EvLD│ccc"
   }
  ]
 }

@@ -1,0 +1,77 @@
+{
+ "modelId": "k2-horizon-7b-q4",
+ "contenderId": "pi-hashline-edit-pro",
+ "contenderVersion": "4.4.1",
+ "scenarioId": "b6-change-then-revert",
+ "task": "Modify b6.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D. Use the provided tools.",
+ "startedAt": "2026-09-23T20:57:28.904Z",
+ "durationMs": 6150,
+ "tokensIn": 7588,
+ "tokensOut": 128,
+ "costUsd": 0,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nB\nD\n",
+ "actualContent": "aaa\nB\nD\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: `-anchor│` rows in a post-edit diff are dead anchors; only `+anchor│` and ` anchor│` rows are live. Check the post-edit diff before the next turn's edits on that file.\n`replace`: same-file same-message calls batch: disjoint ranges, one undo. A call whose anchors resolve nowhere fails alone; its file's batch still commits.\n`replace`: `[E_STALE_ANCHOR]` means the anchor is not owned in this session: call `read` on the file for fresh anchors. `[E_RANGE_STALE]` means a line in the range changed since it was shown, or was never shown: retry with the fresh anchors the error returns.\n`replace`: `[E_BATCH_OVERLAP]` means two batch calls share lines: retry with disjoint ranges. `[E_OP_ABORTED]` means another batch call failed or the file changed: fix that call, then retry, or call `read` for fresh anchors.\n`replace`: use `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines`: one string per line, `[\"\"]` is one blank line, `[]` deletes. Pasted `anchor│` prefixes are stripped. Single line: same anchor for `remove_from` and `remove_to`.\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-prcp96/pi-hashline-edit-pro-b6-change-then-revert"
+  },
+  {
+   "role": "user",
+   "content": "Modify b6.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "Let me start by reading the file to see its current contents.",
+   "toolCalls": [
+    {
+     "id": "dambhmHpYWSYqoWfptAsp371dTRyttdN",
+     "name": "read",
+     "arguments": "{\"path\":\"b6.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "dambhmHpYWSYqoWfptAsp371dTRyttdN",
+   "content": "eqdv│aaa\nKIYe│bbb\nrwVB│ccc\nVLJu│ddd"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "X7xE2SKIo6HsA99MIWAJD7VMFebNAH2g",
+     "name": "replace",
+     "arguments": "{\"remove_from\":\"KIYe\",\"remove_to\":\"VLJu\",\"replacement_lines\":[\"B\", \"D\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "X7xE2SKIo6HsA99MIWAJD7VMFebNAH2g",
+   "content": "Successfully replaced in b6.ts. Added 2 line(s), removed 3 line(s).\n eqdv│aaa\n-KIYe│bbb\n-rwVB│ccc\n-VLJu│ddd\n+opCe│B\n+Slhg│D"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "j0qoe1QmrUmZKrdpzkgreanvIOCBaa8h",
+     "name": "read",
+     "arguments": "{\"path\":\"b6.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "j0qoe1QmrUmZKrdpzkgreanvIOCBaa8h",
+   "content": "eqdv│aaa\nopCe│B\nSlhg│D"
+  }
+ ]
+}
