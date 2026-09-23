@@ -54,23 +54,18 @@ const taskDescriptions: Record<string, string> = {
   "stale-range":
     "Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D",
   "external-far": "Replace the line containing 'ccc' with exactly one line: CCC",
-  "anchor-stability": "Replace the line containing 'ccc' with exactly one line: CCC",
   undo: "Replace the line containing 'bbb' with exactly one line: BBB, then undo that change so the file is back to its original state",
   "error-guidance": "Replace the line containing 'bbb' with exactly one line: BBB",
   "b6-change-then-revert":
     "Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D",
-  "b7-paged-read-gap": "Replace the line containing 'eee' with exactly one line: E",
-  "b8-blind-edit": "Replace the line containing 'bbb' with exactly one line: BBB",
   "b9-boundary-changed": "Replace the line containing 'bbb' with exactly one line: BBB",
   "b10-duplicate-drift":
     "The file contains two functions. Replace the line that is the closing brace '}' of the SECOND function (the second line that is exactly '}') with exactly '};'",
   "b12-noop-with-drift": "Replace the line containing 'bbb' with exactly the same line 'bbb' (the file should end up unchanged)",
   "b13-chained-diff-edit":
-    "Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD. Use the anchors from the first edit's result for the second edit; do not re-read the whole file.",
+    "Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD.",
   "b15-large-range-drift":
     "Replace the lines from the line containing 'line10' through the line containing 'line190' with exactly one line: X",
-  "b17-reversed-range":
-    "Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly three lines: B, C, D",
   "b18-boundary-dup":
     "Replace the line containing 'bbb' with exactly two lines: aaa and BBB",
   unicode:
@@ -283,7 +278,6 @@ export async function runLlmScenario(
     const actual = await readFile(filePath, "utf-8");
     base.actualContent = actual;
     const evalOutcome = evaluateLlmOutcome(
-      contender.info.id,
       scenario,
       actual,
       fixtureBytes.toString("utf-8"),
@@ -351,7 +345,6 @@ function isEditCall(name: string): boolean {
 }
 
 export function evaluateLlmOutcome(
-  contenderId: string,
   scenario: Scenario,
   actual: string,
   fixture: string,
@@ -359,9 +352,7 @@ export function evaluateLlmOutcome(
   const postMutation = scenario.mutateAfterRead
     ? scenario.mutateAfterRead(fixture)
     : null;
-  const expected =
-    scenario.expectedByContender?.[contenderId] ?? scenario.expected;
-
+  const expected = scenario.expected;
   if (scenario.id === "undo") {
     if (actual === fixture) return { pass: true, outcome: "undo" };
     return {
@@ -399,6 +390,9 @@ export function evaluateLlmOutcome(
   }
 
   if (expected.outcome === "rejected") {
+    if (postMutation === null && actual === fixture) {
+      return { pass: true, outcome: "rejected" };
+    }
     if (postMutation !== null && actual === postMutation) {
       return { pass: true, outcome: "rejected" };
     }

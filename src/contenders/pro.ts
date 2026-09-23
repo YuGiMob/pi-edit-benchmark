@@ -14,7 +14,7 @@ export interface ProContenderOptions {
 const DEFAULT_ID = "pi-hashline-edit-pro";
 const DEFAULT_NAME = "pi-hashline-edit-pro";
 const DEFAULT_DESCRIPTION =
-  "Strict hashline fork: 4-char perfect anchors, served-range verification, boundary anti-duplication, persisted undo.";
+  "Strict hashline fork: 4-char perfect anchors, served-range verification, persisted undo.";
 const DEFAULT_DIFF_CONTEXT_LINES = 1;
 
 const CONFIG_ROOT = join(tmpdir(), "pi-edit-benchmark-pro-config");

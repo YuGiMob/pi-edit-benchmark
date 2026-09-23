@@ -24,15 +24,18 @@ describe("contender registry", () => {
     expect(contenders.length).toBeGreaterThanOrEqual(9);
   });
 
-  it("registers the pro family and drops removed contenders", () => {
-    const ids = allContenders().map((c) => c.info.id);
-    expect(ids).toContain("pi-hashline-edit-pro");
-    expect(ids).toContain("builtin-bash");
-    expect(ids).toContain("pi-hashline-edit-pro-nodedup");
-    expect(ids).toContain("pi-edit-guard");
-    expect(ids).not.toContain("pi-hashline-edit-pro-diff0");
-    expect(ids).not.toContain("pi-hashline-edit");
-    expect(ids).not.toContain("pi-hashline-context-edit");
-    expect(ids).not.toContain("pi-agent-ide");
+  it("registers exactly the supported contender set", () => {
+    const ids = allContenders().map((c) => c.info.id).sort();
+    expect(ids).toEqual([
+      "@agimon-ai/doompi-edit",
+      "@cortexkit/aft-pi",
+      "@xynogen/pix-edit",
+      "builtin-bash",
+      "builtin-edit",
+      "pi-edit-guard",
+      "pi-hashline-edit-pro",
+      "pi-hashline-readmap",
+      "pi-semantic-edit",
+    ]);
   });
 });

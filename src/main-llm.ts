@@ -391,9 +391,17 @@ export function renderLlmReport(report: LlmReport, totalCost: number, outPath?: 
   }
   out.push("");
   const focusById = new Map(scenarios.map((sc) => [sc.id, sc.focus ?? "core"]));
+  const groupCount: Record<string, number> = {};
+  for (const sc of scenarios) {
+    const focus = sc.focus ?? "core";
+    groupCount[focus] = (groupCount[focus] ?? 0) + 1;
+  }
+  const focusOrder = Object.keys(groupCount).sort((a, b) => (a === "core" ? -1 : b === "core" ? 1 : a.localeCompare(b)));
+  const focusLabel = (focus: string): string => focus.charAt(0).toUpperCase() + focus.slice(1);
   const focusTotals = (id: string) => {
     const runs = report.runs.filter((r) => r.contenderId === id);
-    const cell: Record<string, { passed: number; total: number }> = { core: { passed: 0, total: 0 }, staleness: { passed: 0, total: 0 }, "served-state": { passed: 0, total: 0 } };
+    const cell: Record<string, { passed: number; total: number }> = {};
+    for (const focus of focusOrder) cell[focus] = { passed: 0, total: 0 };
     for (const r of runs) {
       const cell2 = cell[focusById.get(r.scenarioId) ?? "core"];
       cell2.total += 1;
@@ -401,17 +409,15 @@ export function renderLlmReport(report: LlmReport, totalCost: number, outPath?: 
     }
     return cell;
   };
-  const groupCount: Record<string, number> = {};
-  for (const sc of scenarios) groupCount[sc.focus ?? "core"] = (groupCount[sc.focus ?? "core"] ?? 0) + 1;
   out.push("## Per-tool totals (all models)");
   out.push("");
-  out.push(`| Tool | Core (${groupCount.core}) | Staleness (${groupCount.staleness}) | Served-state (${groupCount["served-state"]}) | Passed | Total | Pass rate |`);
-  out.push("| --- | --- | --- | --- | --- | --- | --- |");
+  out.push(`| Tool | ${focusOrder.map((focus) => `${focusLabel(focus)} (${groupCount[focus]})`).join(" | ")} | Passed | Total | Pass rate |`);
+  out.push(`| --- | ${focusOrder.map(() => "---").join(" | ")} | --- | --- | --- |`);
   for (const id of contenderIds) {
     const runs = report.runs.filter((r) => r.contenderId === id);
     const passed = runs.filter((r) => r.pass).length;
     const cell = focusTotals(id);
-    out.push(`| ${id} | ${cell.core.passed}/${cell.core.total} | ${cell.staleness.passed}/${cell.staleness.total} | ${cell["served-state"].passed}/${cell["served-state"].total} | ${passed} | ${runs.length} | ${(passed / Math.max(1, runs.length) * 100).toFixed(0)}% |`);
+    out.push(`| ${id} | ${focusOrder.map((focus) => `${cell[focus].passed}/${cell[focus].total}`).join(" | ")} | ${passed} | ${runs.length} | ${(passed / Math.max(1, runs.length) * 100).toFixed(0)}% |`);
   }
   out.push("");
   out.push("## Per-tool process (all models)");

@@ -17,28 +17,6 @@ export const betterEditScenarios: Scenario[] = [
     expected: { outcome: "applied", content: "aaa\nB\nD\n" },
   },
   {
-    id: "b7-paged-read-gap",
-    fileName: "b7.ts",
-    category: "safety",
-    focus: "served-state",
-    name: "never-served interior via paged read (B7)",
-    description:
-      "The model read only the first two lines; the edit targets a line that was never shown. Served-state tools must reject.",
-    fixture: "aaa\nbbb\nccc\nddd\neee\nfff\n",
-    expected: { outcome: "either", content: "aaa\nbbb\nccc\nddd\nE\nfff\n" },
-  },
-  {
-    id: "b8-blind-edit",
-    fileName: "b8.ts",
-    category: "safety",
-    focus: "served-state",
-    name: "blind edit without any read (B8)",
-    description:
-      "The model edits with anchors it never received from a read of this file (simulated by reading a copy at another path). Served-state tools must reject.",
-    fixture: "aaa\nbbb\nccc\n",
-    expected: { outcome: "either", content: "aaa\nBBB\nccc\n" },
-  },
-  {
     id: "b9-boundary-changed",
     fileName: "b9.ts",
     category: "safety",
@@ -79,10 +57,10 @@ export const betterEditScenarios: Scenario[] = [
     id: "b13-chained-diff-edit",
     fileName: "b13.ts",
     category: "robustness",
-    focus: "served-state",
-    name: "chained edit from post-edit diff rows (B13)",
+    focus: "core",
+    name: "two sequential edits (B13)",
     description:
-      "After the first edit, the second edit anchors on the post-edit diff rows without a re-read.",
+      "Two sequential edits in one file; both must land and the rest of the file must stay byte-identical.",
     fixture: "aaa\nbbb\nccc\nddd\neee\n",
     expected: { outcome: "applied", content: "aaa\nbbb\nCCC\nDDD\neee\n" },
   },
@@ -99,29 +77,14 @@ export const betterEditScenarios: Scenario[] = [
     expected: { outcome: "rejected" },
   },
   {
-    id: "b17-reversed-range",
-    fileName: "b17.ts",
-    category: "correctness",
-    focus: "served-state",
-    name: "reversed range autocorrect (B17)",
-    description:
-      "remove_from/remove_to were swapped by mistake; anchor tools should autocorrect and apply.",
-    fixture: "aaa\nbbb\nccc\nddd\n",
-    expected: { outcome: "either", content: "aaa\nB\nC\nD\n" },
-  },
-  {
     id: "b18-boundary-dup",
     fileName: "b18.ts",
     category: "correctness",
-    focus: "served-state",
+    focus: "core",
     name: "boundary line duplicated in replacement (B18)",
     description:
-      "The replacement re-includes the boundary line. Tools with boundary anti-duplication strip it; others apply literally.",
+      "The replacement re-includes the line above the range; it is applied literally, duplicating that line.",
     fixture: "aaa\nbbb\nccc\n",
     expected: { outcome: "applied", content: "aaa\naaa\nBBB\nccc\n" },
-    expectedByContender: {
-      "pi-hashline-edit-pro": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
-      "pi-hashline-readmap": { outcome: "applied", content: "aaa\nBBB\nccc\n" },
-    },
   },
 ];

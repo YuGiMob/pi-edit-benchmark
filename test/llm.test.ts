@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { evaluateLlmOutcome, taskPrompt } from "../src/llm/runner";
 import { scenarios } from "../src/scenarios";
+import type { Scenario } from "../src/types";
 
 function scenario(id: string) {
   const s = scenarios.find((x) => x.id === id);
@@ -11,14 +12,14 @@ function scenario(id: string) {
 describe("evaluateLlmOutcome", () => {
   it("passes a correctly applied edit", () => {
     const s = scenario("single-line");
-    const r = evaluateLlmOutcome("pi-hashline-edit-pro", s, "aaa\nBBB\nccc\nddd\n", s.fixture);
+    const r = evaluateLlmOutcome(s, "aaa\nBBB\nccc\nddd\n", s.fixture);
     expect(r.pass).toBe(true);
     expect(r.outcome).toBe("applied");
   });
 
   it("fails an applied-wrong edit", () => {
     const s = scenario("single-line");
-    const r = evaluateLlmOutcome("pi-hashline-edit-pro", s, "aaa\nbbb\nccc\nddd\n", s.fixture);
+    const r = evaluateLlmOutcome(s, "aaa\nbbb\nccc\nddd\n", s.fixture);
     expect(r.pass).toBe(false);
     expect(r.failureKind).toBe("noop");
   });
@@ -26,54 +27,72 @@ describe("evaluateLlmOutcome", () => {
   it("passes a stale edit that was rejected (file untouched by the model)", () => {
     const s = scenario("stale-line");
     const postMutation = s.mutateAfterRead!(s.fixture);
-    const r = evaluateLlmOutcome("pi-hashline-edit-pro", s, postMutation, s.fixture);
+    const r = evaluateLlmOutcome(s, postMutation, s.fixture);
     expect(r.pass).toBe(true);
     expect(r.outcome).toBe("rejected");
   });
 
   it("credits a stale edit that was rejected and then recovered by the model", () => {
     const s = scenario("stale-line");
-    const r = evaluateLlmOutcome("pi-hashline-edit-pro", s, "aaa\nBBB\nccc\n", s.fixture);
+    const r = evaluateLlmOutcome(s, "aaa\nBBB\nccc\n", s.fixture);
     expect(r.pass).toBe(true);
     expect(r.outcome).toBe("recovered");
   });
 
+  it("credits a refusal when the scenario has no external mutation", () => {
+    const s: Scenario = {
+      id: "synthetic-rejection",
+      fileName: "synthetic.txt",
+      category: "safety",
+      focus: "core",
+      name: "synthetic rejection",
+      description: "synthetic",
+      fixture: "aaa\n",
+      expected: { outcome: "rejected" },
+    };
+    expect(evaluateLlmOutcome(s, "aaa\n", s.fixture)).toMatchObject({ pass: true, outcome: "rejected" });
+    expect(evaluateLlmOutcome(s, "bbb\n", s.fixture)).toMatchObject({ pass: false, failureKind: "silent-wrong-line" });
+  });
+
   it("flags a silent wrong-line edit on a stale file", () => {
     const s = scenario("stale-line");
-    const r = evaluateLlmOutcome("builtin-edit", s, "aaa\nBBB-external\nccc\n", s.fixture);
+    const r = evaluateLlmOutcome(s, "aaa\nBBB-external\nccc\n", s.fixture);
     expect(r.pass).toBe(false);
     expect(r.failureKind).toBe("silent-wrong-line");
   });
 
   it("passes an external-far edit that combines both changes", () => {
     const s = scenario("external-far");
-    const r = evaluateLlmOutcome("pi-hashline-edit-pro", s, "aaa-external\nbbb\nCCC\nddd\neee\n", s.fixture);
+    const r = evaluateLlmOutcome(s, "aaa-external\nbbb\nCCC\nddd\neee\n", s.fixture);
     expect(r.pass).toBe(true);
   });
 
   it("passes the undo scenario only when the file is byte-identical to the fixture", () => {
     const s = scenario("undo");
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, "aaa\nbbb\nccc\n", s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, "aaa\nBBB\nccc\n", s.fixture).pass).toBe(false);
+    expect(evaluateLlmOutcome(s, "aaa\nbbb\nccc\n", s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, "aaa\nBBB\nccc\n", s.fixture).pass).toBe(false);
   });
 
   it("passes duplicate-nth only when the second occurrence was edited", () => {
     const s = scenario("duplicate-nth");
     const correct = "function a() {\n  return 1;\n}\nfunction b() {\n  return 2;\n};\n";
     const wrong = "function a() {\n  return 1;\n};\nfunction b() {\n  return 2;\n}\n";
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, correct, s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, wrong, s.fixture).pass).toBe(false);
+    expect(evaluateLlmOutcome(s, correct, s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, wrong, s.fixture).pass).toBe(false);
   });
-  it("applies the pro boundary-dedup expectation to the readmap", () => {
+
+  it("scores b18-boundary-dup on the literal replacement result", () => {
     const s = scenario("b18-boundary-dup");
-    expect(evaluateLlmOutcome("pi-hashline-readmap", s, "aaa\nBBB\nccc\n", s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("pi-hashline-readmap", s, "aaa\naaa\nBBB\nccc\n", s.fixture).pass).toBe(false);
+    expect(evaluateLlmOutcome(s, "aaa\naaa\nBBB\nccc\n", s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, "aaa\nBBB\nccc\n", s.fixture).pass).toBe(false);
   });
-  it("applies the literal boundary expectation to the dedup-off variant", () => {
-    const s = scenario("b18-boundary-dup");
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro-nodedup", s, "aaa\naaa\nBBB\nccc\n", s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro-nodedup", s, "aaa\nBBB\nccc\n", s.fixture).pass).toBe(false);
+
+  it("scores b13-chained-diff-edit on the two sequential edits", () => {
+    const s = scenario("b13-chained-diff-edit");
+    expect(evaluateLlmOutcome(s, "aaa\nbbb\nCCC\nDDD\neee\n", s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, s.fixture, s.fixture).pass).toBe(false);
   });
+
   it("scores sub-line-token on the resulting line, not the mechanism", () => {
     const s = scenario("sub-line-token");
     const good = [
@@ -82,9 +101,10 @@ describe("evaluateLlmOutcome", () => {
       '  const fallback = "https://api.example.com/v1/resources?limit=25&sort=desc";',
       "  return { endpoint, fallback };",
     ].join("\n") + "\n";
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, good, s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("builtin-edit", s, good, s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, good, s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, s.fixture, s.fixture).pass).toBe(false);
   });
+
   it("scores replace-all only when every occurrence changed", () => {
     const s = scenario("replace-all");
     const full = [
@@ -95,9 +115,10 @@ describe("evaluateLlmOutcome", () => {
       "  smoke: ship --env smoke",
     ].join("\n") + "\n";
     const partial = full.replace("  prod: ship", "  prod: deploy");
-    expect(evaluateLlmOutcome("@xynogen/pix-edit", s, full, s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("@xynogen/pix-edit", s, partial, s.fixture).pass).toBe(false);
+    expect(evaluateLlmOutcome(s, full, s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, partial, s.fixture).pass).toBe(false);
   });
+
   it("scores batch-edits only when all five values landed", () => {
     const s = scenario("batch-edits");
     const full = [
@@ -109,20 +130,21 @@ describe("evaluateLlmOutcome", () => {
       "  loglevel: debug",
     ].join("\n") + "\n";
     const partial = full.replace("  timeout: 60", "  timeout: 30");
-    expect(evaluateLlmOutcome("@cortexkit/aft-pi", s, full, s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("@cortexkit/aft-pi", s, partial, s.fixture).pass).toBe(false);
+    expect(evaluateLlmOutcome(s, full, s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, partial, s.fixture).pass).toBe(false);
   });
+
   it("formatter-drift passes a correct formatted result and fails a stale cached write", () => {
     const s = scenario("formatter-drift");
     const formatted = s.mutateAfterRead!(s.fixture);
     const good = formatted.replace("8080", "9090");
     const staleCacheWrite = s.fixture.replace("8080", "9090");
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, good, s.fixture).pass).toBe(true);
-    expect(evaluateLlmOutcome("pi-hashline-edit-pro", s, formatted, s.fixture)).toMatchObject({
+    expect(evaluateLlmOutcome(s, good, s.fixture).pass).toBe(true);
+    expect(evaluateLlmOutcome(s, formatted, s.fixture)).toMatchObject({
       pass: false,
       failureKind: "no-recovery",
     });
-    expect(evaluateLlmOutcome("builtin-edit", s, staleCacheWrite, s.fixture).pass).toBe(false);
+    expect(evaluateLlmOutcome(s, staleCacheWrite, s.fixture).pass).toBe(false);
   });
 });
 

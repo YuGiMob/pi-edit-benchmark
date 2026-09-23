@@ -1,256 +1,66 @@
 # pi edit-tool benchmark — LLM runs
 
-Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamacpp; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $3.4436. Read mandate off.
+Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamacpp; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $3.2206. Read mandate off.
 
 ## Models
 
 | Model | Runs | Passed | Pass rate | Avg steps | Avg tokens/run | Cost |
 | --- | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | 342 | 322/342 | 94% | 3.1 | 7954 | $0.4953 |
-| GLM 5.3 Flash | 342 | 315/342 | 92% | 3.2 | 6005 | $0.3524 |
-| Qwen3.8-Flash | 342 | 319/342 | 93% | 3.6 | 8115 | $0.4894 |
-| MiMo 2.6 Flash | 342 | 321/342 | 94% | 3.8 | 8049 | $0.4129 |
-| MiMo-V2.6-Pro | 342 | 319/342 | 93% | 3.5 | 7620 | $1.2281 |
-| Muse Spark 1.3 Contributor | 342 | 315/342 | 92% | 3.2 | 11940 | $0.4654 |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 342 | 319/342 | 93% | 3.4 | 8182 | $0.0000 |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 342 | 288/342 | 84% | 3.4 | 6522 | $0.0000 |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 342 | 260/342 | 76% | 3.6 | 6646 | $0.0000 |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 342 | 272/342 | 80% | 4.3 | 7624 | $0.0000 |
+| DeepSeek V4.1 Flash | 306 | 292/306 | 95% | 3.2 | 8295 | $0.4645 |
+| GLM 5.3 Flash | 306 | 285/306 | 93% | 3.3 | 6179 | $0.3258 |
+| Qwen3.8-Flash | 306 | 290/306 | 95% | 3.6 | 8332 | $0.4511 |
+| MiMo 2.6 Flash | 306 | 292/306 | 95% | 4.0 | 8460 | $0.3891 |
+| MiMo-V2.6-Pro | 306 | 289/306 | 94% | 3.6 | 7954 | $1.1491 |
+| Muse Spark 1.3 Contributor | 306 | 285/306 | 93% | 3.3 | 12617 | $0.4409 |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 306 | 289/306 | 94% | 3.5 | 8453 | $0.0000 |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 306 | 260/306 | 85% | 3.5 | 6821 | $0.0000 |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 306 | 231/306 | 75% | 3.7 | 6780 | $0.0000 |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 306 | 245/306 | 80% | 4.4 | 7713 | $0.0000 |
 
 ## Results — pass rate by model (rows) × tool (columns)
 
 | Model | builtin-edit | pi-hashline-readmap | @cortexkit/aft-pi | @xynogen/pix-edit | pi-semantic-edit | @agimon-ai/doompi-edit | builtin-bash | pi-edit-guard | pi-hashline-edit-pro | Overall |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | 34/38 | 35/38 | 36/38 | 37/38 | 34/38 | 38/38 | 37/38 | 34/38 | 37/38 | 322/342 (94%) |
-| GLM 5.3 Flash | 33/38 | 36/38 | 33/38 | 36/38 | 32/38 | 35/38 | 37/38 | 36/38 | 37/38 | 315/342 (92%) |
-| Qwen3.8-Flash | 35/38 | 35/38 | 35/38 | 37/38 | 33/38 | 37/38 | 36/38 | 34/38 | 37/38 | 319/342 (93%) |
-| MiMo 2.6 Flash | 34/38 | 36/38 | 36/38 | 36/38 | 33/38 | 37/38 | 37/38 | 35/38 | 37/38 | 321/342 (94%) |
-| MiMo-V2.6-Pro | 33/38 | 36/38 | 35/38 | 37/38 | 33/38 | 37/38 | 36/38 | 35/38 | 37/38 | 319/342 (93%) |
-| Muse Spark 1.3 Contributor | 30/38 | 35/38 | 36/38 | 36/38 | 33/38 | 37/38 | 36/38 | 35/38 | 37/38 | 315/342 (92%) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 34/38 | 35/38 | 35/38 | 37/38 | 33/38 | 37/38 | 36/38 | 35/38 | 37/38 | 319/342 (93%) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 29/38 | 33/38 | 33/38 | 30/38 | 27/38 | 36/38 | 34/38 | 29/38 | 37/38 | 288/342 (84%) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 30/38 | 21/38 | 23/38 | 31/38 | 28/38 | 28/38 | 33/38 | 29/38 | 37/38 | 260/342 (76%) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 34/38 | 24/38 | 35/38 | 34/38 | 30/38 | 12/38 | 34/38 | 32/38 | 37/38 | 272/342 (80%) |
+| DeepSeek V4.1 Flash | 32/34 | 32/34 | 32/34 | 33/34 | 32/34 | 34/34 | 33/34 | 30/34 | 34/34 | 292/306 (95%) |
+| GLM 5.3 Flash | 31/34 | 33/34 | 29/34 | 32/34 | 30/34 | 31/34 | 33/34 | 32/34 | 34/34 | 285/306 (93%) |
+| Qwen3.8-Flash | 33/34 | 32/34 | 31/34 | 33/34 | 32/34 | 33/34 | 32/34 | 30/34 | 34/34 | 290/306 (95%) |
+| MiMo 2.6 Flash | 32/34 | 33/34 | 32/34 | 32/34 | 32/34 | 33/34 | 33/34 | 31/34 | 34/34 | 292/306 (95%) |
+| MiMo-V2.6-Pro | 31/34 | 33/34 | 31/34 | 33/34 | 31/34 | 33/34 | 32/34 | 31/34 | 34/34 | 289/306 (94%) |
+| Muse Spark 1.3 Contributor | 28/34 | 32/34 | 32/34 | 32/34 | 31/34 | 33/34 | 32/34 | 31/34 | 34/34 | 285/306 (93%) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 32/34 | 32/34 | 31/34 | 33/34 | 31/34 | 33/34 | 32/34 | 31/34 | 34/34 | 289/306 (94%) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 28/34 | 28/34 | 29/34 | 27/34 | 26/34 | 32/34 | 30/34 | 26/34 | 34/34 | 260/306 (85%) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 28/34 | 20/34 | 20/34 | 27/34 | 26/34 | 24/34 | 29/34 | 25/34 | 32/34 | 231/306 (75%) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 32/34 | 21/34 | 31/34 | 30/34 | 28/34 | 11/34 | 30/34 | 28/34 | 34/34 | 245/306 (80%) |
 
 ## Per-tool totals (all models)
 
-| Tool | Core (20) | Staleness (11) | Served-state (7) | Passed | Total | Pass rate |
-| --- | --- | --- | --- | --- | --- | --- |
-| builtin-edit | 169/200 | 89/110 | 68/70 | 326 | 380 | 86% |
-| pi-hashline-readmap | 175/200 | 95/110 | 56/70 | 326 | 380 | 86% |
-| @cortexkit/aft-pi | 169/200 | 101/110 | 67/70 | 337 | 380 | 89% |
-| @xynogen/pix-edit | 187/200 | 95/110 | 69/70 | 351 | 380 | 92% |
-| pi-semantic-edit | 170/200 | 77/110 | 69/70 | 316 | 380 | 83% |
-| @agimon-ai/doompi-edit | 176/200 | 96/110 | 62/70 | 334 | 380 | 88% |
-| builtin-bash | 186/200 | 100/110 | 70/70 | 356 | 380 | 94% |
-| pi-edit-guard | 186/200 | 81/110 | 67/70 | 334 | 380 | 88% |
-| pi-hashline-edit-pro | 199/200 | 110/110 | 61/70 | 370 | 380 | 97% |
+| Tool | Core (23) | Staleness (11) | Passed | Total | Pass rate |
+| --- | --- | --- | --- | --- | --- |
+| builtin-edit | 218/230 | 89/110 | 307 | 340 | 90% |
+| pi-hashline-readmap | 201/230 | 95/110 | 296 | 340 | 87% |
+| @cortexkit/aft-pi | 197/230 | 101/110 | 298 | 340 | 88% |
+| @xynogen/pix-edit | 217/230 | 95/110 | 312 | 340 | 92% |
+| pi-semantic-edit | 222/230 | 77/110 | 299 | 340 | 88% |
+| @agimon-ai/doompi-edit | 201/230 | 96/110 | 297 | 340 | 87% |
+| builtin-bash | 216/230 | 100/110 | 316 | 340 | 93% |
+| pi-edit-guard | 214/230 | 81/110 | 295 | 340 | 87% |
+| pi-hashline-edit-pro | 228/230 | 110/110 | 338 | 340 | 99% |
 
 ## Per-tool process (all models)
 
 | Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |
 | --- | --- | --- | --- | --- | --- |
-| builtin-edit | 0.87.0 | 3.7 | 6573 | $0.0009 | 31 |
-| pi-hashline-readmap | 0.14.0 | 3.8 | 8178 | $0.0009 | 15 |
-| @cortexkit/aft-pi | 0.57.1 | 3.9 | 12726 | $0.0016 | 10 |
-| @xynogen/pix-edit | 0.2.5 | 3.5 | 6616 | $0.0010 | 27 |
-| pi-semantic-edit | 0.4.0 | 3.0 | 5772 | $0.0007 | 10 |
-| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.1 | 8007 | $0.0010 | 24 |
-| builtin-bash | 0.87.0 | 3.4 | 6855 | $0.0009 | 16 |
-| pi-edit-guard | 0.1.5 | 3.2 | 7192 | $0.0009 | 15 |
-| pi-hashline-edit-pro | 4.4.1 | 3.0 | 8871 | $0.0010 | 15 |
+| builtin-edit | 0.87.0 | 3.9 | 6898 | $0.0010 | 31 |
+| pi-hashline-readmap | 0.14.0 | 3.9 | 8390 | $0.0010 | 15 |
+| @cortexkit/aft-pi | 0.57.1 | 4.0 | 13087 | $0.0016 | 10 |
+| @xynogen/pix-edit | 0.2.5 | 3.6 | 6958 | $0.0011 | 27 |
+| pi-semantic-edit | 0.4.0 | 3.1 | 5972 | $0.0007 | 10 |
+| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.2 | 8255 | $0.0011 | 24 |
+| builtin-bash | 0.87.0 | 3.5 | 7386 | $0.0010 | 16 |
+| pi-edit-guard | 0.1.5 | 3.3 | 7463 | $0.0010 | 15 |
+| pi-hashline-edit-pro | 4.4.1 | 3.0 | 9034 | $0.0011 | 15 |
 
 ## Scenario detail
-
-### b8-blind-edit
-
-| Model | Contender | Pass | Outcome | Steps | Trace |
-| --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/builtin-edit-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-b8-blind-edit.json) |
-| DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-b8-blind-edit.json) |
-| GLM 5.3 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-b8-blind-edit.json) |
-| GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-b8-blind-edit.json) |
-| GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-b8-blind-edit.json) |
-| GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-b8-blind-edit.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-semantic-edit-b8-blind-edit.json) |
-| GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-b8-blind-edit.json) |
-| GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-edit-guard-b8-blind-edit.json) |
-| GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-b8-blind-edit.json) |
-| Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/builtin-edit-b8-blind-edit.json) |
-| Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-b8-blind-edit.json) |
-| Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-b8-blind-edit.json) |
-| Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-b8-blind-edit.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-b8-blind-edit.json) |
-| Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-b8-blind-edit.json) |
-| Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-edit-guard-b8-blind-edit.json) |
-| Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-b8-blind-edit.json) |
-| MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-b8-blind-edit.json) |
-| MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-b8-blind-edit.json) |
-| MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-b8-blind-edit.json) |
-| MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-b8-blind-edit.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-b8-blind-edit.json) |
-| MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-b8-blind-edit.json) |
-| MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-b8-blind-edit.json) |
-| MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-b8-blind-edit.json) |
-| MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-b8-blind-edit.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-b8-blind-edit.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep edit` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b8-blind-edit.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit✗ edit✗ read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-b8-blind-edit.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | noop | `read edit✗ edit✗ edit✗ read edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ❌ | applied (applied-wrong) | `read edit read edit✗ edit read edit read edit read` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-b8-blind-edit.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-b8-blind-edit.json) |
-
-### b7-paged-read-gap
-
-| Model | Contender | Pass | Outcome | Steps | Trace |
-| --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/builtin-edit-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-b7-paged-read-gap.json) |
-| DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | builtin-edit | ✅ | applied | `read read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-semantic-edit-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-edit-guard-b7-paged-read-gap.json) |
-| GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit read read read` | [trace](traces/qwen3.8-flash/builtin-edit-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read read edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-edit-guard-b7-paged-read-gap.json) |
-| Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read grep edit` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-b7-paged-read-gap.json) |
-| MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read grep edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-b7-paged-read-gap.json) |
-| MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-b7-paged-read-gap.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/builtin-edit-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read edit✗` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-b7-paged-read-gap.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b7-paged-read-gap.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit✗ edit` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-b7-paged-read-gap.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | noop | `read replace undo_last_change read replace undo_last_change read replace undo_last_change read` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit✗ edit✗ read edit✗ edit read` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read edit read edit read read read read` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ❌ | applied (applied-wrong) | `read edit read read edit read edit read edit read` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-b7-paged-read-gap.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-b7-paged-read-gap.json) |
 
 ### b6-change-then-revert
 
@@ -441,101 +251,6 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ❌ | applied (silent-wrong-line) | `read edit✗ read edit read` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b9-boundary-changed.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | recovered | `bash bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-b9-boundary-changed.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | recovered | `read edit read edit read undo read edit read` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-b9-boundary-changed.json) |
-
-### b17-reversed-range
-
-| Model | Contender | Pass | Outcome | Steps | Trace |
-| --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/builtin-edit-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit✗ read edit` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-b17-reversed-range.json) |
-| DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-b17-reversed-range.json) |
-| GLM 5.3 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-b17-reversed-range.json) |
-| GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-b17-reversed-range.json) |
-| GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-b17-reversed-range.json) |
-| GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-b17-reversed-range.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-semantic-edit-b17-reversed-range.json) |
-| GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-b17-reversed-range.json) |
-| GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/pi-edit-guard-b17-reversed-range.json) |
-| GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-b17-reversed-range.json) |
-| Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-b17-reversed-range.json) |
-| Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-b17-reversed-range.json) |
-| Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-b17-reversed-range.json) |
-| Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-b17-reversed-range.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-b17-reversed-range.json) |
-| Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-b17-reversed-range.json) |
-| Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-edit-guard-b17-reversed-range.json) |
-| Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-b17-reversed-range.json) |
-| MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-b17-reversed-range.json) |
-| MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-b17-reversed-range.json) |
-| MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-b17-reversed-range.json) |
-| MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-b17-reversed-range.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-b17-reversed-range.json) |
-| MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-b17-reversed-range.json) |
-| MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-b17-reversed-range.json) |
-| MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-b17-reversed-range.json) |
-| MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-b17-reversed-range.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/builtin-edit-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-b17-reversed-range.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ❌ | applied (applied-wrong) | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-b17-reversed-range.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | noop | `read replace✗ read replace✗ read replace✗ read replace undo_last_change read` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-b17-reversed-range.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-b17-reversed-range.json) |
 
 ### b13-chained-diff-edit
 
@@ -732,89 +447,89 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 | Model | Contender | Pass | Outcome | Steps | Trace |
 | --- | --- | --- | --- | --- | --- |
 | DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/builtin-edit-b18-boundary-dup.json) |
-| DeepSeek V4.1 Flash | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read edit read` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-b18-boundary-dup.json) |
+| DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit read edit read` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-b18-boundary-dup.json) |
 | DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-b18-boundary-dup.json) |
 | DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-b18-boundary-dup.json) |
 | DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-b18-boundary-dup.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-b18-boundary-dup.json) |
-| DeepSeek V4.1 Flash | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | GLM 5.3 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-b18-boundary-dup.json) |
-| GLM 5.3 Flash | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit edit edit✗ read edit read` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-b18-boundary-dup.json) |
+| GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit edit edit✗ read edit read` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-b18-boundary-dup.json) |
 | GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read✗` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-b18-boundary-dup.json) |
 | GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/pi-semantic-edit-b18-boundary-dup.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | ❌ | applied (applied-wrong) | `read edit read read read edit read read read read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-b18-boundary-dup.json) |
 | GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit read read` | [trace](traces/glm-5.3-flash/pi-edit-guard-b18-boundary-dup.json) |
-| GLM 5.3 Flash | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-b18-boundary-dup.json) |
-| Qwen3.8-Flash | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-b18-boundary-dup.json) |
+| Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-b18-boundary-dup.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-b18-boundary-dup.json) |
 | Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-b18-boundary-dup.json) |
 | Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-b18-boundary-dup.json) |
 | Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-edit-guard-b18-boundary-dup.json) |
-| Qwen3.8-Flash | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace read` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-b18-boundary-dup.json) |
-| MiMo 2.6 Flash | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-b18-boundary-dup.json) |
+| MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read✗ read✗` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-b18-boundary-dup.json) |
-| MiMo 2.6 Flash | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-b18-boundary-dup.json) |
-| MiMo-V2.6-Pro | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read edit✗ read read read edit✗ edit✗ edit✗ edit✗ edit✗ edit read edit✗` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-b18-boundary-dup.json) |
+| MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit read edit✗ read read read edit✗ edit✗ edit✗ edit✗ edit✗ edit read edit✗` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-b18-boundary-dup.json) |
-| MiMo-V2.6-Pro | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-b18-boundary-dup.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-b18-boundary-dup.json) |
+| Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-b18-boundary-dup.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-b18-boundary-dup.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-b18-boundary-dup.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-b18-boundary-dup.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit edit✗ read read` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-b18-boundary-dup.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ❌ | applied (applied-wrong) | `read edit edit✗ read edit edit read read read read` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-b18-boundary-dup.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit edit✗ read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ❌ | applied (applied-wrong) | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b18-boundary-dup.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-b18-boundary-dup.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit✗ edit✗ edit✗ edit` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep read✗ read edit read` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-b18-boundary-dup.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-b18-boundary-dup.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ❌ | applied (applied-wrong) | `read replace` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit✗ edit read read edit✗ edit✗ edit✗ read edit✗` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit✗ edit read read edit✗ edit✗ edit✗ read edit✗` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-b18-boundary-dup.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-b18-boundary-dup.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-b18-boundary-dup.json) |
@@ -1111,93 +826,93 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 
 | Model | Contender | Pass | Outcome | Steps | Trace |
 | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/deepseek-v4.1-flash/builtin-edit-duplicate-import.json) |
+| DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/builtin-edit-duplicate-import.json) |
 | DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-duplicate-import.json) |
 | DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-duplicate-import.json) |
 | DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-duplicate-import.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-duplicate-import.json) |
+| DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-duplicate-import.json) |
 | DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-duplicate-import.json) |
 | DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-duplicate-import.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-duplicate-import.json) |
 | DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-duplicate-import.json) |
-| GLM 5.3 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-duplicate-import.json) |
+| GLM 5.3 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-duplicate-import.json) |
 | GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-duplicate-import.json) |
 | GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-duplicate-import.json) |
 | GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-duplicate-import.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/glm-5.3-flash/pi-semantic-edit-duplicate-import.json) |
+| GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-semantic-edit-duplicate-import.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-duplicate-import.json) |
 | GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-duplicate-import.json) |
 | GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/pi-edit-guard-duplicate-import.json) |
 | GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-duplicate-import.json) |
-| Qwen3.8-Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-duplicate-import.json) |
+| Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-duplicate-import.json) |
 | Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-duplicate-import.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-duplicate-import.json) |
 | Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-duplicate-import.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/qwen3.8-flash/pi-semantic-edit-duplicate-import.json) |
+| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/pi-semantic-edit-duplicate-import.json) |
 | Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-duplicate-import.json) |
 | Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-duplicate-import.json) |
 | Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-edit-guard-duplicate-import.json) |
 | Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-duplicate-import.json) |
-| MiMo 2.6 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-duplicate-import.json) |
+| MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-duplicate-import.json) |
 | MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-duplicate-import.json) |
 | MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read✗ read✗ edit read✗` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-duplicate-import.json) |
 | MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-duplicate-import.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-duplicate-import.json) |
+| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-duplicate-import.json) |
 | MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read grep edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-duplicate-import.json) |
 | MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-duplicate-import.json) |
 | MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-duplicate-import.json) |
 | MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-duplicate-import.json) |
-| MiMo-V2.6-Pro | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/mimo-v2.6-pro/builtin-edit-duplicate-import.json) |
+| MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/builtin-edit-duplicate-import.json) |
 | MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-duplicate-import.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-duplicate-import.json) |
 | MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-duplicate-import.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-duplicate-import.json) |
+| MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-duplicate-import.json) |
 | MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-duplicate-import.json) |
 | MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-duplicate-import.json) |
 | MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-duplicate-import.json) |
 | MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-duplicate-import.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-duplicate-import.json) |
+| Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-duplicate-import.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-duplicate-import.json) |
+| Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-duplicate-import.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-duplicate-import.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-duplicate-import.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-duplicate-import.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-duplicate-import.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-duplicate-import.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-duplicate-import.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit✗ edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit✗ edit read edit` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-duplicate-import.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-duplicate-import.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-duplicate-import.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-duplicate-import.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit✗ edit✗ read edit✗` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-duplicate-import.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-import.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash✗ bash bash bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-duplicate-import.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-duplicate-import.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ read edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-duplicate-import.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-duplicate-import.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit✗ read edit✗ read edit` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-duplicate-import.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-duplicate-import.json) |
@@ -1206,93 +921,93 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 
 | Model | Contender | Pass | Outcome | Steps | Trace |
 | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/deepseek-v4.1-flash/builtin-edit-duplicate-nth.json) |
+| DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/builtin-edit-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-duplicate-nth.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-duplicate-nth.json) |
+| DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-duplicate-nth.json) |
-| GLM 5.3 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-duplicate-nth.json) |
+| GLM 5.3 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-duplicate-nth.json) |
 | GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-duplicate-nth.json) |
 | GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit read✗` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-duplicate-nth.json) |
 | GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-duplicate-nth.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/glm-5.3-flash/pi-semantic-edit-duplicate-nth.json) |
+| GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/pi-semantic-edit-duplicate-nth.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-duplicate-nth.json) |
 | GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-edit-guard-duplicate-nth.json) |
 | GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-duplicate-nth.json) |
-| Qwen3.8-Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-duplicate-nth.json) |
+| Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-duplicate-nth.json) |
 | Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-duplicate-nth.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-duplicate-nth.json) |
 | Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-duplicate-nth.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-duplicate-nth.json) |
+| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-duplicate-nth.json) |
 | Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-duplicate-nth.json) |
 | Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/pi-edit-guard-duplicate-nth.json) |
 | Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-duplicate-nth.json) |
-| MiMo 2.6 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-duplicate-nth.json) |
+| MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-duplicate-nth.json) |
 | MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-duplicate-nth.json) |
 | MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-duplicate-nth.json) |
 | MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-duplicate-nth.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-duplicate-nth.json) |
+| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-duplicate-nth.json) |
 | MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-duplicate-nth.json) |
 | MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-duplicate-nth.json) |
 | MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-duplicate-nth.json) |
-| MiMo-V2.6-Pro | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-duplicate-nth.json) |
+| MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-duplicate-nth.json) |
 | MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-duplicate-nth.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-duplicate-nth.json) |
 | MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-duplicate-nth.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-duplicate-nth.json) |
+| MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-duplicate-nth.json) |
 | MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-duplicate-nth.json) |
 | MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-duplicate-nth.json) |
 | MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-duplicate-nth.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-duplicate-nth.json) |
+| Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-duplicate-nth.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-duplicate-nth.json) |
+| Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit✗ edit read` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-duplicate-nth.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-duplicate-nth.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-duplicate-nth.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-duplicate-nth.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-duplicate-nth.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-duplicate-nth.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-duplicate-nth.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit✗ edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit✗ edit✗ edit read edit✗ edit read` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-duplicate-nth.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-duplicate-nth.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash✗ bash bash bash bash bash bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-duplicate-nth.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-duplicate-nth.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-duplicate-nth.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit✗ edit✗ edit✗ edit✗ edit✗ read edit✗ edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-duplicate-nth.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-nth.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-duplicate-nth.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-duplicate-nth.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/k2-horizon-7b-q4/builtin-edit-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (applied-wrong) | `read edit✗ edit read` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit read edit✗ read edit✗ read read read read` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-duplicate-nth.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-duplicate-nth.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-duplicate-nth.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-duplicate-nth.json) |
@@ -2722,101 +2437,6 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-formatter-drift.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ❌ | rejected (no-recovery) | `read✗ read✗ read✗ read✗ read✗ read✗ read✗ read✗ read✗ read✗` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-formatter-drift.json) |
 
-### anchor-stability
-
-| Model | Contender | Pass | Outcome | Steps | Trace |
-| --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/builtin-edit-anchor-stability.json) |
-| DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-anchor-stability.json) |
-| DeepSeek V4.1 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-anchor-stability.json) |
-| DeepSeek V4.1 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-anchor-stability.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-anchor-stability.json) |
-| DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-anchor-stability.json) |
-| DeepSeek V4.1 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-anchor-stability.json) |
-| DeepSeek V4.1 Flash | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-anchor-stability.json) |
-| DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-anchor-stability.json) |
-| GLM 5.3 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/builtin-edit-anchor-stability.json) |
-| GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-anchor-stability.json) |
-| GLM 5.3 Flash | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit✗ edit` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-anchor-stability.json) |
-| GLM 5.3 Flash | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-anchor-stability.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-semantic-edit-anchor-stability.json) |
-| GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-anchor-stability.json) |
-| GLM 5.3 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/glm-5.3-flash/builtin-bash-anchor-stability.json) |
-| GLM 5.3 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-edit-guard-anchor-stability.json) |
-| GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-anchor-stability.json) |
-| Qwen3.8-Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/builtin-edit-anchor-stability.json) |
-| Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-anchor-stability.json) |
-| Qwen3.8-Flash | @cortexkit/aft-pi | ✅ | applied | `read✗ structure✗ read edit read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-anchor-stability.json) |
-| Qwen3.8-Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-anchor-stability.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/pi-semantic-edit-anchor-stability.json) |
-| Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `edit✗ read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-anchor-stability.json) |
-| Qwen3.8-Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-anchor-stability.json) |
-| Qwen3.8-Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/qwen3.8-flash/pi-edit-guard-anchor-stability.json) |
-| Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-anchor-stability.json) |
-| MiMo 2.6 Flash | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/builtin-edit-anchor-stability.json) |
-| MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-anchor-stability.json) |
-| MiMo 2.6 Flash | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-anchor-stability.json) |
-| MiMo 2.6 Flash | @xynogen/pix-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-anchor-stability.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-anchor-stability.json) |
-| MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-anchor-stability.json) |
-| MiMo 2.6 Flash | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-anchor-stability.json) |
-| MiMo 2.6 Flash | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-anchor-stability.json) |
-| MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-anchor-stability.json) |
-| MiMo-V2.6-Pro | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/builtin-edit-anchor-stability.json) |
-| MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-anchor-stability.json) |
-| MiMo-V2.6-Pro | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-anchor-stability.json) |
-| MiMo-V2.6-Pro | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-anchor-stability.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-anchor-stability.json) |
-| MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-anchor-stability.json) |
-| MiMo-V2.6-Pro | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-anchor-stability.json) |
-| MiMo-V2.6-Pro | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-anchor-stability.json) |
-| MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ✅ | applied | `read✗ read edit read` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | builtin-bash | ✅ | applied | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-anchor-stability.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/builtin-edit-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/_xynogen_pix-edit-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-anchor-stability.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit✗ edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-anchor-stability.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (noop) | `read edit✗ read edit✗ read edit✗ read edit✗ read edit✗` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `read edit✗ edit✗ edit✗ edit edit edit✗ edit✗ read edit✗` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `grep edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-anchor-stability.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/builtin-edit-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ✅ | applied | `bash bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-anchor-stability.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ❌ | applied (applied-wrong) | `read edit read edit read edit read edit read edit` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-anchor-stability.json) |
-
 ### stale-line
 
 | Model | Contender | Pass | Outcome | Steps | Trace |
@@ -3581,28 +3201,28 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 
 | Model | Contender | Pass | Outcome | Steps | Trace |
 | --- | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ read✗ read read✗ edit✗ read edit✗ edit✗` | [trace](traces/deepseek-v4.1-flash/builtin-edit-empty-file.json) |
+| DeepSeek V4.1 Flash | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ read✗ read read✗ edit✗ read edit✗ edit✗` | [trace](traces/deepseek-v4.1-flash/builtin-edit-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-empty-file.json) |
 | DeepSeek V4.1 Flash | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `edit read` | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-empty-file.json) |
 | DeepSeek V4.1 Flash | @xynogen/pix-edit | ❌ | applied (noop) | `read edit✗ edit✗` | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-empty-file.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ read edit read` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-empty-file.json) |
+| DeepSeek V4.1 Flash | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit✗ read edit read` | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-empty-file.json) |
 | DeepSeek V4.1 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/deepseek-v4.1-flash/_agimon-ai_doompi-edit-empty-file.json) |
 | DeepSeek V4.1 Flash | builtin-bash | ❌ | applied (applied-wrong) | `bash` | [trace](traces/deepseek-v4.1-flash/builtin-bash-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ edit✗ edit✗ read✗ edit✗ edit✗ edit✗` | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-empty-file.json) |
-| GLM 5.3 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `edit✗ edit✗ read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/glm-5.3-flash/builtin-edit-empty-file.json) |
+| GLM 5.3 Flash | builtin-edit | ❌ | applied (noop) | `edit✗ edit✗ read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/glm-5.3-flash/builtin-edit-empty-file.json) |
 | GLM 5.3 Flash | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/glm-5.3-flash/pi-hashline-readmap-empty-file.json) |
 | GLM 5.3 Flash | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `edit✗ edit` | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-empty-file.json) |
 | GLM 5.3 Flash | @xynogen/pix-edit | ❌ | applied (noop) | `edit✗ read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-empty-file.json) |
-| GLM 5.3 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/glm-5.3-flash/pi-semantic-edit-empty-file.json) |
+| GLM 5.3 Flash | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit✗ edit read` | [trace](traces/glm-5.3-flash/pi-semantic-edit-empty-file.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-empty-file.json) |
 | GLM 5.3 Flash | builtin-bash | ❌ | applied (applied-wrong) | `bash` | [trace](traces/glm-5.3-flash/builtin-bash-empty-file.json) |
 | GLM 5.3 Flash | pi-edit-guard | ❌ | applied (noop) | `read edit✗ edit✗` | [trace](traces/glm-5.3-flash/pi-edit-guard-empty-file.json) |
 | GLM 5.3 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-empty-file.json) |
-| Qwen3.8-Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ read edit✗ edit✗ read edit✗ read✗` | [trace](traces/qwen3.8-flash/builtin-edit-empty-file.json) |
+| Qwen3.8-Flash | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ read edit✗ edit✗ read edit✗ read✗` | [trace](traces/qwen3.8-flash/builtin-edit-empty-file.json) |
 | Qwen3.8-Flash | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/pi-hashline-readmap-empty-file.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `read edit read read read` | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-empty-file.json) |
-| Qwen3.8-Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-empty-file.json) |
+| Qwen3.8-Flash | pi-semantic-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/qwen3.8-flash/pi-semantic-edit-empty-file.json) |
 | Qwen3.8-Flash | @xynogen/pix-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ read read✗ edit✗ edit✗ read✗ edit✗ edit✗ read edit✗` | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-empty-file.json) |
 | Qwen3.8-Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-empty-file.json) |
 | Qwen3.8-Flash | builtin-bash | ❌ | applied (applied-wrong) | `bash bash` | [trace](traces/qwen3.8-flash/builtin-bash-empty-file.json) |
@@ -3610,35 +3230,35 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 | Qwen3.8-Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-empty-file.json) |
 | MiMo 2.6 Flash | pi-hashline-readmap | ✅ | applied | `read read edit read` | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-empty-file.json) |
 | MiMo 2.6 Flash | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `edit read` | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-empty-file.json) |
-| MiMo 2.6 Flash | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ read` | [trace](traces/mimo-v2.6-flash/builtin-edit-empty-file.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-empty-file.json) |
+| MiMo 2.6 Flash | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ read` | [trace](traces/mimo-v2.6-flash/builtin-edit-empty-file.json) |
+| MiMo 2.6 Flash | pi-semantic-edit | ✅ | applied | `read edit✗ edit read` | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-empty-file.json) |
 | MiMo 2.6 Flash | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-empty-file.json) |
 | MiMo 2.6 Flash | @xynogen/pix-edit | ❌ | applied (noop) | `edit✗ read read✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ read✗ read✗ read✗` | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-empty-file.json) |
 | MiMo 2.6 Flash | builtin-bash | ❌ | applied (applied-wrong) | `bash` | [trace](traces/mimo-v2.6-flash/builtin-bash-empty-file.json) |
 | MiMo 2.6 Flash | pi-edit-guard | ❌ | applied (noop) | `edit✗ read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/mimo-v2.6-flash/pi-edit-guard-empty-file.json) |
 | MiMo 2.6 Flash | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-empty-file.json) |
-| MiMo-V2.6-Pro | builtin-edit | ❌ | applied (silent-wrong-line) | `edit✗ read` | [trace](traces/mimo-v2.6-pro/builtin-edit-empty-file.json) |
+| MiMo-V2.6-Pro | builtin-edit | ❌ | applied (noop) | `edit✗ read` | [trace](traces/mimo-v2.6-pro/builtin-edit-empty-file.json) |
 | MiMo-V2.6-Pro | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-empty-file.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `edit` | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-empty-file.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-empty-file.json) |
+| MiMo-V2.6-Pro | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit✗ edit read` | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-empty-file.json) |
 | MiMo-V2.6-Pro | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-empty-file.json) |
 | MiMo-V2.6-Pro | builtin-bash | ❌ | applied (applied-wrong) | `bash bash bash` | [trace](traces/mimo-v2.6-pro/builtin-bash-empty-file.json) |
 | MiMo-V2.6-Pro | @xynogen/pix-edit | ❌ | applied (noop) | `read edit✗ edit✗ read✗ edit✗ edit✗ edit✗ read edit✗ edit✗ edit✗ edit✗ read read✗ read✗ read read read read read read✗` | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-empty-file.json) |
 | MiMo-V2.6-Pro | pi-edit-guard | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ read` | [trace](traces/mimo-v2.6-pro/pi-edit-guard-empty-file.json) |
 | MiMo-V2.6-Pro | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-empty-file.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ read edit✗ read✗` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-empty-file.json) |
+| Muse Spark 1.3 Contributor | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ read edit✗ read✗` | [trace](traces/muse-spark-1.3-contributor/builtin-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-readmap | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-empty-file.json) |
 | Muse Spark 1.3 Contributor | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `read✗ edit✗ edit read✗ read` | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-empty-file.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-empty-file.json) |
+| Muse Spark 1.3 Contributor | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit✗ edit read` | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | @xynogen/pix-edit | ❌ | applied (noop) | `read edit✗ edit✗ read` | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/muse-spark-1.3-contributor/_agimon-ai_doompi-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | builtin-bash | ❌ | applied (applied-wrong) | `bash bash` | [trace](traces/muse-spark-1.3-contributor/builtin-bash-empty-file.json) |
 | Muse Spark 1.3 Contributor | pi-edit-guard | ❌ | applied (noop) | `read edit✗ edit✗ undo✗ read` | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-empty-file.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-edit-pro | ✅ | applied | `read replace read` | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-empty-file.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ edit✗ edit✗ read edit✗ edit✗ edit✗` | [trace](traces/qwen3.8-27b-q2/builtin-edit-empty-file.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ edit✗ edit✗ read edit✗ edit✗ edit✗` | [trace](traces/qwen3.8-27b-q2/builtin-edit-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read edit read` | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `read edit read` | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-empty-file.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ read edit✗ edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-empty-file.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit✗ edit✗ read edit✗ edit read` | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | ❌ | error (crashed) | `read edit✗ read edit✗ edit✗ edit✗ edit✗` | - |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/qwen3.8-27b-q2/_agimon-ai_doompi-edit-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | ❌ | applied (applied-wrong) | `bash bash` | [trace](traces/qwen3.8-27b-q2/builtin-bash-empty-file.json) |
@@ -3647,27 +3267,27 @@ Generated 2026-09-23T21:10:22.460Z. Real-model runs against opencode-go + llamac
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | ❌ | error (crashed) | `read edit✗ read✗ edit✗ read✗ edit✗ edit✗` | - |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `read edit` | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-empty-file.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-empty-file.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | ❌ | applied (applied-wrong) | `read edit✗ edit read` | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | ❌ | applied (noop) | `read edit✗ read✗ read✗ edit✗ read edit✗ edit✗ edit✗ read` | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit read` | [trace](traces/gemma-4-26b-a4b-q4/_agimon-ai_doompi-edit-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | ❌ | applied (applied-wrong) | `bash bash bash` | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | ❌ | applied (noop) | `read edit✗ read✗ read edit✗ edit✗` | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-empty-file.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-empty-file.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ✅ | applied | `read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ❌ | applied (applied-wrong) | `edit` | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ❌ | applied (noop) | `edit✗ read read edit✗ read edit✗ read edit✗ read edit✗` | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-empty-file.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ edit✗ edit✗ read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-empty-file.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ✅ | applied | `read edit✗ edit✗ edit✗ edit✗ edit✗ read edit read` | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-3.7b-q4/_agimon-ai_doompi-edit-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ❌ | applied (applied-wrong) | `bash` | [trace](traces/k2-horizon-3.7b-q4/builtin-bash-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ❌ | applied (noop) | `edit✗ read read read read read read read read read` | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read replace` | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-empty-file.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/builtin-edit-empty-file.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/builtin-edit-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | ✅ | applied | `read insert` | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | ❌ | applied (noop) | `edit✗ read edit✗ edit✗ edit✗ read edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | ✅ | applied | `edit read` | [trace](traces/k2-horizon-7b-q4/_cortexkit_aft-pi-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-empty-file.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (silent-wrong-line) | `read edit✗ edit✗ edit✗ read edit✗ read edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-empty-file.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | ❌ | applied (noop) | `read edit✗ edit✗ edit✗ read edit✗ read edit✗ edit✗ edit✗` | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | ✅ | applied | `read edit` | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-bash | ❌ | applied (applied-wrong) | `bash bash bash` | [trace](traces/k2-horizon-7b-q4/builtin-bash-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | ❌ | applied (noop) | `edit✗ read read edit✗ read edit✗ read read read read` | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-empty-file.json) |
@@ -3678,32 +3298,23 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 
 | Model | Contender | Scenario | Outcome | Trace |
 | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/builtin-edit-duplicate-import.json) |
-| DeepSeek V4.1 Flash | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/builtin-edit-duplicate-nth.json) |
 | DeepSeek V4.1 Flash | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/builtin-edit-insert-race-stale-boundary.json) |
-| DeepSeek V4.1 Flash | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/builtin-edit-empty-file.json) |
-| DeepSeek V4.1 Flash | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-b18-boundary-dup.json) |
+| DeepSeek V4.1 Flash | builtin-edit | empty-file | applied (noop) | [trace](traces/deepseek-v4.1-flash/builtin-edit-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-hashline-readmap | formatter-drift | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-formatter-drift.json) |
 | DeepSeek V4.1 Flash | @cortexkit/aft-pi | empty-file | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-hashline-readmap | insert-eof | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/pi-hashline-readmap-insert-eof.json) |
 | DeepSeek V4.1 Flash | @cortexkit/aft-pi | batch-edits | applied (noop) | [trace](traces/deepseek-v4.1-flash/_cortexkit_aft-pi-batch-edits.json) |
 | DeepSeek V4.1 Flash | @xynogen/pix-edit | empty-file | applied (noop) | [trace](traces/deepseek-v4.1-flash/_xynogen_pix-edit-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-b10-duplicate-drift.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-duplicate-nth.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-duplicate-import.json) |
-| DeepSeek V4.1 Flash | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-empty-file.json) |
+| DeepSeek V4.1 Flash | pi-semantic-edit | empty-file | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/pi-semantic-edit-empty-file.json) |
 | DeepSeek V4.1 Flash | builtin-bash | empty-file | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/builtin-bash-empty-file.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-b10-duplicate-drift.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | formatter-drift | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-formatter-drift.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-insert-race-stale-boundary.json) |
 | DeepSeek V4.1 Flash | pi-edit-guard | empty-file | applied (noop) | [trace](traces/deepseek-v4.1-flash/pi-edit-guard-empty-file.json) |
-| DeepSeek V4.1 Flash | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/deepseek-v4.1-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| GLM 5.3 Flash | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/builtin-edit-duplicate-nth.json) |
-| GLM 5.3 Flash | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/builtin-edit-duplicate-import.json) |
 | GLM 5.3 Flash | builtin-edit | b15-large-range-drift | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/builtin-edit-b15-large-range-drift.json) |
-| GLM 5.3 Flash | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/builtin-edit-empty-file.json) |
+| GLM 5.3 Flash | builtin-edit | empty-file | applied (noop) | [trace](traces/glm-5.3-flash/builtin-edit-empty-file.json) |
 | GLM 5.3 Flash | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/builtin-edit-insert-race-stale-boundary.json) |
-| GLM 5.3 Flash | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/glm-5.3-flash/pi-hashline-readmap-b18-boundary-dup.json) |
 | GLM 5.3 Flash | pi-hashline-readmap | formatter-drift | applied (applied-wrong) | [trace](traces/glm-5.3-flash/pi-hashline-readmap-formatter-drift.json) |
 | GLM 5.3 Flash | @cortexkit/aft-pi | crlf | applied (applied-wrong) | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-crlf.json) |
 | GLM 5.3 Flash | @cortexkit/aft-pi | delete-line | applied (applied-wrong) | [trace](traces/glm-5.3-flash/_cortexkit_aft-pi-delete-line.json) |
@@ -3713,31 +3324,22 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | GLM 5.3 Flash | @xynogen/pix-edit | b15-large-range-drift | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-b15-large-range-drift.json) |
 | GLM 5.3 Flash | @xynogen/pix-edit | empty-file | applied (noop) | [trace](traces/glm-5.3-flash/_xynogen_pix-edit-empty-file.json) |
 | GLM 5.3 Flash | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-semantic-edit-b10-duplicate-drift.json) |
-| GLM 5.3 Flash | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-semantic-edit-duplicate-nth.json) |
-| GLM 5.3 Flash | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-semantic-edit-duplicate-import.json) |
 | GLM 5.3 Flash | pi-semantic-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-semantic-edit-error-guidance.json) |
 | GLM 5.3 Flash | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-semantic-edit-insert-race-stale-boundary.json) |
-| GLM 5.3 Flash | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-semantic-edit-empty-file.json) |
+| GLM 5.3 Flash | pi-semantic-edit | empty-file | applied (applied-wrong) | [trace](traces/glm-5.3-flash/pi-semantic-edit-empty-file.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | b18-boundary-dup | applied (applied-wrong) | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-b18-boundary-dup.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | formatter-drift | applied (applied-wrong) | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-formatter-drift.json) |
 | GLM 5.3 Flash | builtin-bash | empty-file | applied (applied-wrong) | [trace](traces/glm-5.3-flash/builtin-bash-empty-file.json) |
 | GLM 5.3 Flash | @agimon-ai/doompi-edit | insert-eof | applied (applied-wrong) | [trace](traces/glm-5.3-flash/_agimon-ai_doompi-edit-insert-eof.json) |
 | GLM 5.3 Flash | pi-edit-guard | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/glm-5.3-flash/pi-edit-guard-b10-duplicate-drift.json) |
 | GLM 5.3 Flash | pi-edit-guard | empty-file | applied (noop) | [trace](traces/glm-5.3-flash/pi-edit-guard-empty-file.json) |
-| GLM 5.3 Flash | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/glm-5.3-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| Qwen3.8-Flash | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/builtin-edit-duplicate-nth.json) |
-| Qwen3.8-Flash | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/builtin-edit-duplicate-import.json) |
-| Qwen3.8-Flash | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/builtin-edit-empty-file.json) |
-| Qwen3.8-Flash | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/qwen3.8-flash/pi-hashline-readmap-b18-boundary-dup.json) |
+| Qwen3.8-Flash | builtin-edit | empty-file | applied (noop) | [trace](traces/qwen3.8-flash/builtin-edit-empty-file.json) |
 | Qwen3.8-Flash | pi-hashline-readmap | formatter-drift | applied (applied-wrong) | [trace](traces/qwen3.8-flash/pi-hashline-readmap-formatter-drift.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | empty-file | applied (applied-wrong) | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-empty-file.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | batch-edits | applied (applied-wrong) | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-batch-edits.json) |
 | Qwen3.8-Flash | pi-hashline-readmap | insert-eof | applied (applied-wrong) | [trace](traces/qwen3.8-flash/pi-hashline-readmap-insert-eof.json) |
 | Qwen3.8-Flash | @cortexkit/aft-pi | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/_cortexkit_aft-pi-insert-race-stale-boundary.json) |
 | Qwen3.8-Flash | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/pi-semantic-edit-b10-duplicate-drift.json) |
-| Qwen3.8-Flash | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/pi-semantic-edit-duplicate-import.json) |
-| Qwen3.8-Flash | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/pi-semantic-edit-duplicate-nth.json) |
-| Qwen3.8-Flash | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/pi-semantic-edit-empty-file.json) |
 | Qwen3.8-Flash | @xynogen/pix-edit | empty-file | applied (noop) | [trace](traces/qwen3.8-flash/_xynogen_pix-edit-empty-file.json) |
 | Qwen3.8-Flash | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/pi-semantic-edit-insert-race-stale-boundary.json) |
 | Qwen3.8-Flash | @agimon-ai/doompi-edit | insert-eof | applied (applied-wrong) | [trace](traces/qwen3.8-flash/_agimon-ai_doompi-edit-insert-eof.json) |
@@ -3747,20 +3349,13 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | Qwen3.8-Flash | pi-edit-guard | empty-file | applied (noop) | [trace](traces/qwen3.8-flash/pi-edit-guard-empty-file.json) |
 | Qwen3.8-Flash | pi-edit-guard | formatter-drift | applied (applied-wrong) | [trace](traces/qwen3.8-flash/pi-edit-guard-formatter-drift.json) |
 | Qwen3.8-Flash | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/qwen3.8-flash/pi-edit-guard-insert-race-stale-boundary.json) |
-| Qwen3.8-Flash | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/qwen3.8-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| MiMo 2.6 Flash | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/builtin-edit-duplicate-nth.json) |
-| MiMo 2.6 Flash | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/builtin-edit-duplicate-import.json) |
 | MiMo 2.6 Flash | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/builtin-edit-insert-race-stale-boundary.json) |
-| MiMo 2.6 Flash | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-b18-boundary-dup.json) |
 | MiMo 2.6 Flash | pi-hashline-readmap | insert-eof | applied (applied-wrong) | [trace](traces/mimo-v2.6-flash/pi-hashline-readmap-insert-eof.json) |
 | MiMo 2.6 Flash | @cortexkit/aft-pi | empty-file | applied (applied-wrong) | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-empty-file.json) |
-| MiMo 2.6 Flash | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/builtin-edit-empty-file.json) |
+| MiMo 2.6 Flash | builtin-edit | empty-file | applied (noop) | [trace](traces/mimo-v2.6-flash/builtin-edit-empty-file.json) |
 | MiMo 2.6 Flash | @cortexkit/aft-pi | batch-edits | applied (applied-wrong) | [trace](traces/mimo-v2.6-flash/_cortexkit_aft-pi-batch-edits.json) |
 | MiMo 2.6 Flash | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-b10-duplicate-drift.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-duplicate-import.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-duplicate-nth.json) |
 | MiMo 2.6 Flash | @xynogen/pix-edit | stale-range | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-stale-range.json) |
-| MiMo 2.6 Flash | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-empty-file.json) |
 | MiMo 2.6 Flash | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-semantic-edit-insert-race-stale-boundary.json) |
 | MiMo 2.6 Flash | @agimon-ai/doompi-edit | insert-eof | applied (applied-wrong) | [trace](traces/mimo-v2.6-flash/_agimon-ai_doompi-edit-insert-eof.json) |
 | MiMo 2.6 Flash | @xynogen/pix-edit | empty-file | applied (noop) | [trace](traces/mimo-v2.6-flash/_xynogen_pix-edit-empty-file.json) |
@@ -3768,21 +3363,15 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | MiMo 2.6 Flash | pi-edit-guard | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-edit-guard-b10-duplicate-drift.json) |
 | MiMo 2.6 Flash | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-flash/pi-edit-guard-insert-race-stale-boundary.json) |
 | MiMo 2.6 Flash | pi-edit-guard | empty-file | applied (noop) | [trace](traces/mimo-v2.6-flash/pi-edit-guard-empty-file.json) |
-| MiMo 2.6 Flash | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/mimo-v2.6-flash/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| MiMo-V2.6-Pro | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/builtin-edit-duplicate-nth.json) |
-| MiMo-V2.6-Pro | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/builtin-edit-duplicate-import.json) |
-| MiMo-V2.6-Pro | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/builtin-edit-empty-file.json) |
+| MiMo-V2.6-Pro | builtin-edit | empty-file | applied (noop) | [trace](traces/mimo-v2.6-pro/builtin-edit-empty-file.json) |
 | MiMo-V2.6-Pro | builtin-edit | external-far | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/builtin-edit-external-far.json) |
 | MiMo-V2.6-Pro | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/builtin-edit-insert-race-stale-boundary.json) |
-| MiMo-V2.6-Pro | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-b18-boundary-dup.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | empty-file | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-empty-file.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | formatter-drift | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-formatter-drift.json) |
 | MiMo-V2.6-Pro | pi-hashline-readmap | insert-eof | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/pi-hashline-readmap-insert-eof.json) |
 | MiMo-V2.6-Pro | @cortexkit/aft-pi | batch-edits | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/_cortexkit_aft-pi-batch-edits.json) |
 | MiMo-V2.6-Pro | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-b10-duplicate-drift.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-duplicate-import.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-duplicate-nth.json) |
-| MiMo-V2.6-Pro | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-empty-file.json) |
+| MiMo-V2.6-Pro | pi-semantic-edit | empty-file | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-empty-file.json) |
 | MiMo-V2.6-Pro | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/pi-semantic-edit-insert-race-stale-boundary.json) |
 | MiMo-V2.6-Pro | @agimon-ai/doompi-edit | insert-eof | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/_agimon-ai_doompi-edit-insert-eof.json) |
 | MiMo-V2.6-Pro | builtin-bash | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/builtin-bash-b10-duplicate-drift.json) |
@@ -3791,25 +3380,19 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | MiMo-V2.6-Pro | @xynogen/pix-edit | empty-file | applied (noop) | [trace](traces/mimo-v2.6-pro/_xynogen_pix-edit-empty-file.json) |
 | MiMo-V2.6-Pro | pi-edit-guard | empty-file | applied (noop) | [trace](traces/mimo-v2.6-pro/pi-edit-guard-empty-file.json) |
 | MiMo-V2.6-Pro | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/mimo-v2.6-pro/pi-edit-guard-insert-race-stale-boundary.json) |
-| MiMo-V2.6-Pro | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/mimo-v2.6-pro/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | Muse Spark 1.3 Contributor | builtin-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-b9-boundary-changed.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-duplicate-nth.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-duplicate-import.json) |
 | Muse Spark 1.3 Contributor | builtin-edit | stale-line | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-stale-line.json) |
 | Muse Spark 1.3 Contributor | builtin-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-error-guidance.json) |
 | Muse Spark 1.3 Contributor | builtin-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-b10-duplicate-drift.json) |
 | Muse Spark 1.3 Contributor | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-insert-race-stale-boundary.json) |
-| Muse Spark 1.3 Contributor | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-empty-file.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-b18-boundary-dup.json) |
+| Muse Spark 1.3 Contributor | builtin-edit | empty-file | applied (noop) | [trace](traces/muse-spark-1.3-contributor/builtin-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-readmap | formatter-drift | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-formatter-drift.json) |
 | Muse Spark 1.3 Contributor | @cortexkit/aft-pi | empty-file | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-empty-file.json) |
 | Muse Spark 1.3 Contributor | pi-hashline-readmap | insert-eof | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/pi-hashline-readmap-insert-eof.json) |
 | Muse Spark 1.3 Contributor | @cortexkit/aft-pi | batch-edits | applied (noop) | [trace](traces/muse-spark-1.3-contributor/_cortexkit_aft-pi-batch-edits.json) |
 | Muse Spark 1.3 Contributor | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-b10-duplicate-drift.json) |
 | Muse Spark 1.3 Contributor | @xynogen/pix-edit | b15-large-range-drift | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-b15-large-range-drift.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-duplicate-nth.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-duplicate-import.json) |
-| Muse Spark 1.3 Contributor | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-empty-file.json) |
+| Muse Spark 1.3 Contributor | pi-semantic-edit | empty-file | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | @xynogen/pix-edit | empty-file | applied (noop) | [trace](traces/muse-spark-1.3-contributor/_xynogen_pix-edit-empty-file.json) |
 | Muse Spark 1.3 Contributor | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-semantic-edit-insert-race-stale-boundary.json) |
 | Muse Spark 1.3 Contributor | builtin-bash | empty-file | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/builtin-bash-empty-file.json) |
@@ -3818,20 +3401,14 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | Muse Spark 1.3 Contributor | pi-edit-guard | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-b10-duplicate-drift.json) |
 | Muse Spark 1.3 Contributor | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-insert-race-stale-boundary.json) |
 | Muse Spark 1.3 Contributor | pi-edit-guard | empty-file | applied (noop) | [trace](traces/muse-spark-1.3-contributor/pi-edit-guard-empty-file.json) |
-| Muse Spark 1.3 Contributor | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/muse-spark-1.3-contributor/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/builtin-edit-duplicate-import.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/builtin-edit-duplicate-nth.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | stale-line | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/builtin-edit-stale-line.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/builtin-edit-empty-file.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-b18-boundary-dup.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-edit | empty-file | applied (noop) | [trace](traces/qwen3.8-27b-q2/builtin-edit-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | formatter-drift | applied (applied-wrong) | [trace](traces/qwen3.8-27b-q2/pi-hashline-readmap-formatter-drift.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | empty-file | applied (applied-wrong) | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-readmap | insert-eof | error (crashed) | - |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | batch-edits | applied (applied-wrong) | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-batch-edits.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-b10-duplicate-drift.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-duplicate-nth.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-duplicate-import.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-empty-file.json) |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | empty-file | applied (applied-wrong) | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-empty-file.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @cortexkit/aft-pi | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/_cortexkit_aft-pi-insert-race-stale-boundary.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/pi-semantic-edit-insert-race-stale-boundary.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | @xynogen/pix-edit | empty-file | error (crashed) | - |
@@ -3841,15 +3418,12 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | builtin-bash | stale-line | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/builtin-bash-stale-line.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-insert-race-stale-boundary.json) |
 | Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-edit-guard | empty-file | applied (noop) | [trace](traces/qwen3.8-27b-q2/pi-edit-guard-empty-file.json) |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/qwen3.8-27b-q2/pi-hashline-edit-pro-b18-boundary-dup.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | b17-reversed-range | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-b17-reversed-range.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-duplicate-nth.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-duplicate-import.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | b18-boundary-dup | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | stale-line | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-stale-line.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-error-guidance.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-insert-race-stale-boundary.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | b6-change-then-revert | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b6-change-then-revert.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | stale-range | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/builtin-edit-stale-range.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-readmap | bom | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-readmap-bom.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-edit | empty-file | error (crashed) | - |
@@ -3862,7 +3436,6 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-b9-boundary-changed.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | crlf-bom | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-crlf-bom.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-insert-race-stale-boundary.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | b17-reversed-range | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-b17-reversed-range.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @cortexkit/aft-pi | batch-edits | applied (noop) | [trace](traces/gemma-4-26b-a4b-q4/_cortexkit_aft-pi-batch-edits.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | stale-line | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-stale-line.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-error-guidance.json) |
@@ -3870,11 +3443,8 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b9-boundary-changed.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b10-duplicate-drift.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/_xynogen_pix-edit-insert-race-stale-boundary.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | b17-reversed-range | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-b17-reversed-range.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | @xynogen/pix-edit | b12-noop-with-drift | error (crashed) | - |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-duplicate-nth.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-duplicate-import.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-empty-file.json) |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | empty-file | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-empty-file.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | stale-line | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-stale-line.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-error-guidance.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-semantic-edit | stale-range | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-semantic-edit-stale-range.json) |
@@ -3888,26 +3458,20 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | builtin-bash | sub-line-token | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/builtin-bash-sub-line-token.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b9-boundary-changed.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | b6-change-then-revert | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b6-change-then-revert.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | b17-reversed-range | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b17-reversed-range.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | b18-boundary-dup | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b18-boundary-dup.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b10-duplicate-drift.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | stale-line | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-stale-line.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | error-guidance | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-error-guidance.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | b15-large-range-drift | applied (silent-wrong-line) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-b15-large-range-drift.json) |
 | Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-edit-guard | empty-file | applied (noop) | [trace](traces/gemma-4-26b-a4b-q4/pi-edit-guard-empty-file.json) |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/gemma-4-26b-a4b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-b9-boundary-changed.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | whitespace-only | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-whitespace-only.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-duplicate-import.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-empty-file.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | empty-file | applied (noop) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | stale-line | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-stale-line.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-error-guidance.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/builtin-edit-insert-race-stale-boundary.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b7-paged-read-gap | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b7-paged-read-gap.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b9-boundary-changed.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b6-change-then-revert | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b6-change-then-revert.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | delete-line | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-delete-line.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | duplicate-import | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-duplicate-import.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | duplicate-nth | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-duplicate-nth.json) |
@@ -3918,7 +3482,6 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | insert-eof | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-insert-eof.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | external-far | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-external-far.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | undo | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-undo.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | anchor-stability | applied (noop) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-anchor-stability.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | crlf-bom | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-crlf-bom.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | delete-range | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-readmap-delete-range.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | b13-chained-diff-edit | applied (noop) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-b13-chained-diff-edit.json) |
@@ -3929,7 +3492,6 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | tabs | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-tabs.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | batch-edits | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-batch-edits.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | external-far | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-external-far.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | anchor-stability | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-anchor-stability.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | insert-eof | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-insert-eof.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | crlf-bom | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-crlf-bom.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @cortexkit/aft-pi | undo | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/_cortexkit_aft-pi-undo.json) |
@@ -3945,10 +3507,8 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b9-boundary-changed.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/_xynogen_pix-edit-insert-race-stale-boundary.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b10-duplicate-drift.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-nth.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-import.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | duplicate-nth | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-duplicate-nth.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | b15-large-range-drift | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-b15-large-range-drift.json) |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-empty-file.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | stale-line | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-stale-line.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | stale-range | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-stale-range.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-semantic-edit-error-guidance.json) |
@@ -3977,17 +3537,14 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | error-guidance | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-error-guidance.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-insert-race-stale-boundary.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | crlf-bom | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-edit-guard-crlf-bom.json) |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
 | K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | batch-edits | applied (applied-wrong) | [trace](traces/k2-horizon-3.7b-q4/pi-hashline-edit-pro-batch-edits.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | b6-change-then-revert | applied (noop) | [trace](traces/k2-horizon-7b-q4/builtin-edit-b6-change-then-revert.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/builtin-edit-duplicate-import.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/builtin-edit-duplicate-nth.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | empty-file | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/builtin-edit-empty-file.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-edit-pro | b18-boundary-dup | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/pi-hashline-edit-pro-b18-boundary-dup.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | builtin-edit | empty-file | applied (noop) | [trace](traces/k2-horizon-7b-q4/builtin-edit-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b15-large-range-drift | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b15-large-range-drift.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b13-chained-diff-edit | applied (noop) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b13-chained-diff-edit.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | single-line | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-single-line.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | duplicate-nth | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-duplicate-nth.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | b18-boundary-dup | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-b18-boundary-dup.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | delete-line | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-delete-line.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | bom | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-bom.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-hashline-readmap | empty-file | applied (noop) | [trace](traces/k2-horizon-7b-q4/pi-hashline-readmap-empty-file.json) |
@@ -4006,16 +3563,12 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @xynogen/pix-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/_xynogen_pix-edit-error-guidance.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-b10-duplicate-drift.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-b9-boundary-changed.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | duplicate-nth | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-duplicate-nth.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | duplicate-import | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-duplicate-import.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | empty-file | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-empty-file.json) |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | empty-file | applied (noop) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | error-guidance | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-error-guidance.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | stale-line | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-stale-line.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-semantic-edit | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-semantic-edit-insert-race-stale-boundary.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | b9-boundary-changed | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b9-boundary-changed.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | b7-paged-read-gap | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b7-paged-read-gap.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | b12-noop-with-drift | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b12-noop-with-drift.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | b8-blind-edit | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b8-blind-edit.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | b10-duplicate-drift | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b10-duplicate-drift.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | single-line | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-single-line.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | b13-chained-diff-edit | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-b13-chained-diff-edit.json) |
@@ -4047,4 +3600,3 @@ Every failed run is listed with its full transcript link (system prompt, user ta
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | empty-file | applied (noop) | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-empty-file.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | formatter-drift | rejected (no-recovery) | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-formatter-drift.json) |
 | K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | pi-edit-guard | insert-race-stale-boundary | applied (silent-wrong-line) | [trace](traces/k2-horizon-7b-q4/pi-edit-guard-insert-race-stale-boundary.json) |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | @agimon-ai/doompi-edit | anchor-stability | applied (applied-wrong) | [trace](traces/k2-horizon-7b-q4/_agimon-ai_doompi-edit-anchor-stability.json) |

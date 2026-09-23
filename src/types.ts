@@ -1,6 +1,6 @@
 export type Outcome = "applied" | "rejected" | "merged";
 
-export type ScenarioFocus = "core" | "staleness" | "served-state";
+export type ScenarioFocus = "core" | "staleness";
 
 export interface Scenario {
   id: string;
@@ -16,10 +16,6 @@ export interface Scenario {
     outcome: Outcome | "either";
     content?: string;
   };
-  expectedByContender?: Record<
-    string,
-    { outcome: Outcome | "either"; content?: string }
-  >;
 }
 
 export interface ContenderInfo {

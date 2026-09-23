@@ -53,10 +53,6 @@ export const scenarios: Scenario[] = [
       outcome: "applied",
       content: "function a() {\n  return 1;\n}\nfunction b() {\n  return 2;\n};\n",
     },
-    expectedByContender: {
-      "builtin-edit": { outcome: "rejected" },
-      "pi-semantic-edit": { outcome: "rejected" },
-    },
   },
   {
     id: "duplicate-import",
@@ -69,10 +65,6 @@ export const scenarios: Scenario[] = [
     expected: {
       outcome: "applied",
       content: "import { a } from 'x';\nimport { b } from 'y';\nimport { a2 } from 'x';\n",
-    },
-    expectedByContender: {
-      "builtin-edit": { outcome: "rejected" },
-      "pi-semantic-edit": { outcome: "rejected" },
     },
   },
   {
@@ -116,10 +108,6 @@ export const scenarios: Scenario[] = [
     description: "Insert the first content into an empty file.",
     fixture: "",
     expected: { outcome: "applied", content: "first\nsecond" },
-    expectedByContender: {
-      "builtin-edit": { outcome: "rejected" },
-      "pi-semantic-edit": { outcome: "rejected" },
-    },
   },
   {
     id: "noop",
@@ -313,21 +301,10 @@ export const scenarios: Scenario[] = [
     },
   },
   {
-    id: "anchor-stability",
-    fileName: "stability.ts",
-    category: "robustness",
-    focus: "served-state",
-    name: "anchors of untouched lines survive an edit",
-    description:
-      "After editing one line, the anchors of all other lines must be unchanged (no re-read needed).",
-    fixture: "aaa\nbbb\nccc\nddd\neee\n",
-    expected: { outcome: "applied", content: "aaa\nbbb\nCCC\nddd\neee\n" },
-  },
-  {
     id: "undo",
     fileName: "undo.ts",
     category: "robustness",
-    focus: "served-state",
+    focus: "core",
     name: "undo restores the exact previous content",
     description: "After an applied edit, undo must restore the original bytes.",
     fixture: "aaa\nbbb\nccc\n",
@@ -340,7 +317,7 @@ export const scenarios: Scenario[] = [
     focus: "staleness",
     name: "stale-edit error carries recovery guidance",
     description:
-      "When an edit is refused as stale, the error should point at fresh anchors or a re-read.",
+      "Intended: the refusal names fresh anchors or a re-read. Scored on whether a recovery edit lands on the current bytes.",
     fixture: "aaa\nbbb\nccc\n",
     mutateAfterRead: (content) => content.replace("bbb", "bbb-external"),
     expected: { outcome: "rejected" },

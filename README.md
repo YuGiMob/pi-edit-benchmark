@@ -31,7 +31,7 @@ The model must read the file and issue edits through the tools; the file state a
 
 ```
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
-bun run src/main-llm.ts                        # 10 models × 9 contenders × 38 scenarios (3,420 runs)
+bun run src/main-llm.ts                        # 10 models × 9 contenders × 34 scenarios (3,060 runs)
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
@@ -84,11 +84,11 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | `pi-edit-guard` | same surface as built-in `edit` (`{ path, edits: [{ oldText, newText }] }`) plus `undo` | none (argument repair, 14-pass fuzzy match chain, mtime staleness check) | yes |
 
 
-## Scenarios (38)
+## Scenarios (34)
 
-Each scenario carries a `focus` that the report splits by: **core editing** (20), **staleness & concurrency** (11), and **served-state & undo** (7) — the last group exercises anchor/served-state mechanics that only hashline-style tools implement.
+Each scenario carries a `focus` that the report splits by: **core editing** (23) and **staleness & concurrency** (11).
 
-### Core editing (20)
+### Core editing (23)
 - `single-line` — replace one line
 - `range` — replace an inclusive range
 - `delete-line` — delete one line cleanly
@@ -107,6 +107,9 @@ Each scenario carries a `focus` that the report splits by: **core editing** (20)
 - `sub-line-token` — replace a small token inside a longer line; the rest of the line stays byte-identical (search/replace targets the token, line-anchored tools rewrite the line — the outcome is the same for both)
 - `replace-all` — every occurrence of a repeated token replaced (one `replaceAll`-style edit vs per-occurrence entries or ranges)
 - `batch-edits` — five disjoint small values changed in one file; tests batching economy
+- `undo` — undo restores the exact previous bytes
+- `b13-chained-diff-edit` — two sequential edits in one file; both must land and the rest stay byte-identical
+- `b18-boundary-dup` — the replacement re-includes the line above the range; applied literally, so the duplicate stays
 
 ### Staleness & concurrency (11)
 - `stale-line` — the target line changed on disk; the edit must be refused
@@ -121,14 +124,6 @@ Each scenario carries a `focus` that the report splits by: **core editing** (20)
 - `insert-race-stale-boundary` — insert after a line changed on disk; must be refused
 - `formatter-drift` — a formatter reindents the whole file between read and edit; the target token survives, so tolerant apply or refuse-and-recover both end at the same formatted result — writing back a stale cached view fails
 
-### Served-state & undo (7)
-- `anchor-stability` — anchors of untouched lines survive an edit (no re-read needed)
-- `undo` — undo restores the exact previous bytes
-- `b7-paged-read-gap` — edit targets a line never shown by a paged read; served-state tools must reject
-- `b8-blind-edit` — edit with anchors never served for this file; served-state tools must reject
-- `b13-chained-diff-edit` — second edit anchored on the post-edit diff rows, no re-read
-- `b17-reversed-range` — swapped remove_from/remove_to; anchor tools autocorrect
-- `b18-boundary-dup` — replacement re-includes the boundary line; dedup tools strip it
 
 ## Scoring
 
@@ -137,66 +132,66 @@ Each scenario carries a `focus` that the report splits by: **core editing** (20)
 - `applied wrong content` — applied, but the result differs from the intent (e.g. BOM dropped, blank line left behind).
 - `rejected a valid edit` — refused an edit that should have applied.
 
-The report splits every score by the three focus groups above.
+The report splits every score by the two focus groups above.
 
-## Results — full wave (10 models × 9 contenders × 38 scenarios, 3,420 runs, $3.44)
+## Results — full wave (10 models × 9 contenders × 34 scenarios, 3,060 runs, $3.22)
 
-Reports: `results/llm-report.md` (all models), `results/llm-report-cloud.md` (6 opencode-go models, 2,052 runs, $3.44), and `results/llm-report-local.md` (4 llama.cpp models, 1,368 runs, $0.00).
+Reports: `results/llm-report.md` (all models), `results/llm-report-cloud.md` (6 opencode-go models, 1,836 runs, $3.22), and `results/llm-report-local.md` (4 llama.cpp models, 1,224 runs, $0.00).
 
-> This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, `pi-hashline-edit-pro` 4.4.1, and lifecycle events live. The two K2 Horizon models run through IFM's llama.cpp fork (`model/K2Horizon` branch); mainline still does not support the `k2_horizon` architecture. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-nodedup` was dropped in favor of the standard config, and `long-line` was dropped from the battery.
+> This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, `pi-hashline-edit-pro` 4.4.1, and lifecycle events live. The two K2 Horizon models run through IFM's llama.cpp fork (`model/K2Horizon` branch); mainline still does not support the `k2_horizon` architecture. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, and `long-line` was dropped from the battery. Scores below are re-evaluated offline from the committed run traces under the current evaluator.
 
-Per model (each /342):
+Per model (each /306):
 
 | Model | Passed | Rate | Avg tokens/run | Cost |
 | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | 322 | **94%** | 7,954 | $0.50 |
-| MiMo 2.6 Flash | 321 | **94%** | 8,049 | $0.41 |
-| Qwen3.8-Flash | 319 | **93%** | 8,115 | $0.49 |
-| MiMo-V2.6-Pro | 319 | **93%** | 7,620 | $1.23 |
-| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 319 | **93%** | 8,182 | $0.00 |
-| GLM 5.3 Flash | 315 | **92%** | 6,005 | $0.35 |
-| Muse Spark 1.3 Contributor | 315 | **92%** | 11,940 | $0.47 |
-| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 288 | **84%** | 6,522 | $0.00 |
-| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 272 | **80%** | 7,624 | $0.00 |
-| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 260 | **76%** | 6,646 | $0.00 |
+| DeepSeek V4.1 Flash | 292 | **95%** | 8,295 | $0.46 |
+| MiMo 2.6 Flash | 292 | **95%** | 8,460 | $0.39 |
+| Qwen3.8-Flash | 290 | **95%** | 8,332 | $0.45 |
+| MiMo-V2.6-Pro | 289 | **94%** | 7,954 | $1.15 |
+| Qwen3.8-27B (UD-Q2_K_XL, llama.cpp) | 289 | **94%** | 8,453 | $0.00 |
+| GLM 5.3 Flash | 285 | **93%** | 6,179 | $0.33 |
+| Muse Spark 1.3 Contributor | 285 | **93%** | 12,617 | $0.44 |
+| Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp) | 260 | **85%** | 6,821 | $0.00 |
+| K2 Horizon 7B (Q4_K_M, IFM fork, llama.cpp) | 245 | **80%** | 7,713 | $0.00 |
+| K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp) | 231 | **75%** | 6,780 | $0.00 |
 
 Per tool with the focus split (each cell passed/total across all ten models):
 
-| Tool | Core (20) | Staleness (11) | Served-state (7) | Overall (38) |
-| --- | --- | --- | --- | --- |
-| pi-hashline-edit-pro | 199/200 | 110/110 | 61/70 | 370/380 (97%) |
-| builtin-bash | 186/200 | 100/110 | 70/70 | 356/380 (94%) |
-| @xynogen/pix-edit | 187/200 | 95/110 | 69/70 | 351/380 (92%) |
-| @cortexkit/aft-pi | 169/200 | 101/110 | 67/70 | 337/380 (89%) |
-| @agimon-ai/doompi-edit | 176/200 | 96/110 | 62/70 | 334/380 (88%) |
-| pi-edit-guard | 186/200 | 81/110 | 67/70 | 334/380 (88%) |
-| builtin-edit | 169/200 | 89/110 | 68/70 | 326/380 (86%) |
-| pi-hashline-readmap | 175/200 | 95/110 | 56/70 | 326/380 (86%) |
-| pi-semantic-edit | 170/200 | 77/110 | 69/70 | 316/380 (83%) |
+| Tool | Core (23) | Staleness (11) | Overall (34) |
+| --- | --- | --- | --- |
+| pi-hashline-edit-pro | 228/230 | 110/110 | 338/340 (99%) |
+| builtin-bash | 216/230 | 100/110 | 316/340 (93%) |
+| @xynogen/pix-edit | 217/230 | 95/110 | 312/340 (92%) |
+| builtin-edit | 218/230 | 89/110 | 307/340 (90%) |
+| pi-semantic-edit | 222/230 | 77/110 | 299/340 (88%) |
+| @cortexkit/aft-pi | 197/230 | 101/110 | 298/340 (88%) |
+| @agimon-ai/doompi-edit | 201/230 | 96/110 | 297/340 (87%) |
+| pi-hashline-readmap | 201/230 | 95/110 | 296/340 (87%) |
+| pi-edit-guard | 214/230 | 81/110 | 295/340 (87%) |
 
 Per-tool process (all ten models):
 
 | Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |
 | --- | --- | --- | --- | --- | --- |
-| builtin-edit | 0.87.0 | 3.7 | 6,573 | $0.0009 | 31 |
-| pi-hashline-edit-pro | 4.4.1 | 3.0 | 8,871 | $0.0010 | 15 |
-| pi-hashline-readmap | 0.14.0 | 3.8 | 8,178 | $0.0009 | 15 |
-| @cortexkit/aft-pi | 0.57.1 | 3.9 | 12,726 | $0.0016 | 10 |
-| @xynogen/pix-edit | 0.2.5 | 3.5 | 6,616 | $0.0010 | 27 |
-| pi-semantic-edit | 0.4.0 | 3.0 | 5,772 | $0.0007 | 10 |
-| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.1 | 8,007 | $0.0010 | 24 |
-| builtin-bash | 0.87.0 | 3.4 | 6,855 | $0.0009 | 16 |
-| pi-edit-guard | 0.1.5 | 3.2 | 7,192 | $0.0009 | 15 |
+| builtin-edit | 0.87.0 | 3.9 | 6,898 | $0.0010 | 31 |
+| pi-hashline-edit-pro | 4.4.1 | 3.0 | 9,034 | $0.0011 | 15 |
+| pi-hashline-readmap | 0.14.0 | 3.9 | 8,390 | $0.0010 | 15 |
+| @cortexkit/aft-pi | 0.57.1 | 4.0 | 13,087 | $0.0016 | 10 |
+| @xynogen/pix-edit | 0.2.5 | 3.6 | 6,958 | $0.0011 | 27 |
+| pi-semantic-edit | 0.4.0 | 3.1 | 5,972 | $0.0007 | 10 |
+| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.2 | 8,255 | $0.0011 | 24 |
+| builtin-bash | 0.87.0 | 3.5 | 7,386 | $0.0010 | 16 |
+| pi-edit-guard | 0.1.5 | 3.3 | 7,463 | $0.0010 | 15 |
 
-Totals across the wave: **24.5M prompt tokens in, 2.4M completion tokens out, 12,019 tool calls** (1,514 failed), 26.6h of summed run time.
+Totals across the wave: **22.7M prompt tokens in, 2.3M completion tokens out, 11,040 tool calls** (1,466 failed), 25.1h of summed run time.
 
 **Findings:**
-- **`pi-hashline-edit-pro` 4.4.1 sweeps the wave at 97% (370/380)** — the only tool to take all 110 staleness runs, ahead of `builtin-bash` (94%) and `@xynogen/pix-edit` (92%).
-- **Qwen3.8-27B-Q2 runs with the cloud leaders at 93% (319/342)** — the best local model, matching Qwen3.8-Flash and MiMo-V2.6-Pro and trailing only DeepSeek (322) and MiMo 2.6 Flash (321).
-- **K2 Horizon scales with size**: 7B at 80% (272/342) beats 3.7B at 76% (260/342), but both trail Gemma 4 26B A4B (84%) and need IFM's fork to run at all.
-- **`builtin-bash` remains the strongest non-anchor baseline** at 94% overall — it and `pix-edit` take 69-70 of the 70 served-state runs, where tolerance pays off.
-- **The two K2 models drive the worst failure class**: 74 of the 152 applied-wrong results and 59 of the 176 silent-wrong-line results, on 20% of the matrix.
-- **`pi-semantic-edit` sits last at 83%**, with the weakest staleness score in the field (77/110); `builtin-edit` and `@cortexkit/aft-pi` tie for the weakest core (169/200).
+- **`pi-hashline-edit-pro` 4.4.1 sweeps the wave at 99% (338/340)** — the only tool to take all 110 staleness runs, ahead of `builtin-bash` (93%) and `@xynogen/pix-edit` (92%).
+- **Qwen3.8-27B-Q2 runs with the cloud leaders at 94% (289/306)** — the best local model, one run behind Qwen3.8-Flash (290) and tied with MiMo-V2.6-Pro (289), trailing DeepSeek and MiMo 2.6 Flash (292 each).
+- **K2 Horizon scales with size**: 7B at 80% (245/306) beats 3.7B at 75% (231/306), but both trail Gemma 4 26B A4B (85%) and need IFM's fork to run at all.
+- **`builtin-bash` remains the strongest non-anchor baseline** at 93%, with `@xynogen/pix-edit` (92%) the best structured-edit tool behind it.
+- **The two K2 models drive the worst failure class**: 68 of the 134 applied-wrong results and 47 of the 117 silent-wrong-line results, on 20% of the matrix.
+- **`pi-edit-guard` sits last at 87% (295/340)**; `pi-semantic-edit` keeps the weakest staleness score (77/110) and `@cortexkit/aft-pi` the weakest core (197/230).
 
 ## Ecosystem popularity (npm + GitHub, snapshot 2026-09)
 
@@ -223,7 +218,7 @@ src/
   main-llm.ts   benchmark entry point
   types.ts      shared types
   contenders/   per-tool adapters (expose the real pi tools to the LLM loop)
-  scenarios/    the scenario battery (38, tagged core/staleness/served-state)
+  scenarios/    the scenario battery (34, tagged core/staleness)
   llm/          multi-provider client + tool-calling runner + report rendering
 results/        generated reports + per-run traces (committed)
 ```
@@ -233,7 +228,7 @@ results/        generated reports + per-run traces (committed)
 1. `npm install <package>` (use `--legacy-peer-deps`; keep `@earendil-works/pi-tui` installed — extensions peer-depend on it).
 2. Add an adapter in `src/contenders/` implementing the `Contender` interface: `info` plus `listTools()`, which loads the extension through the fake pi `ExtensionAPI` and returns its tools. `promptSnippet`/`promptGuidelines` are rendered into the pi-mirror system prompt.
 3. Register it in `src/contenders/index.ts` and add its tool filter to `LLM_TOOL_FILTERS` in `src/llm/models.ts`.
-4. Add a `taskDescriptions` entry in `src/llm/runner.ts` for any new scenario id, and per-contender expectations (`expectedByContender`) where the tool's contract genuinely differs (e.g. no empty-file seeding).
+4. Add a `taskDescriptions` entry in `src/llm/runner.ts` for any new scenario id.
 
 ## License
 
