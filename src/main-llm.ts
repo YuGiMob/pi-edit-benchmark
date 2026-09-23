@@ -326,6 +326,27 @@ async function main(): Promise<void> {
   console.log(
     `\nReport written to ${outPath} (total API cost: $${totalCost.toFixed(4)})`,
   );
+
+  const providerById = new Map(models.map((model) => [model.id, providerOf(model)]));
+  const splitBase = outPath.replace(/\.md$/, "");
+  const writeSplit = async (suffix: string, splitRuns: LlmRun[]): Promise<void> => {
+    if (splitRuns.length === 0) return;
+    const splitModels = models.filter((model) => splitRuns.some((run) => run.modelId === model.id));
+    const splitReport: LlmReport = {
+      generatedAt: report.generatedAt,
+      models: splitModels,
+      runs: splitRuns,
+      mandateRead: report.mandateRead,
+    };
+    const splitPath = `${splitBase}-${suffix}.md`;
+    const splitCost = splitRuns.reduce((sum, run) => sum + run.costUsd, 0);
+    await writeFile(splitPath, renderLlmReport(splitReport, splitCost, splitPath));
+    await writeFile(splitPath.replace(/\.md$/, ".json"), JSON.stringify(splitReport, null, 2));
+    await writeFile(splitPath.replace(/\.md$/, ".runs.jsonl"), splitRuns.map((run) => JSON.stringify(run)).join("\n") + "\n");
+    console.log(`Split report written to ${splitPath} (${splitRuns.length} runs, $${splitCost.toFixed(4)})`);
+  };
+  await writeSplit("cloud", runs.filter((run) => providerById.get(run.modelId) !== "llamacpp"));
+  await writeSplit("local", runs.filter((run) => providerById.get(run.modelId) === "llamacpp"));
 }
 
 export function renderLlmReport(report: LlmReport, totalCost: number, outPath?: string): string {

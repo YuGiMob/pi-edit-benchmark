@@ -1,0 +1,79 @@
+{
+ "modelId": "qwen3.8-27b-q2",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "b13-chained-diff-edit",
+ "task": "Modify b13.ts in the current working directory. Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD. Use the anchors from the first edit's result for the second edit; do not re-read the whole file.. Use the provided tools.",
+ "startedAt": "2026-09-23T09:33:29.693Z",
+ "durationMs": 82500,
+ "tokensIn": 6413,
+ "tokensOut": 953,
+ "costUsd": 0,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nCCC\nDDD\neee\n",
+ "actualContent": "aaa\nbbb\nCCC\nDDD\neee\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-dSU1kS/pi-hashline-readmap-b13-chained-diff-edit"
+  },
+  {
+   "role": "user",
+   "content": "Modify b13.ts in the current working directory. Replace the line containing 'ccc' with exactly one line: CCC, then replace the line containing 'ddd' with exactly one line: DDD. Use the anchors from the first edit's result for the second edit; do not re-read the whole file.. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "I need to first read the file and find the \"ccc\" and \"ddd\" lines.\n",
+   "toolCalls": [
+    {
+     "id": "V3zI1332lfvMTsqYXiS1j7PCrcxsX4sF",
+     "name": "read",
+     "arguments": "{\"path\":\"b13.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "V3zI1332lfvMTsqYXiS1j7PCrcxsX4sF",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:efd|ddd\n5:9f6|eee\n6:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "I need to edit a file in two steps. First, I'll replace the line containing 'ccc' with 'CCC' using the set_line function and the anchor from the initial edit result. Then, I'll use the anchors from that first edit to perform a second edit, replacing the line with 'ddd' with 'DDD', without re-reading the entire file.\n",
+   "toolCalls": [
+    {
+     "id": "CC3Cc8LjKmONEWQsJlaN3YXnC5ygJcYn",
+     "name": "edit",
+     "arguments": "{\"path\":\"b13.ts\",\"edits\":[{\"set_line\": {\"anchor\": \"3:c00\", \"new_text\": \"CCC\"}}],\"postEditVerify\":true}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "CC3Cc8LjKmONEWQsJlaN3YXnC5ygJcYn",
+   "content": "Edited b13.ts (1 change, +1 -1 line)\n3:c00|ccc → 3:ba3|CCC"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The first edit succeeded. Next, I need to do the second edit using the anchors from the first edit's result. The result was as follows: `3:c00|ccc → 3:ba3|CCC`. The anchor for the first line is updated, but I need the anchor for the line containing 'ddd'.\n\nThe first edit's result only showed the changed line. The instruction says \"use the anchor from the first edit's result for the second edit, and don't re-read the entire file.\"\n\nHmm, the first edit's result only shows the updated line `3:ba3|CCC`. The line containing 'ddd' was originally line 4 `4:efd|ddd`. Since the edit was only a 1-line replacement (no line addition or deletion), the line numbers haven't changed. But is the hash for line 4 still `efd`?\n\nWait — the hash might depend on the line content and/or position. Let me think. Hashes like `55f`, `467`, `c00`, `efd`, `9f6`, `d05` look like content hashes. Line 4's content is `ddd` and its position hasn't changed, so its hash is likely still `efd`. But wait, could the hash depend on surrounding lines? That would be unusual. Typically, in this kind of hashline system, the hash is content-based (and possibly index-based).\n\nActually, the instruction \"use the anchor from the first edit's result for the second edit\" — the first edit's result only showed the changed line `3:ba3|CCC`. That doesn't directly give me an anchor for the ddd line. Hmm.\n\nMaybe the system provides a full diff including unchanged lines with updated anchors? The result shown here is: `Edited b13.ts (1 change, +1 -1 line) 3:c00|ccc → 3:ba3|CCC`. Only one line was displayed.\n\nSince line 4's content `ddd` hasn't changed and no lines were added or removed, the anchor should still be `4:efd`. The hash is probably content-based (and possibly position-based). Line 4's content and position are unchanged, so `4:efd` should still be valid.\n\nNo, wait — could the hash depend on a file-wide checksum? If so, all line hashes should have changed, and the first edit's result would have shown more. The result only showed the changed line. So line hashes are per-line. The ddd line's hash should still be `efd`.\n\nLet me try using the anchor `4:efd` for the second edit.\n",
+   "toolCalls": [
+    {
+     "id": "fgRZL9iQDneqL6HEurYjmA2hm4mbrJea",
+     "name": "edit",
+     "arguments": "{\"path\":\"b13.ts\",\"edits\":[{\"set_line\": {\"anchor\": \"4:efd\", \"new_text\": \"DDD\"}}],\"postEditVerify\":true}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "fgRZL9iQDneqL6HEurYjmA2hm4mbrJea",
+   "content": "Edited b13.ts (1 change, +1 -1 line)\n4:efd|ddd → 4:aac|DDD"
+  }
+ ]
+}

@@ -1,0 +1,79 @@
+{
+ "modelId": "qwen3.8-27b-q2",
+ "contenderId": "pi-hashline-edit-pro",
+ "contenderVersion": "4.3.8",
+ "scenarioId": "insert-after",
+ "task": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools.",
+ "startedAt": "2026-09-23T09:24:46.083Z",
+ "durationMs": 38004,
+ "tokensIn": 8450,
+ "tokensOut": 435,
+ "costUsd": 0,
+ "pass": true,
+ "outcome": "applied",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "actualContent": "aaa\nbbb\nB1\nB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-8Au2ml/pi-hashline-edit-pro-insert-after"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert.ts in the current working directory. Insert exactly two lines 'B1' and 'B2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "First, let's read the file to check what's in it.\n",
+   "toolCalls": [
+    {
+     "id": "NpMJDW7bwP0acWxJbGZroReO3HNP6UEv",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-8Au2ml/pi-hashline-edit-pro-insert-after/insert.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "NpMJDW7bwP0acWxJbGZroReO3HNP6UEv",
+   "content": "TRfb│aaa\nBlfd│bbb\nhnCL│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "I need to insert two lines, 'B1' and 'B2', right after the line containing 'bbb' (the line with anchor Blfd). I'll use the insert tool.\n",
+   "toolCalls": [
+    {
+     "id": "kAPEkhPF3xWdkcdBvkUWkBP1bovtuYRB",
+     "name": "insert",
+     "arguments": "{\"anchor\":\"Blfd\",\"direction\":\"after\",\"lines\":[\"B1\", \"B2\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "kAPEkhPF3xWdkcdBvkUWkBP1bovtuYRB",
+   "content": "Successfully inserted in insert.ts. Added 2 line(s), removed 1 line(s).\n ...\n Blfd│bbb\n+MrGU│B1\n+ukib│B2\n hnCL│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The output says \"removed 1 line(s)\" — hmm, this is strange. The diff shows:\n- Blfd│bbb (still exists, with a space prefix meaning no change)\n- +MrGU│B1\n- +ukib│B2\n- hnCL│ccc\n\nWait, it says \"removed 1 line(s)\", but the diff shows that bbb still exists. Actually, the insert tool's response says \"added 2 lines, removed 1 line\" — this might just be standard phrasing. The diff looks correct: B1 and B2 were inserted after bbb, and bbb remains. Let me read the file to confirm.\n",
+   "toolCalls": [
+    {
+     "id": "XSMPtomrun3YgAJMBPkM5pRvbaqPGaw8",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-8Au2ml/pi-hashline-edit-pro-insert-after/insert.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "XSMPtomrun3YgAJMBPkM5pRvbaqPGaw8",
+   "content": "TRfb│aaa\nBlfd│bbb\nMrGU│B1\nukib│B2\nhnCL│ccc"
+  }
+ ]
+}

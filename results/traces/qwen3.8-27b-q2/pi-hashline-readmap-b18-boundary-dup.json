@@ -1,0 +1,114 @@
+{
+ "modelId": "qwen3.8-27b-q2",
+ "contenderId": "pi-hashline-readmap",
+ "contenderVersion": "0.14.0",
+ "scenarioId": "b18-boundary-dup",
+ "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools.",
+ "startedAt": "2026-09-23T09:34:15.819Z",
+ "durationMs": 387966,
+ "tokensIn": 9814,
+ "tokensOut": 2568,
+ "costUsd": 0,
+ "pass": false,
+ "outcome": "applied",
+ "failureKind": "applied-wrong",
+ "readFirst": true,
+ "editedBlind": false,
+ "expectedContent": "aaa\naaa\nBBB\nccc\n",
+ "actualContent": "aaa\naaa\nBBB\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read text files or images; text reads include hashline anchors and optional maps/symbol lookup\n- edit: Edit files using hash-verified anchors from read/grep/ast_search/write\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read for file contents, images/screenshots, ranges, symbols, and edit anchors.\nUse read for images; it returns attachments, so avoid OCR tools unless explicitly needed.\nUse edit with fresh LINE:HASH anchors for existing files.\nUse edit replace only when anchored edits are impractical.\n\nCurrent working directory: /tmp/pi-llm-bench-JpyV9c/pi-hashline-readmap-b18-boundary-dup"
+  },
+  {
+   "role": "user",
+   "content": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The user wants to modify b18.ts in the current working directory. Let's first find and read the file, and locate the line containing 'bbb'.\n",
+   "toolCalls": [
+    {
+     "id": "aMdbIGHb6UvTNyFrdj1C1qw7bN5L4Z5a",
+     "name": "read",
+     "arguments": "{\"path\":\"b18.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "aMdbIGHb6UvTNyFrdj1C1qw7bN5L4Z5a",
+   "content": "1:55f|aaa\n2:467|bbb\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The file contains the following:\n- Line 1: `aaa` (hash 55f)\n- Line 2: `bbb` (hash 467)\n- Line 3: `ccc` (hash c00)\n- Line 4: empty (hash d05)\n\nI need to replace the line containing 'bbb' with exactly two lines: `aaa` and `BBB`.\n\nI'll use `set_line` on line 2 (anchor \"2:467\") with the new text being:\n```\naaa\nBBB\n```\n\nThis will replace that line with two lines.\n",
+   "toolCalls": [
+    {
+     "id": "GMA0tFrpnmQee5ewJuDflbTvZQERTtxo",
+     "name": "edit",
+     "arguments": "{\"path\":\"b18.ts\",\"edits\":[{\"set_line\": {\"anchor\": \"2:467\", \"new_text\": \"aaa\\nBBB\"}}]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "GMA0tFrpnmQee5ewJuDflbTvZQERTtxo",
+   "content": "Edited b18.ts (1 change, +1 -1 line)\n2:467|bbb → 2:4c5|BBB"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "Wait, this replacement only produced one line? Let me read the file and check the current state.\n\nActually, it seems the edit replaced \"bbb\" with only \"BBB\"? The output shows \"2:467|bbb → 2:4c5|BBB\" — hmm, that's strange. The new_text was \"aaa\\nBBB\". Let me read the file and verify.\n",
+   "toolCalls": [
+    {
+     "id": "d8Dmwx5mFzficXUyU9wBMwIlTC7xTSVd",
+     "name": "read",
+     "arguments": "{\"path\":\"b18.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "d8Dmwx5mFzficXUyU9wBMwIlTC7xTSVd",
+   "content": "1:55f|aaa\n2:4c5|BBB\n3:c00|ccc\n4:d05|"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The user requested to replace the line containing 'bbb' (line 2: \"bbb\") with exactly two lines: \"aaa\" and \"BBB\".\n\nI executed an edit that replaced line 2 with \"aaa\\nBBB\", but looking at the result, line 2 has become \"BBB\" and the original line 1 \"aaa\" is still there. In other words, the current file is:\n1: aaa\n2: BBB\n3: ccc\n4: (blank)\n\nThe desired state is:\n1: aaa\n2: BBB\n3: aaa\n4: BBB\n5: ccc\n... no wait. The user wants to replace the line containing 'bbb' (the 2nd line) with exactly two lines: \"aaa\" and \"BBB\". So the expected file is:\n\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: (blank)\n\nWait, let me think again. Original file:\n1: aaa\n2: bbb\n3: ccc\n4: (blank line)\n\nReplace the line containing 'bbb' (line 2) with two lines: \"aaa\" and \"BBB\". Result:\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: (blank line)\n\nHmm, but my edit replaced line 2 with \"aaa\\nBBB\". The result was:\n1: aaa\n2: BBB\n3: ccc\n4: (blank)\n\nSo it seems only \"BBB\" was reflected... no wait, that's not right. The result shows 4 lines: aaa, BBB, ccc, blank. If I had replaced line 2 with \"aaa\\nBBB\", the file should be aaa, aaa, BBB, ccc, blank (5 lines). But it's showing 4 lines.\n\nInteresting. The edit summary says \"1 change, +1 -1 line\", and line 2 changed from bbb to BBB. So it seems set_line with a multi-line new_text replaced line 2 with... hmm, apparently only \"BBB\" remained? That's odd. Maybe the harness replaced line 2's text \"bbb\" with \"aaa\\nBBB\" but... in that case it should have become 5 lines.\n\nActually wait — maybe set_line replaced the entire line 2 with the new text, and the new text was \"aaa\\nBBB\", so line 2 becomes \"aaa\" and a new line becomes \"BBB\". That should make 5 lines. But the result is 4 lines with line 2 being BBB.\n\nHmm, could it be that set_line with a multi-line text only kept the last line? Or the file was deduplicated? Let me think: \"2:467|bbb → 2:4c5|BBB\" suggests line 2 is now BBB. And the read result is:\n1: aaa\n2: BBB\n3: ccc\n4: blank\n\nSo the multi-line replacement... maybe the tool inserted \"aaa\" as line 2 and \"BBB\" as line 3, and line 2... no, line 2 is BBB.\n\nWait, maybe set_line only replaces the content of the line, and the new text \"aaa\\nBBB\" — the tool replaced line 2's content with the last line of the new text? That seems weird. Or maybe it treated it as a replacement but there's a bug/behavior where the first line of the new text matches the existing line 1 \"aaa\" (boundary duplication?), and there's some deduplication happening. The directory name is \"pi-hashline-readmap-b18-boundary-dup\" — suggesting a \"boundary-dup\" test: a duplicate at the boundary? Hmm.\n\nActually, maybe the tool replaced the line and inserted \"aaa\" as a new line before \"BBB\"... in that case the file should be:\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: blank\n\nBut it's showing:\n1: aaa\n2: BBB\n3: ccc\n4: blank\n\nHmm, 4 lines. So it seems the multi-line new_text was... let me count: originally 4 lines. Result 4 lines. If line 2 became 2 lines, it should be 5 lines. So something collapsed. Maybe the tool deduplicated: since the new first line \"aaa\" matches the existing line 1 \"aaa\"? That's the \"boundary-dup\" test. Actually, the directory name suggests a boundary duplicate issue: when replacing a line with multi-line text, the first line of the replacement might merge with the previous line?\n\nIn any case, the current state is:\n1: aaa\n2: BBB\n3: ccc\n4: blank\n\nThe expected final state is:\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: blank\n\nSo I need to insert \"aaa\" before line 2 (or replace line 2 \"BBB\" with \"aaa\\nBBB\"). The current line 2 is \"BBB\". I can use insert_after with the anchor \"1:55f\" (aaa) and new_text \"aaa\", or use set_line with anchor \"2:4c5\" and new_text \"aaa\\nBBB\" — though the latter might trigger the same weird behavior. Better: use insert_after on line 1's anchor \"1:55f\" and insert \"aaa\". That way line 2 becomes \"aaa\", and the old line 2 \"BBB\" becomes line 3.\n\nResult:\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: blank\n\nThis is exactly the desired state: the original 'bbb' line is replaced with \"aaa\" and \"BBB\".\n\nWait, but is this really the desired result? Original: line 1 aaa, line 2 bbb, line 3 ccc. Replace the 'bbb' line with \"aaa\" and \"BBB\": lines become aaa (original line 1), then aaa, BBB (replacing bbb), then ccc. So:\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: (blank line)\n\nYes. The file's final line is a blank line (line 4 \"d05|\"). So the file ends with a newline after ccc? Line 4's content is empty, meaning the file is \"aaa\\nbbb\\nccc\\n\" — 3 lines of content, with a blank line at the end? Actually line 4 has empty content, so the file is \"aaa\\nbbb\\nccc\\n\" (i.e., a trailing newline creating a phantom blank line) — the read displays 4 lines, with line 4 empty. So the file ends with \"ccc\\n\".\n\nAlright, let me execute the edit: insert_after anchor \"1:55f\", new_text \"aaa\".\n\nNote: set_line was applied previously; the new read has fresh anchors. Line 1 is \"1:55f|aaa\". Using insert_after after that line.\n",
+   "toolCalls": [
+    {
+     "id": "VgbadpthecSuDUtFm5m5w8XhXuJnAnid",
+     "name": "edit",
+     "arguments": "{\"path\":\"b18.ts\",\"edits\":[{\"insert_after\": {\"anchor\": \"1:55f\", \"new_text\": \"aaa\"}}]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "VgbadpthecSuDUtFm5m5w8XhXuJnAnid",
+   "content": "Edited b18.ts (1 change, +1 -0 line)\n 1 aaa\n+2 aaa\n 2 BBB\n 3 ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The file is now as follows:\n1: aaa\n2: aaa\n3: BBB\n4: ccc\n5: (blank line)\n\nThe requirements state \"replace the line containing 'bbb' with exactly 2 lines: aaa and BBB.\" Therefore, the result should be:\n1: aaa\n2: BBB\n3: ccc\n4: (blank line)\n\nThe line with \"aaa\" was duplicated. I need to delete one of the \"aaa\" lines. Let me read it to get a new anchor.\n",
+   "toolCalls": [
+    {
+     "id": "TMffjRKjuV6dz3UIy4b6c7L1zXGm8Npb",
+     "name": "read",
+     "arguments": "{\"path\":\"b18.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "TMffjRKjuV6dz3UIy4b6c7L1zXGm8Npb",
+   "content": "1:55f|aaa\n2:55f|aaa\n3:4c5|BBB\n4:c00|ccc\n5:d05|"
+  }
+ ]
+}

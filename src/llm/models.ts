@@ -55,14 +55,6 @@ export const LLM_MODELS: LlmModelSpec[] = [
     reasoningEffort: "xhigh",
   },
   {
-    id: "qwen3.5-9b-q4km",
-    name: "Qwen3.5 9B (Q4_K_M, llama.cpp)",
-    reasoning: true,
-    maxTokens: 16384,
-    provider: "llamacpp",
-    baseUrl: "http://192.168.0.21:8080/v1",
-  },
-  {
     id: "qwen3.8-27b-q2",
     name: "Qwen3.8-27B (UD-Q2_K_XL, llama.cpp)",
     reasoning: true,
@@ -73,6 +65,14 @@ export const LLM_MODELS: LlmModelSpec[] = [
   {
     id: "gemma-4-26b-a4b-q4",
     name: "Gemma 4 26B A4B (UD-Q4_K_XL, llama.cpp)",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "llamacpp",
+    baseUrl: "http://192.168.0.21:8080/v1",
+  },
+  {
+    id: "minicpm5-2b-q4",
+    name: "MiniCPM5-2B (Q4_K_M, llama.cpp)",
     reasoning: true,
     maxTokens: 16384,
     provider: "llamacpp",

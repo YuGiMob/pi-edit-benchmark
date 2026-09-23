@@ -1,0 +1,112 @@
+{
+ "modelId": "qwen3.8-27b-q2",
+ "contenderId": "pi-hashline-edit-pro",
+ "contenderVersion": "4.3.8",
+ "scenarioId": "insert-race-stale-boundary",
+ "task": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools.",
+ "startedAt": "2026-09-23T09:27:17.807Z",
+ "durationMs": 97583,
+ "tokensIn": 13608,
+ "tokensOut": 1085,
+ "costUsd": 0,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nbbb-x\nBB1\nBB2\nccc\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-k6W0QK/pi-hashline-edit-pro-insert-race-stale-boundary"
+  },
+  {
+   "role": "user",
+   "content": "Modify insert-race.ts in the current working directory. Insert exactly two lines 'BB1' and 'BB2' immediately after the line containing 'bbb'; the line 'bbb' itself must stay. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "Let me first take a look at the file to understand the structure.\n",
+   "toolCalls": [
+    {
+     "id": "gU2LsqgxeEcqtoqiSQMA6605KyLBSoSP",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-k6W0QK/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "gU2LsqgxeEcqtoqiSQMA6605KyLBSoSP",
+   "content": "LSjh│aaa\nszFN│bbb\nWhhc│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The user wants me to insert exactly two lines, \"BB1\" and \"BB2\", immediately after the line containing \"bbb\". The \"bbb\" line must remain.\n\nThe line containing \"bbb\" has the anchor \"szFN\". I'll use the \"insert\" tool to add these lines after the anchor \"szFN\".\n",
+   "toolCalls": [
+    {
+     "id": "tm7KHEE6Uxx2es3GQy3uIpqabkZ1nDhf",
+     "name": "insert",
+     "arguments": "{\"anchor\":\"szFN\",\"direction\":\"after\",\"lines\":[\"BB1\", \"BB2\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "tm7KHEE6Uxx2es3GQy3uIpqabkZ1nDhf",
+   "content": "Error: [E_STALE_ANCHOR] 2 stale anchors in /tmp/pi-llm-bench-k6W0QK/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts: \"szFN\", \"szFN\". The file changed since read. Call read() on /tmp/pi-llm-bench-k6W0QK/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts for fresh anchors."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The file has been modified. Please reload to get the new anchor.\n",
+   "toolCalls": [
+    {
+     "id": "ulctQp1nO7rULiWttBzTNesB9o1GlAQo",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-k6W0QK/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "ulctQp1nO7rULiWttBzTNesB9o1GlAQo",
+   "content": "LSjh│aaa\nINmo│bbb-x\nWhhc│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The file was modified externally — the \"bbb\" line is now \"bbb-x\". The task specified to insert after the line containing \"bbb\". \"bbb-x\" contains \"bbb\" as a substring. Hmm, but the task said \"the line 'bbb' itself must be preserved.\" The file was changed externally between reads — this is an \"insert-race\" scenario. The line is now \"bbb-x\", which contains \"bbb\" as a substring. I should insert after that line. The intent of the task: insert 'BB1' and 'BB2' immediately after the line containing 'bbb'. \"bbb-x\" contains \"bbb\". I'll proceed with INmo.\n",
+   "toolCalls": [
+    {
+     "id": "vqFX3PFIDMjosZHB7sIOxSatGKl3M952",
+     "name": "insert",
+     "arguments": "{\"anchor\":\"INmo\",\"direction\":\"after\",\"lines\":[\"BB1\", \"BB2\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "vqFX3PFIDMjosZHB7sIOxSatGKl3M952",
+   "content": "Successfully inserted in insert-race.ts. Added 2 line(s), removed 1 line(s).\n ...\n INmo│bbb-x\n+erTe│BB1\n+KKdk│BB2\n Whhc│ccc"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "Wait, something's off. The diff shows \"added 2 lines, deleted 1 line,\" and \"INmo│bbb-x\" is being kept (no +/- prefix, meaning it's a context line). But it says \"deleted 1 line\"? Hmm. Looking at the diff: \" INmo│bbb-x\" (space = context, meaning preserved), \"+erTe│BB1\", \"+KKdk│BB2\", \" Whhc│ccc\". So it seems like the insertion itself went fine. The \"deleted 1 line\" might be a quirk of the message, or maybe it refers to something else. Let me read the file and check the final state.\n\nAlso, the \"bbb\" line had become \"bbb-x\"—the file contents have changed from the original read (which was \"bbb\"). The task specified to insert after the line containing \"bbb\". The current line \"bbb-x\" contains \"bbb\" as a substring. No problem.\n\nLet me verify with a read.\n",
+   "toolCalls": [
+    {
+     "id": "a6WPFMrDkzQMP03jFdBwmz4jiNNgGOwm",
+     "name": "read",
+     "arguments": "{\"path\":\"/tmp/pi-llm-bench-k6W0QK/pi-hashline-edit-pro-insert-race-stale-boundary/insert-race.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "a6WPFMrDkzQMP03jFdBwmz4jiNNgGOwm",
+   "content": "LSjh│aaa\nINmo│bbb-x\nerTe│BB1\nKKdk│BB2\nWhhc│ccc"
+  }
+ ]
+}

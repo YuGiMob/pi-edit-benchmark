@@ -1,0 +1,76 @@
+{
+ "modelId": "gemma-4-26b-a4b-q4",
+ "contenderId": "pi-hashline-edit-pro-nodedup",
+ "contenderVersion": "4.3.8",
+ "scenarioId": "stale-range",
+ "task": "Modify stale-range.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D. Use the provided tools.",
+ "startedAt": "2026-09-23T08:31:03.184Z",
+ "durationMs": 16896,
+ "tokensIn": 7209,
+ "tokensOut": 525,
+ "costUsd": 0,
+ "pass": true,
+ "outcome": "recovered",
+ "readFirst": true,
+ "editedBlind": false,
+ "actualContent": "aaa\nB\nD\n",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read a file; each line returned as anchor│content\n- replace: Replace lines by anchor: bare anchors in `remove_from`/`remove_to`, bare lines in `replacement_lines` without `│`, one edit per call\n- insert: Insert `lines` after or before an anchor line: the anchor line stays, `lines` are bare without `│`, one per element\n- undo_last_change: Single-level undo: reverts a file's last `replace` or `insert`\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\n`read`: call again after an edit when you need anchors you lack — post-edit diff `+anchor│`/` anchor│` rows and any served `anchor│content` rows already carry fresh anchors for the changed range.\n`replace`: edit with `replace`/`insert`, not `sed -i` or heredocs — anchor edits are verified against what was shown and undoable.\n`replace`: `replacement_lines` `[\"\"]` is one blank line; pasted `anchor│` prefixes are stripped automatically (single line: same anchor for `remove_from` and `remove_to`).\n`replace`: never anchor on `-anchor│` rows of the post-edit diff, those anchors were freed by the edit. Check each batch diff before the next turn's edits on that file.\n`replace`: same-file same-message batches must target disjoint ranges; an overlap or member failure aborts only that file's batch unwritten. Unresolvable calls stay solo and don't abort.\n`replace`: if `replacement_lines` re-include the boundary line adjacent to the range, it is deduplicated automatically (not editable, never use `dedup` as an anchor).\n`replace`: path resolution is anchor-only; don't pass `path`.\n`insert`: path resolution is anchor-only; don't pass `path`.\n`undo_last_change`: only the last `replace`/`insert` per file is undoable; a `write` clears it, so undo right after a bad diff — review the diff's `-anchor│` rows first to confirm what you're restoring.\n\nCurrent working directory: /tmp/pi-llm-bench-asq83G/pi-hashline-edit-pro-nodedup-stale-range"
+  },
+  {
+   "role": "user",
+   "content": "Modify stale-range.ts in the current working directory. Replace the lines from the line containing 'bbb' through the line containing 'ddd' with exactly two lines: B, D. Use the provided tools."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "LOPK6h2k1fJHwo0qGmTlX9cCUb0RXaP1",
+     "name": "read",
+     "arguments": "{\"path\":\"stale-range.ts\"}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "LOPK6h2k1fJHwo0qGmTlX9cCUb0RXaP1",
+   "content": "IRRA│aaa\npuTI│bbb\nTiIn│ccc\nCFuw│ddd"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "mbFQhPnrqs24wBNnkao3Awtxrsa4YeyJ",
+     "name": "replace",
+     "arguments": "{\"remove_from\":\"puTI\",\"remove_to\":\"CFuw\",\"replacement_lines\":[\"B\",\"D\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "mbFQhPnrqs24wBNnkao3Awtxrsa4YeyJ",
+   "content": "Error: [E_RANGE_STALE] Line 3 of the replaced range (lines 2-4) in stale-range.ts does not match what was shown. Current range with fresh anchors:\n\npuTI│bbb\nalFK│ccc-external\nCFuw│ddd\n\nRetry with the fresh anchors above without a read."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": "The previous attempt failed because the file content changed unexpectedly (or I misread it, but the error message says the content is different). The error message provides the fresh anchors.\n\nThe current content is:\n```\npuTI│bbb\nalFK│ccc-external\nCFuw│ddd\n```\n\nWait, I should have seen the whole file. The `read` output showed:\n```\nIRRA│aaa\npuTI│bbb\nTiIn│ccc\nCFuw│ddd\n```\n\nBut the error message says:\n```\npuTI│bbb\nalFK│ccc-external\nCFuw│ddd\n```\n\nIt seems like between my `read` and `replace`, something happened, or I'm in a state where the file changed. Actually, I just made a `replace` call and it failed with `[E_RANGE_STALE]`.\n\nThe error message says:\n\"Current range with fresh anchors:\npuTI│bbb\nalFK│ccc-external\nCFuw│ddd\"\n\nThe user wants to replace from 'bbb' to 'ddd' with 'B' and 'D'.\n\n'bbb' has anchor `puTI`.\n'ddd' has anchor `CFuw`.\n\nI will try again using the anchors provided in the error message.",
+   "toolCalls": [
+    {
+     "id": "hiYbSqXCuCFhv2y8CLQQ7Dck1E6zZNr1",
+     "name": "replace",
+     "arguments": "{\"remove_from\":\"puTI\",\"remove_to\":\"CFuw\",\"replacement_lines\":[\"B\",\"D\"]}"
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "toolCallId": "hiYbSqXCuCFhv2y8CLQQ7Dck1E6zZNr1",
+   "content": "Successfully replaced in stale-range.ts. Added 2 line(s), removed 3 line(s).\n IRRA│aaa\n-puTI│bbb\n-alFK│ccc-external\n-CFuw│ddd\n+SrTI│B\n+BJfs│D"
+  }
+ ]
+}

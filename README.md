@@ -20,7 +20,7 @@ npm install --legacy-peer-deps   # peer-dep conflicts between extensions; keep @
 bun run src/main-llm.ts          # real-LLM benchmark (multi-provider)
 ```
 
-Output: `results/llm-report.md` + `results/llm-report.json`; traces land in `results/traces/<model>/`.
+Output: `results/llm-report.md` + `results/llm-report.json` (all models), plus `results/llm-report-cloud.*` and `results/llm-report-local.*` splits (each with `.md`, `.json`, `.runs.jsonl`); traces land in `results/traces/<model>/`.
 
 Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without `"type": "module"` and only Bun resolves their ESM imports of `pi-coding-agent` correctly.
 
@@ -56,13 +56,13 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 | --- | --- | --- | --- | --- | --- |
 | DeepSeek V4.1 Flash | `deepseek-v4.1-flash` | opencode-go | chat completions | provider default | $0.15 / $0.60 |
 | Gemma 4 26B A4B | `gemma-4-26b-a4b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
+| MiniCPM5-2B | `minicpm5-2b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.075 / $0.25 |
 | Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
 | MiMo 2.6 Flash | `mimo-v2.6-flash` | opencode-go | chat completions | provider default | $0.14 / $0.28 |
 | MiMo-V2.6-Pro | `mimo-v2.6-pro` | opencode-go | chat completions | provider default | $0.435 / $0.87 |
-| Qwen3.5 9B (Q4_K_M, llama.cpp) | `qwen3.5-9b-q4km` | llamacpp | chat completions | provider default | local, $0.00 |
 
 Reported per run: pass/fail against the scenario expectations, outcome class (`applied`, `rejected`, `recovered` — the model re-read after a stale rejection and applied correctly), tool-call trace, tokens, and API cost (prices from `~/.pi/agent/models-store.json`).
 
