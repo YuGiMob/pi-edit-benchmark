@@ -137,60 +137,60 @@ Each scenario carries a `focus` that the report splits by: **core editing** (20)
 
 The report splits every score by the three focus groups above.
 
-## Results — preliminary opencode-go wave (6 models × 10 contenders × 38 scenarios, `results/llm-report.md`, 2,280 runs, $3.59)
+## Results — opencode-go wave (6 models × 10 contenders × 38 scenarios, `results/llm-report.md`, 2,280 runs, $3.80)
 
-> **Preliminary:** only the opencode-go lanes have run so far. The three local llama.cpp models will be merged in with `--resume` once their server is available; the tables below cover the six remote models only. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-diff0` was replaced by `pi-hashline-edit-pro-nodedup`, and `long-line` was dropped from the battery. Lifecycle-event wiring landed after this wave, so the `pi-edit-guard` lanes predate it and will be rerun.
+> **Local lanes pending:** the three llama.cpp models will be merged in with `--resume` once their server is available; the tables below cover the six opencode-go models only. This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, and lifecycle events live. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-diff0` was replaced by `pi-hashline-edit-pro-nodedup`, and `long-line` was dropped from the battery.
 
 Per model (each /380):
 
 | Model | Passed | Rate | Avg tokens/run | Cost |
 | --- | --- | --- | --- | --- |
-| DeepSeek V4.1 Flash | 357 | 94% | 7,825 | $0.53 |
-| GLM 5.3 Flash | 354 | 93% | 5,650 | $0.35 |
-| Qwen3.8-Flash | 356 | 94% | 8,422 | $0.56 |
-| MiMo 2.6 Flash | 358 | **94%** | 7,240 | $0.41 |
-| MiMo-V2.6-Pro | 356 | 94% | 7,259 | $1.30 |
-| Muse Spark 1.3 Contributor | 356 | 94% | 10,126 | $0.44 |
+| DeepSeek V4.1 Flash | 360 | **95%** | 7,945 | $0.55 |
+| MiMo 2.6 Flash | 359 | 94% | 7,978 | $0.45 |
+| Qwen3.8-Flash | 357 | 94% | 8,200 | $0.55 |
+| MiMo-V2.6-Pro | 357 | 94% | 7,615 | $1.36 |
+| GLM 5.3 Flash | 353 | 93% | 6,068 | $0.39 |
+| Muse Spark 1.3 Contributor | 353 | 93% | 11,688 | $0.50 |
 
 Per tool with the focus split (each cell passed/total across all six models):
 
 | Tool | Core (20) | Staleness (11) | Served-state (7) | Overall (38) |
 | --- | --- | --- | --- | --- |
 | **pi-hashline-edit-pro-nodedup** | **120** | **66** | **42** | **228 (100%)** |
-| pi-hashline-edit-pro | 120 | 66 | 37 | 223 (98%) |
-| @agimon-ai/doompi-edit | 114 | 65 | 42 | 221 (97%) |
-| builtin-bash | 113 | 65 | 42 | 220 (96%) |
-| pi-hashline-readmap | 116 | 60 | 37 | 213 (93%) |
-| @xynogen/pix-edit | 114 | 57 | 42 | 213 (93%) |
-| @cortexkit/aft-pi | 107 | 63 | 41 | 211 (93%) |
-| pi-edit-guard | 113 | 52 | 42 | 207 (91%) |
-| builtin-edit | 102 | 58 | 42 | 202 (89%) |
-| pi-semantic-edit | 102 | 55 | 42 | 199 (87%) |
+| pi-hashline-edit-pro | 120 | 66 | 36 | 222 (97%) |
+| @agimon-ai/doompi-edit | 115 | 65 | 41 | 221 (97%) |
+| @xynogen/pix-edit | 114 | 63 | 42 | 219 (96%) |
+| builtin-bash | 114 | 63 | 42 | 219 (96%) |
+| pi-hashline-readmap | 115 | 62 | 36 | 213 (93%) |
+| @cortexkit/aft-pi | 106 | 63 | 42 | 211 (93%) |
+| pi-edit-guard | 114 | 53 | 42 | 209 (92%) |
+| builtin-edit | 102 | 55 | 42 | 199 (87%) |
+| pi-semantic-edit | 102 | 54 | 42 | 198 (87%) |
 
 Per-tool process (all six models):
 
 | Tool | Version | Avg steps | Avg tokens/run | Avg cost | Max steps |
 | --- | --- | --- | --- | --- | --- |
-| builtin-edit | 0.87.0 | 3.6 | 6,552 | $0.0014 | 13 |
-| pi-hashline-edit-pro | 4.3.8 | 2.9 | 8,550 | $0.0016 | 7 |
-| pi-hashline-edit-pro-nodedup | 4.3.8 | 2.9 | 8,423 | $0.0016 | 7 |
-| pi-hashline-readmap | 0.14.0 | 3.2 | 7,365 | $0.0015 | 10 |
-| @cortexkit/aft-pi | 0.57.1 | 3.2 | 11,342 | $0.0023 | 10 |
-| @xynogen/pix-edit | 0.2.5 | 3.4 | 6,673 | $0.0015 | 37 |
-| pi-semantic-edit | 0.4.0 | 3.0 | 6,191 | $0.0013 | 12 |
-| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 3.8 | 7,644 | $0.0016 | 16 |
-| builtin-bash | 0.87.0 | 3.2 | 7,520 | $0.0013 | 12 |
-| pi-edit-guard | 0.1.4 | 3.0 | 7,277 | $0.0016 | 10 |
+| builtin-edit | 0.87.0 | 3.8 | 7,114 | $0.0016 | 31 |
+| pi-hashline-edit-pro | 4.3.8 | 2.9 | 8,580 | $0.0017 | 7 |
+| pi-hashline-edit-pro-nodedup | 4.3.8 | 2.9 | 8,452 | $0.0016 | 7 |
+| pi-hashline-readmap | 0.14.0 | 3.2 | 7,621 | $0.0016 | 15 |
+| @cortexkit/aft-pi | 0.57.1 | 3.8 | 12,844 | $0.0026 | 10 |
+| @xynogen/pix-edit | 0.2.5 | 3.6 | 7,365 | $0.0017 | 27 |
+| pi-semantic-edit | 0.4.0 | 3.0 | 5,982 | $0.0012 | 7 |
+| @agimon-ai/doompi-edit | 0.0.1-alpha.52 | 4.0 | 8,196 | $0.0017 | 24 |
+| builtin-bash | 0.87.0 | 3.2 | 8,967 | $0.0015 | 16 |
+| pi-edit-guard | 0.1.5 | 3.1 | 7,369 | $0.0015 | 11 |
 
-Totals across the wave: **16.2M prompt tokens in, 1.5M completion tokens out, 7,317 tool calls** (574 failed), 13.2h of summed run time.
+Totals across the wave: **17.2M prompt tokens in, 1.6M completion tokens out, 7,619 tool calls** (778 failed), 12.9h of summed run time.
 
 **Findings:**
-- **`pi-hashline-edit-pro-nodedup` sweeps the wave at 100% (228/228)**, ahead of `pi-hashline-edit-pro` 4.3.8 at 98% — the dedup-off variant takes all 42 served-state runs while pro loses 5 there.
-- **`@agimon-ai/doompi-edit` alpha.52 lands 3rd (97%)** with 65/66 staleness, and **`builtin-bash` scores 96%** — the shell baseline now rivals the best dedicated tools on this battery.
-- **`pi-edit-guard` 0.1.4 is strongest on core (113/120) but weakest on staleness (52/66)**: `insert-race-stale-boundary` and `b10-duplicate-drift` account for 11 of its 14 staleness misses, and all six models fail `empty-file` because the guard cannot seed an empty file.
-- **`pi-semantic-edit` remains last (87%)** and produces the most silent wrong-line edits (29), followed by `builtin-edit` (26) at 89% overall.
-- **All six opencode-go models land within one point of each other (93–94%)**, so tool choice, not model choice, dominates this battery.
-- **`@xynogen/pix-edit` produced the longest run (37 tool calls, `b15-large-range-drift`)** — its retry loops can snowball; every other tool stayed at or below 16 steps.
+- **`pi-hashline-edit-pro-nodedup` sweeps the wave at 100% (228/228)**, ahead of `pi-hashline-edit-pro` 4.3.8 at 97% — the dedup-off variant takes all 42 served-state runs while pro loses 6 there.
+- **`@agimon-ai/doompi-edit` alpha.52 lands 3rd (97%)**, with `@xynogen/pix-edit` and `builtin-bash` at 96% — the shell baseline matches the best tolerant matchers on this battery.
+- **`pi-edit-guard` 0.1.5 sits at 92%**: lifecycle events now run (traces show stale blocks and `recovered` flows), but its `isVerbatimSafe` check allows edits whose `oldText` survives verbatim as a substring, so suffix-style drifts rarely trigger the block.
+- **Without the read mandate, the text tools lose staleness ground**: `builtin-edit` (87% overall, 55/66 staleness) and `pi-semantic-edit` (87%, last on core and served-state) now trail; the mandate previously prompted the read their matching depends on.
+- **DeepSeek V4.1 Flash leads the models at 95%** after the `reasoning_content` echo fix (its earlier 17 API-400 crashes are gone); all six models land between 93% and 95%.
+- **Cleanest wave so far**: 76 silent-wrong-line, 50 applied-wrong, 15 noop, and 0 crashes across 2,280 runs.
 
 ## Ecosystem popularity (npm + GitHub, snapshot 2026-09)
 
