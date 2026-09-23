@@ -3,12 +3,12 @@
  "contenderId": "builtin-edit",
  "contenderVersion": "0.87.0",
  "scenarioId": "b18-boundary-dup",
- "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing.",
- "startedAt": "2026-09-22T17:27:02.447Z",
- "durationMs": 38455,
- "tokensIn": 4249,
- "tokensOut": 823,
- "costUsd": 0.002564325,
+ "task": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools.",
+ "startedAt": "2026-09-23T04:55:47.065Z",
+ "durationMs": 16155,
+ "tokensIn": 3570,
+ "tokensOut": 367,
+ "costUsd": 0.0018722399999999998,
  "pass": true,
  "outcome": "applied",
  "readFirst": true,
@@ -18,27 +18,27 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-rnhdyR/builtin-edit-b18-boundary-dup"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-mVTAyV/builtin-edit-b18-boundary-dup"
   },
   {
    "role": "user",
-   "content": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools; always read the file before editing."
+   "content": "Modify b18.ts in the current working directory. Replace the line containing 'bbb' with exactly two lines: aaa and BBB. Use the provided tools."
   },
   {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "call_eda7de51082b4dccba775f12",
+     "id": "call_3982c15dcf32493bab764527",
      "name": "read",
      "arguments": "{\"path\": \"b18.ts\"}"
     }
    ],
-   "reasoning": "The task: replace the line containing 'bbb' with exactly two lines: aaa and BBB. But there might be duplicate 'bbb' lines (boundary-dup suggests duplicates). Let me read the file first."
+   "reasoning": "Let me read the file first."
   },
   {
    "role": "tool",
-   "toolCallId": "call_eda7de51082b4dccba775f12",
+   "toolCallId": "call_3982c15dcf32493bab764527",
    "content": "aaa\nbbb\nccc\n"
   },
   {
@@ -46,16 +46,16 @@
    "content": "",
    "toolCalls": [
     {
-     "id": "call_c46b17cf703646039ce65536",
+     "id": "call_cfb922d5de8e4e09a208c236",
      "name": "edit",
-     "arguments": "{\"path\": \"b18.ts\", \"edits\": [{\"oldText\": \"bbb\\n\", \"newText\": \"aaa\\nBBB\\n\"}]}"
+     "arguments": "{\"path\": \"b18.ts\", \"edits\": [{\"oldText\": \"bbb\", \"newText\": \"aaa\\nBBB\"}]}"
     }
    ],
-   "reasoning": "Replace the line 'bbb' with 'aaa' and 'BBB'. Wait — \"Replace the line containing 'bbb' with exactly two lines: aaa and BBB.\" The result would be:\n\naaa\naaa\nBBB\nccc\n\nHmm, but there's already an 'aaa' line. The instruction says the replacement content is two lines: aaa and BBB. So result is:\n\naaa\naaa\nBBB\nccc\n\nThe \"boundary-dup\" hint suggests the oldText 'bbb' or surrounding context might be ambiguous... Actually there's only one 'bbb' line. But if I edit \"aaa\\nbbb\\nccc\" the oldText includes 'aaa' which is duplicated after the edit — that's fine for matching against original. But the concern is edit uniqueness: oldText must match unique region in original. \"bbb\" appears once. But careful: if I use oldText \"bbb\" it's unique. Let me just replace \"bbb\" with \"aaa\\nBBB\".\n\nWait, but \"bbb\" as substring — only appears once. Fine.\n\nActually the boundary-dup issue: if oldText is \"aaa\\nbbb\" it's unique in the original but produces duplicate. The task just says replace the line containing 'bbb' with two lines: aaa and BBB. So the result should be:\n\naaa\naaa\nBBB\nccc\n\nYes. Use oldText \"bbb\" — but \"bbb\" is a line. Need exact match. Let me do edits with oldText \"bbb\" → \"aaa\\nBBB\". But careful: oldText \"bbb\" matches \"bbb\" in \"bbb\\nccc\" — unique. However there's a subtle issue: matching just \"bbb\" would also be within... no other occurrence. Fine.\n\nActually to be safe with line boundaries, I could use \"bbb\\n\" → \"aaa\\nBBB\\n\". Either works. I'll do that."
+   "reasoning": "Replace the line containing 'bbb' with two lines: aaa and BBB. The line \"bbb\" appears as its own line. Also note \"aaa\" is already a line — need unique oldText. Use \"aaa\\nbbb\\nccc\" but keep edits minimal... The line containing 'bbb' is just \"bbb\" which is unique. Replace with \"aaa\\nBBB\"."
   },
   {
    "role": "tool",
-   "toolCallId": "call_c46b17cf703646039ce65536",
+   "toolCallId": "call_cfb922d5de8e4e09a208c236",
    "content": "Successfully replaced 1 block(s) in b18.ts."
   },
   {
@@ -63,16 +63,16 @@
    "content": "",
    "toolCalls": [
     {
-     "id": "call_5c12ab3aa15b4173a1b0a533",
+     "id": "call_b69da6af1c3c478c928c48b8",
      "name": "read",
      "arguments": "{\"path\": \"b18.ts\"}"
     }
    ],
-   "reasoning": "Let me verify by reading the file."
+   "reasoning": "Wait — \"bbb\" — could match inside \"bbb\"? The oldText \"bbb\" matched 1 block. But careful: did it replace only the line? The file was \"aaa\\nbbb\\nccc\\n\". \"bbb\" appears once as substring. Good. Result: \"aaa\\naaa\\nBBB\\nccc\\n\". That matches the request: replace the line containing 'bbb' with exactly two lines: aaa and BBB."
   },
   {
    "role": "tool",
-   "toolCallId": "call_5c12ab3aa15b4173a1b0a533",
+   "toolCallId": "call_b69da6af1c3c478c928c48b8",
    "content": "aaa\naaa\nBBB\nccc\n"
   }
  ]

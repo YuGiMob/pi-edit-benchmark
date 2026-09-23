@@ -8,6 +8,7 @@ export const LLM_MODELS: LlmModelSpec[] = [
     maxTokens: 16384,
     provider: "opencode-go",
     baseUrl: "https://opencode.ai/zen/go/v1",
+    requiresReasoningContent: true,
   },
   {
     id: "glm-5.3-flash",

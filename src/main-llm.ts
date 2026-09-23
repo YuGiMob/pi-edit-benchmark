@@ -22,7 +22,7 @@ interface CliArgs {
   laneConcurrency: Record<string, number>;
   out: string;
   delayMs: number;
-  noReadMandate: boolean;
+  readMandate: boolean;
   resume: boolean;
   timeoutMs?: number;
 }
@@ -40,15 +40,15 @@ function parseArgs(argv: string[]): CliArgs {
     laneConcurrency: {},
     out: "results/llm-report.md",
     delayMs: 0,
-    noReadMandate: false,
+    readMandate: false,
     resume: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
     const next = () => argv[++i]!;
     switch (a) {
-      case "--no-read-mandate":
-        args.noReadMandate = true;
+      case "--read-mandate":
+        args.readMandate = true;
         break;
       case "--resume":
         args.resume = true;
@@ -106,8 +106,8 @@ Options:
   --delay-ms <n>       Pause before starting each provider lane (pacing for tight rate limits)
   --timeout-ms <n>     Per-API-call timeout (default: 180000)
 
-  --no-read-mandate   Drop the 'always read the file before editing' task suffix
-                      (secondary comparison: lets text tools attempt blind edits)
+  --read-mandate      Append the 'always read the file before editing' task suffix
+                      (off by default; the main run leaves the read decision to the model)
 
   --resume            Skip runs already recorded in <out>.runs.jsonl; new runs append there
 
@@ -285,7 +285,7 @@ async function main(): Promise<void> {
               toolFilter: LLM_TOOL_FILTERS[q.contenderId] ?? [],
               maxSteps: args.maxSteps,
               timeoutMs: args.timeoutMs ?? 180_000,
-              mandateRead: !args.noReadMandate,
+              mandateRead: args.readMandate,
               costPerMIn: cost.in,
               costPerMOut: cost.out,
               traceDir: join(process.cwd(), "results", "traces"),
@@ -318,7 +318,7 @@ async function main(): Promise<void> {
     generatedAt: new Date().toISOString(),
     models,
     runs,
-    mandateRead: !args.noReadMandate,
+    mandateRead: args.readMandate,
   };
   await mkdir(join(process.cwd(), "results"), { recursive: true });
   await writeFile(outPath, renderLlmReport(report, totalCost, outPath));
@@ -333,7 +333,7 @@ export function renderLlmReport(report: LlmReport, totalCost: number, outPath?: 
   out.push("# pi edit-tool benchmark — LLM runs");
   out.push("");
   const providers = [...new Set(report.models.map(providerOf))].join(" + ");
-  out.push(`Generated ${report.generatedAt}. Real-model runs against ${providers}; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $${totalCost.toFixed(4)}.${report.mandateRead === false ? " Read mandate off (--no-read-mandate)." : ""}`);
+  out.push(`Generated ${report.generatedAt}. Real-model runs against ${providers}; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $${totalCost.toFixed(4)}.${report.mandateRead === true ? " Read mandate on (--read-mandate)." : " Read mandate off."}`);
   out.push("");
   out.push("## Models");
   out.push("");

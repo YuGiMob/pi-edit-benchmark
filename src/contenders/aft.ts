@@ -41,5 +41,15 @@ export function aftContender(): Contender {
       return registry.listTools();
     },
     systemPromptPatch,
+    emitEvent: async (name: string, payload: unknown, cwd: string) => {
+      const registry = await getRegistry();
+      return registry.fire(name, payload, {
+        cwd,
+        sessionManager: {
+          getSessionId: () => "benchmark",
+          getSessionFile: () => undefined,
+        },
+      });
+    },
   };
 }

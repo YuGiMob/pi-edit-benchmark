@@ -76,9 +76,6 @@ export function makeRegistry() {
               `[E_BAD_SHAPE] Schema validation failed for tool "${tool.name}" after prepareArguments.\n${errors}`,
             );
           }
-          if (typeof tool.beforeExecute === "function") {
-            await tool.beforeExecute(prepared, ctx);
-          }
           return originalExecute.call(
             this,
             toolCallId,
@@ -113,6 +110,25 @@ export function makeRegistry() {
       const tool = tools.get(name);
       if (!tool) throw new Error(`Tool not registered: ${name}`);
       return tool;
+    },
+    async fire(event: string, payload: any, ctx: unknown) {
+      const handlers = eventHandlers.get(event) ?? [];
+      let current = payload;
+      for (const handler of handlers) {
+        const result = await handler(current, ctx);
+        if (!result || typeof result !== "object") continue;
+        if (event === "tool_call") {
+          if ((result as { block?: unknown }).block) return result;
+          continue;
+        }
+        current = { ...current };
+        for (const key of ["content", "details", "isError", "usage"]) {
+          if (key in result && (result as Record<string, unknown>)[key] !== undefined) {
+            (current as Record<string, unknown>)[key] = (result as Record<string, unknown>)[key];
+          }
+        }
+      }
+      return event === "tool_call" ? undefined : current;
     },
     listTools(): ToolSpec[] {
       return [...tools.values()].map((tool) => ({

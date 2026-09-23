@@ -3,12 +3,12 @@
  "contenderId": "builtin-edit",
  "contenderVersion": "0.87.0",
  "scenarioId": "formatter-drift",
- "task": "Modify formatter-drift.ts in the current working directory. In the line containing 'opts.port ?? 8080', change 8080 to 9090. Use the provided tools; always read the file before editing.",
- "startedAt": "2026-09-22T17:27:32.251Z",
- "durationMs": 11288,
- "tokensIn": 2576,
- "tokensOut": 211,
- "costUsd": 0.0013041300000000001,
+ "task": "Modify formatter-drift.ts in the current working directory. In the line containing 'opts.port ?? 8080', change 8080 to 9090. Use the provided tools.",
+ "startedAt": "2026-09-23T04:57:08.163Z",
+ "durationMs": 27509,
+ "tokensIn": 5058,
+ "tokensOut": 1040,
+ "costUsd": 0.00310503,
  "pass": true,
  "outcome": "applied",
  "readFirst": true,
@@ -18,45 +18,82 @@
  "messages": [
   {
    "role": "system",
-   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-U9Zl2y/builtin-edit-formatter-drift"
+   "content": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\nAvailable tools:\n- read: Read file contents\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n\nGuidelines:\nUse read to examine files instead of cat or sed.\nUse edit for precise changes (edits[].oldText must match exactly)\nWhen changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\nEach edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\nKeep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n\nCurrent working directory: /tmp/pi-llm-bench-qEMFj7/builtin-edit-formatter-drift"
   },
   {
    "role": "user",
-   "content": "Modify formatter-drift.ts in the current working directory. In the line containing 'opts.port ?? 8080', change 8080 to 9090. Use the provided tools; always read the file before editing."
+   "content": "Modify formatter-drift.ts in the current working directory. In the line containing 'opts.port ?? 8080', change 8080 to 9090. Use the provided tools."
   },
   {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "call_18653de95736484aac079b6f",
+     "id": "call_5e5b61acbccd47e083df7ffc",
      "name": "read",
      "arguments": "{\"path\": \"formatter-drift.ts\"}"
+    },
+    {
+     "id": "call_386f81faefa749e483a47bc2",
+     "name": "read",
+     "arguments": "{\"path\": \"./formatter-drift.ts\"}"
     }
    ],
-   "reasoning": "Read the file first."
+   "reasoning": "Let me look at the file first."
   },
   {
    "role": "tool",
-   "toolCallId": "call_18653de95736484aac079b6f",
+   "toolCallId": "call_5e5b61acbccd47e083df7ffc",
    "content": "function connect(opts) {\n  const host = opts.host;\n  const port = opts.port ?? 8080;\n  return { host, port };\n"
   },
   {
+   "role": "tool",
+   "toolCallId": "call_386f81faefa749e483a47bc2",
+   "content": "function connect(opts) {\n    const host = opts.host;\n    const port = opts.port ?? 8080;\n    return { host, port };\n"
+  },
+  {
    "role": "assistant",
    "content": "",
    "toolCalls": [
     {
-     "id": "call_8f59e821fe6945d7b10b05b1",
+     "id": "call_3222bf03a3fa4661ad0f9043",
      "name": "edit",
-     "arguments": "{\"path\": \"formatter-drift.ts\", \"edits\": [{\"oldText\": \"const port = opts.port ?? 8080;\", \"newText\": \"const port = opts.port ?? 9090;\"}]}"
+     "arguments": "{\"path\": \"formatter-drift.ts\", \"edits\": [{\"oldText\": \"opts.port ?? 8080\", \"newText\": \"opts.port ?? 9090\"}]}"
     }
    ],
-   "reasoning": "Now edit. Line contains 'opts.port ?? 8080'. Change 8080 to 9090. Just the port literal."
+   "reasoning": "Interesting - the two reads return different indentation (2 spaces vs 4 spaces). This is \"formatter drift\" - the file content may be shifting. This is a trap where the file drifts between reads. I need to make the edit carefully. Let me just do the edit with a unique oldText matching the line.\n\nThe line could be `  const port = opts.port ?? 8080;` or `    const port = opts.port ?? 8080;`. If I use a minimal oldText like `opts.port ?? 8080`, that's unique and safe regardless of indentation.\n\nBut the task says \"In the line containing 'opts.port ?? 8080', change 8080 to 9090.\" So changing just that substring is fine. Let me use `opts.port ?? 8080` -> `opts.port ?? 9090`. That's minimal and robust against drift.\n\nActually, to be safe against multiple matches... there's only one occurrence in each read. Let me do it.\n\nWait, but the two reads disagree on the file content. The edit tool matches against the actual file. Let me just attempt with the minimal text `opts.port ?? 8080`. That should work regardless of indentation drift.\n\nActually, to change 8080 to 9090 specifically in that line, I could match `?? 8080` but that might be ambiguous. `opts.port ?? 8080` is specific enough. Let me use that.\n\nHmm, but if the drift makes it `opts.port ??  8080` (extra space), it wouldn't match. Let me be careful. The minimal edit to change just the number: match `8080` alone? That's risky if there are multiple. Let me try `opts.port ?? 8080` first.\n\nActually, the safest minimal edit matching just the number in that specific line context. Let me use `?? 8080` -> `?? 9090`. Hmm.\n\nLet me just do `opts.port ?? 8080` -> `opts.port ?? 9090`. If it fails I'll adapt.\n\nActually there's a subtlety - the prompt says \"change 8080 to 9090\" in the line containing 'opts.port ?? 8080'. The most precise minimal edit is to replace just the 8080 token. But oldText must be unique. `8080` appears only once. Let me use `8080` -> `9090`. That's minimal and unique. But wait - could drift introduce other 8080s? Unlikely.\n\nHmm, but if oldText `8080` is not unique, the edit fails. The read shows only one 8080. Let me use `?? 8080` to be safer but still minimal and indentation-agnostic.\n\nI'll go with `opts.port ?? 8080` -> `opts.port ?? 9090` which is clearly unique and specific to the target line."
   },
   {
    "role": "tool",
-   "toolCallId": "call_8f59e821fe6945d7b10b05b1",
+   "toolCallId": "call_3222bf03a3fa4661ad0f9043",
    "content": "Successfully replaced 1 block(s) in formatter-drift.ts."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "toolCalls": [
+    {
+     "id": "call_385e99a859b248479c8f106b",
+     "name": "read",
+     "arguments": "{\"path\": \"formatter-drift.ts\"}"
+    },
+    {
+     "id": "call_9b786db7494e4449a3af4a2d",
+     "name": "read",
+     "arguments": "{\"path\": \"./formatter-drift.ts\"}"
+    }
+   ],
+   "reasoning": "Let me verify the change."
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_385e99a859b248479c8f106b",
+   "content": "function connect(opts) {\n    const host = opts.host;\n    const port = opts.port ?? 9090;\n    return { host, port };\n"
+  },
+  {
+   "role": "tool",
+   "toolCallId": "call_9b786db7494e4449a3af4a2d",
+   "content": "function connect(opts) {\n    const host = opts.host;\n    const port = opts.port ?? 9090;\n    return { host, port };\n"
   }
  ]
 }

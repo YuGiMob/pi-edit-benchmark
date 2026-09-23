@@ -12,7 +12,7 @@ LLM file editing fails in two ways: edits land on the wrong line, and stale edit
 
 ## How it works
 
-Each contender is a real pi extension loaded through a fake pi `ExtensionAPI` (the same registration surface pi uses, including `prepareArguments` + TypeBox validation), so the real tool implementations run unmodified. A real model drives each contender's own tools through a tool-calling loop.
+Each contender is a real pi extension loaded through a fake pi `ExtensionAPI` (the same registration surface pi uses, including `prepareArguments` + TypeBox validation), so the real tool implementations run unmodified. The fake API also fires pi's session and tool lifecycle events (`session_start`, `tool_call`, `tool_result`, `session_shutdown`), so hook-based behavior — e.g. `pi-edit-guard`'s mtime stale-read blocking — runs as it does in pi. A real model drives each contender's own tools through a tool-calling loop.
 Every scenario runs in an isolated temp dir per contender, so no state leaks between runs.
 
 ```
@@ -27,7 +27,7 @@ Requires [Bun](https://bun.sh) — several contenders ship `.ts` sources without
 ## LLM benchmark
 
 `src/main-llm.ts` drives the same contenders with a **real model** through a tool-calling loop. Models come from the opencode-go remote provider (`OPENCODE_API_KEY`), plus a keyless local `llamacpp` provider pointed at a llama.cpp server (e.g. `http://192.168.0.21:8080/v1`). The system prompt **mirrors pi's own `buildSystemPrompt`**: pi header, an "Available tools" list built from each tool's `promptSnippet`, aggregated `promptGuidelines`, any `before_agent_start` system-prompt patches the contender registers, and the working directory. Tool schemas are passed untruncated, and `prepareArguments` + TypeBox validation run exactly as pi runs them.
-The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured.
+The model must read the file and issue edits through the tools; the file state afterwards is scored against the scenario expectations. For the stale scenarios, the external change is applied to the file *immediately after the model's first read* — simulating a concurrent modification — and the model's behavior (silent mis-edit vs. rejected-and-recovered) is what's measured. Task prompts leave the read decision to the model; `--read-mandate` restores the previous 'always read the file before editing' suffix for a comparison run.
 
 ```
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
@@ -139,7 +139,7 @@ The report splits every score by the three focus groups above.
 
 ## Results — preliminary opencode-go wave (6 models × 10 contenders × 38 scenarios, `results/llm-report.md`, 2,280 runs, $3.59)
 
-> **Preliminary:** only the opencode-go lanes have run so far. The three local llama.cpp models will be merged in with `--resume` once their server is available; the tables below cover the six remote models only. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-diff0` was replaced by `pi-hashline-edit-pro-nodedup`, and `long-line` was dropped from the battery.
+> **Preliminary:** only the opencode-go lanes have run so far. The three local llama.cpp models will be merged in with `--resume` once their server is available; the tables below cover the six remote models only. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, `pi-hashline-edit-pro-diff0` was replaced by `pi-hashline-edit-pro-nodedup`, and `long-line` was dropped from the battery. Lifecycle-event wiring landed after this wave, so the `pi-edit-guard` lanes predate it and will be rerun.
 
 Per model (each /380):
 

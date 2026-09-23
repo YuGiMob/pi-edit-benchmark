@@ -134,10 +134,10 @@ describe("taskPrompt", () => {
       expect(p.length).toBeGreaterThan(40);
     }
   });
-  it("appends the read mandate by default and drops it under --no-read-mandate", () => {
+  it("drops the read mandate by default and appends it under --read-mandate", () => {
     const s = scenario("single-line");
-    expect(taskPrompt(s)).toContain("always read the file before editing");
-    expect(taskPrompt(s, { mandateRead: false })).not.toContain("always read the file before editing");
-    expect(taskPrompt(s, { mandateRead: false })).toContain("Use the provided tools.");
+    expect(taskPrompt(s)).not.toContain("always read the file before editing");
+    expect(taskPrompt(s)).toContain("Use the provided tools.");
+    expect(taskPrompt(s, { mandateRead: true })).toContain("always read the file before editing");
   });
 });

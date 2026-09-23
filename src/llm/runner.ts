@@ -3,6 +3,9 @@ import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
 import { chat, type ChatMessage } from "./client";
 import type { Contender, LlmModelSpec, LlmRun, LlmTrace, Scenario, ToolSpec } from "../types";
+import { emitSessionEvent, executeToolWithEvents } from "./tool-events";
+
+const STALE_HOOK_DRIFT_DELAY_MS = 650;
 
 export interface LlmRunnerOptions {
   cwd: string;
@@ -26,9 +29,9 @@ export interface EvaluatedOutcome {
 }
 
 export function taskPrompt(scenario: Scenario, opts?: { mandateRead?: boolean }): string {
-  const suffix = opts?.mandateRead === false
-    ? "Use the provided tools."
-    : "Use the provided tools; always read the file before editing.";
+  const suffix = opts?.mandateRead === true
+    ? "Use the provided tools; always read the file before editing."
+    : "Use the provided tools.";
   return `Modify ${scenario.fileName} in the current working directory. ${taskDescriptions[scenario.id] ?? scenario.name}. ${suffix}`;
 }
 
@@ -166,6 +169,7 @@ export async function runLlmScenario(
       opts.toolFilter.includes(t.name),
     );
     const hasReadTool = tools.some((t) => t.name === "read");
+    await emitSessionEvent(contender, "session_start", dir);
     if (tools.length === 0) {
       base.outcome = "no tools";
       base.failureKind = "skipped";
@@ -179,7 +183,7 @@ export async function runLlmScenario(
           ? contender.systemPromptPatch(buildSystemPrompt(tools, dir))
           : buildSystemPrompt(tools, dir),
       },
-      { role: "user", content: taskPrompt(scenario, { mandateRead: opts.mandateRead !== false }) },
+      { role: "user", content: taskPrompt(scenario, { mandateRead: opts.mandateRead }) },
     ];
     const traceMessages: LlmTrace["messages"] = messages.map((m) => ({ ...m }));
 
@@ -207,6 +211,7 @@ export async function runLlmScenario(
       const assistantMsg: ChatMessage = {
         role: "assistant",
         content: "",
+        reasoning: result.reasoning ?? undefined,
         toolCalls: result.toolCalls.map((tc) => ({
           id: tc.id,
           name: tc.name,
@@ -249,11 +254,12 @@ export async function runLlmScenario(
         if (isEditCall(call.name) && !seenRead.value) {
           base.editedBlind = true;
         }
-        const toolResult = await tool.execute(params, dir);
+        const toolResult = await executeToolWithEvents(contender, tool, params, call.id, dir);
         if (!seenRead.value && readLike) {
           seenRead.value = true;
           if (scenario.mutateAfterRead && !mutationApplied) {
             const current = await readFile(filePath, "utf-8");
+            if (contender.emitEvent) await new Promise((r) => setTimeout(r, STALE_HOOK_DRIFT_DELAY_MS));
             await writeFile(filePath, scenario.mutateAfterRead(current), "utf-8");
             mutationApplied = true;
           }
@@ -292,7 +298,7 @@ export async function runLlmScenario(
         contenderId: contender.info.id,
         contenderVersion: contender.info.version,
         scenarioId: scenario.id,
-        task: taskPrompt(scenario, { mandateRead: opts.mandateRead !== false }),
+        task: taskPrompt(scenario, { mandateRead: opts.mandateRead }),
         startedAt: new Date(startedAt).toISOString(),
         durationMs: base.durationMs,
         tokensIn: base.tokensIn,
@@ -324,6 +330,7 @@ export async function runLlmScenario(
     base.errorMessage = error instanceof Error ? error.message : String(error);
     base.durationMs = Date.now() - startedAt;
   } finally {
+    await emitSessionEvent(contender, "session_shutdown", dir);
     await rm(dir, { recursive: true, force: true });
   }
   return base;

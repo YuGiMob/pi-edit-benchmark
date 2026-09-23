@@ -34,6 +34,7 @@ export interface Contender {
   info: ContenderInfo;
   listTools(): Promise<ToolSpec[]>;
   systemPromptPatch?: (basePrompt: string) => string;
+  emitEvent?: (name: string, payload: unknown, cwd: string) => Promise<unknown>;
 }
 
 export interface ToolSpec {
@@ -58,6 +59,7 @@ export interface LlmModelSpec {
   baseUrl: string;
   api?: "openai-completions" | "openai-responses";
   reasoningEffort?: string;
+  requiresReasoningContent?: boolean;
 }
 
 export interface LlmRun {

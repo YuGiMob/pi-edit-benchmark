@@ -6,6 +6,7 @@ export interface ChatMessage {
   content: string;
   toolCallId?: string;
   toolCalls?: ChatToolCall[];
+  reasoning?: string;
 }
 
 export interface ChatToolCall {
@@ -86,6 +87,9 @@ async function chatCompletions(
     messages: messages.map((m) => {
       const base: Record<string, unknown> = { role: m.role, content: m.content };
       if (m.toolCallId) base.tool_call_id = m.toolCallId;
+      if (opts.model.requiresReasoningContent && m.role === "assistant" && m.reasoning) {
+        base.reasoning_content = m.reasoning;
+      }
       if (m.toolCalls) {
         base.tool_calls = m.toolCalls.map((tc) => ({
           id: tc.id,
