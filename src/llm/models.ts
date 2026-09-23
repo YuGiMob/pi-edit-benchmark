@@ -70,14 +70,6 @@ export const LLM_MODELS: LlmModelSpec[] = [
     provider: "llamacpp",
     baseUrl: "http://192.168.0.21:8080/v1",
   },
-  {
-    id: "minicpm5-2b-q4",
-    name: "MiniCPM5-2B (Q4_K_M, llama.cpp)",
-    reasoning: true,
-    maxTokens: 16384,
-    provider: "llamacpp",
-    baseUrl: "http://192.168.0.21:8080/v1",
-  },
 ];
 
 export const DEFAULT_LLM_SCENARIOS: string[] = [];
