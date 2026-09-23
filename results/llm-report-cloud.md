@@ -1,6 +1,6 @@
 # pi edit-tool benchmark — LLM runs
 
-Generated 2026-09-23T11:12:57.082Z. Real-model runs against opencode-go; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $3.8027. Read mandate off.
+Generated 2026-09-23T11:40:47.435Z. Real-model runs against opencode-go; the model drives each contender's actual tools through a tool-calling loop. Total API cost: $3.8027. Read mandate off.
 
 ## Models
 

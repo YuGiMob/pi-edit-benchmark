@@ -70,6 +70,14 @@ export const LLM_MODELS: LlmModelSpec[] = [
     provider: "llamacpp",
     baseUrl: "http://192.168.0.21:8080/v1",
   },
+  {
+    id: "k2-horizon-3.7b-q4",
+    name: "K2 Horizon 3.7B (Q4_K_M, IFM fork, llama.cpp)",
+    reasoning: true,
+    maxTokens: 16384,
+    provider: "llamacpp",
+    baseUrl: "http://192.168.0.21:8080/v1",
+  },
 ];
 
 export const DEFAULT_LLM_SCENARIOS: string[] = [];

@@ -31,7 +31,7 @@ The model must read the file and issue edits through the tools; the file state a
 
 ```
 bun run src/main-llm.ts --scenarios stale-line,duplicate-nth   # a subset
-bun run src/main-llm.ts                        # 8 models × 10 contenders × 38 scenarios (3,040 runs)
+bun run src/main-llm.ts                        # 9 models × 10 contenders × 38 scenarios (3,420 runs)
 bun run src/main-llm.ts --models glm-5.3-flash,muse-spark-1.3-contributor
 bun run src/main-llm.ts --concurrency 6 --delay-ms 8000 --dry-run
 bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
@@ -56,6 +56,7 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 | --- | --- | --- | --- | --- | --- |
 | DeepSeek V4.1 Flash | `deepseek-v4.1-flash` | opencode-go | chat completions | provider default | $0.15 / $0.60 |
 | Gemma 4 26B A4B | `gemma-4-26b-a4b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
+| K2 Horizon 3.7B | `k2-horizon-3.7b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.075 / $0.25 |
 | Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
