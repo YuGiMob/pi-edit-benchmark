@@ -41,7 +41,7 @@ bun run src/llm/show-trace.ts results/traces/<model>/<contender>-<scenario>.json
 
 ### Run traces (validation)
 
-Every LLM run is recorded as a full transcript in `results/traces/<model>/<contender>-<scenario>.json`:
+Every completed LLM run is recorded as a full transcript in `results/traces/<model>/<contender>-<scenario>.json` (4 of the 3,060 runs aborted before a trace was written and are scored from the committed run log):
 
 - the system prompt and the user task
 - every assistant turn: model **reasoning**, tool calls with their exact **arguments**
@@ -58,7 +58,7 @@ The summary report links every run (scenario tables) and every failed run ("Fail
 | Gemma 4 26B A4B | `gemma-4-26b-a4b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | K2 Horizon 3.7B | `k2-horizon-3.7b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
 | K2 Horizon 7B | `k2-horizon-7b-q4` | llamacpp | chat completions | provider default | local, $0.00 |
-| GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.075 / $0.25 |
+| GLM 5.3 Flash | `glm-5.3-flash` | opencode-go | chat completions | `max` | $0.15 / $0.50 |
 | Qwen3.8-27B | `qwen3.8-27b-q2` | llamacpp | chat completions | provider default | local, $0.00 |
 | Qwen3.8-Flash | `qwen3.8-flash` | opencode-go | chat completions | `max` | $0.15 / $0.47 |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | opencode-go | **OpenAI Responses** | `xhigh` | $0.10 / $0.20 |
@@ -74,7 +74,7 @@ Reported per run: pass/fail against the scenario expectations, outcome class (`a
 | Contender | Edit format | Anchors | Undo |
 | --- | --- | --- | --- |
 | `builtin-edit` | `{ path, edits: [{ oldText, newText }] }` | none (text matching) | no |
-| `pi-hashline-edit-pro` | `{ path, remove_from, remove_to, replacement_lines }` | `HASH│` 4-char, served-range verification | yes |
+| `pi-hashline-edit-pro` | `{ remove_from, remove_to, replacement_lines }` + `insert { anchor, direction, lines }` (no `path`; anchors resolve the file) | `anchor│` 4-char, served-range verification | yes |
 | `pi-hashline-readmap` | `{ path, edits: [{ set_line / replace_lines / insert_after }] }` | `LINE:HASH|` 3-char | no |
 | `@cortexkit/aft-pi` | `{ path, edits: [{ oldString, newString, occurrence }] }` | none (fuzzy find/replace, Rust backend) | no |
 | `@xynogen/pix-edit` | `{ path, edits: [{ oldText, newText }] }` | none (unique-text replace + diff) | no |
@@ -138,7 +138,7 @@ The report splits every score by the two focus groups above.
 
 Reports: `results/llm-report.md` (all models), `results/llm-report-cloud.md` (6 opencode-go models, 1,836 runs, $3.22), and `results/llm-report-local.md` (4 llama.cpp models, 1,224 runs, $0.00).
 
-> This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, `pi-hashline-edit-pro` 4.4.1, and lifecycle events live. The two K2 Horizon models run through IFM's llama.cpp fork (`model/K2Horizon` branch); mainline still does not support the `k2_horizon` architecture. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, and `long-line` was dropped from the battery. Scores below are re-evaluated offline from the committed run traces under the current evaluator.
+> This wave runs with the read mandate off (only `--read-mandate` restores it), `pi-edit-guard` 0.1.5, `pi-hashline-edit-pro` 4.4.1, and lifecycle events live. The two K2 Horizon models run through IFM's llama.cpp fork (`model/K2Horizon` branch); mainline still does not support the `k2_horizon` architecture. Matrix note: `pi-hashline-edit`, `pi-hashline-context-edit`, and `pi-agent-ide` were dropped in earlier rounds, and `long-line` was dropped from the battery. Scores below are re-evaluated offline from the committed run traces under the current evaluator. Since the wave ran, `@cortexkit/aft-pi` 0.57.2 and `@agimon-ai/doompi-edit` 0.0.1-alpha.56 were released upstream (the latter peer-depends on `pi-coding-agent` 0.87.1, while the bench pins 0.87.0); the tables below score the pinned versions.
 
 Per model (each /306):
 
@@ -193,23 +193,25 @@ Totals across the wave: **22.7M prompt tokens in, 2.3M completion tokens out, 11
 - **The two K2 models drive the worst failure class**: 68 of the 134 applied-wrong results and 47 of the 117 silent-wrong-line results, on 20% of the matrix.
 - **`pi-edit-guard` sits last at 87% (295/340)**; `pi-semantic-edit` keeps the weakest staleness score (77/110) and `@cortexkit/aft-pi` the weakest core (197/230).
 
-## Ecosystem popularity (npm + GitHub, snapshot 2026-09)
+## Ecosystem popularity (npm + GitHub, snapshot 2026-09-24)
 
 | Package | Downloads/mo | Stars |
 | --- | --- | --- |
-| **`pi-hashline-edit-pro`** | **20,403** | 74 |
-| `@cortexkit/aft-pi` | 4,362 | 275 |
-| `@xynogen/pix-edit` | 2,599 | 62 |
-| `pi-hashline-readmap` | 2,293 | 104 |
-| `pi-hashline-edit` (removed from bench) | 1,942 | repo deleted |
-| `pi-semantic-edit` | 1,537 | 4 |
-| `pi-better-edit` (removed from bench) | 950 | 4 |
-| `pi-hledit` (removed from bench) | 228 | 2 |
-| `@jerryan/pi-hashline-edit` (removed from bench) | 173 | 7 |
-| `@the-agency/pi-hashline-edit` (removed from bench) | 61 | 25 |
-| `pi-hashline-context-edit` (removed from bench) | 47 | 0 |
+| **`pi-hashline-edit-pro`** | **17,789** | 92 |
+| `@agimon-ai/doompi-edit` | 5,244 | 36 |
+| `@cortexkit/aft-pi` | 2,756 | 308 |
+| `pi-better-edit` (removed from bench) | 2,018 | 7 |
+| `@xynogen/pix-edit` | 1,575 | 71 |
+| `pi-hashline-readmap` | 1,095 | 104 |
+| `pi-hashline-edit` (removed from bench) | 699 | repo deleted |
+| `pi-edit-guard` | 499 | 4 |
+| `@the-agency/pi-hashline-edit` (removed from bench) | 240 | 27 |
+| `pi-semantic-edit` | 171 | 4 |
+| `pi-hledit` (removed from bench) | 128 | 2 |
+| `@jerryan/pi-hashline-edit` (removed from bench) | 118 | 7 |
+| `pi-hashline-context-edit` (removed from bench) | 37 | 0 |
 
-`pi-hashline-edit-pro` is the most-downloaded dedicated editing extension in the pi ecosystem (~4.7× the runner-up) and the only edit tool in the [pi.dev top-50 catalog](https://pi.dev/packages).
+`pi-hashline-edit-pro` is the most-downloaded dedicated editing extension in the pi ecosystem (~3.4× the runner-up, `@agimon-ai/doompi-edit`) and the highest-downloading edit tool in the [pi.dev catalog](https://pi.dev/packages), where it currently sits just outside the overall top 50.
 
 ## Project layout
 
